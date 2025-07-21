@@ -1,0 +1,44 @@
+package com.schoolerp.dto.request;
+
+import com.schoolerp.enums.SectionName;
+
+public class SectionUpdateDto {
+    SectionName name;
+    String roomNo;
+    Integer  capacity;
+    Long classTeacherId;
+
+
+    public SectionName getName() {
+        return name;
+    }
+
+    public void setName(SectionName name) {
+        this.name = name;
+    }
+
+    public String getRoomNo() {
+        return roomNo;
+    }
+
+    public void setRoomNo(String roomNo) {
+        this.roomNo = roomNo;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
+
+    public Long getClassTeacherId() {
+        return classTeacherId;
+    }
+
+    public void setClassTeacherId(Long classTeacherId) {
+        this.classTeacherId = classTeacherId;
+    }
+}

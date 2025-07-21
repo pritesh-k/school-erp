@@ -1,0 +1,3 @@
+DB_PASSWORD=password
+DB_USERNAME=postgres
+JWT_SECRET=-----BEGIN AES 256-BIT KEY-----\n9fMdZc3zrbAcNhvRkE6M6RMHbRxMJYj1EYdi0hF5Yvc\=\n-----END AES 256-BIT KEY-----

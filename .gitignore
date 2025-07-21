@@ -1,0 +1,15 @@
+# IntelliJ IDEA files
+.idea/
+
+# Maven/Gradle build directory
+target/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+school-erp.iml
+

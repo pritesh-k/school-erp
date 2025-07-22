@@ -10,8 +10,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "attendance",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "section_id", "date"}))
+@Table(
+        name = "attendance",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "section_id", "date"}),
+        indexes = {
+                @Index(name = "idx_attendance_student", columnList = "student_id"),
+                @Index(name = "idx_attendance_section", columnList = "section_id"),
+                @Index(name = "idx_attendance_date", columnList = "date")
+        }
+)
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Attendance extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)

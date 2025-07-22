@@ -1,6 +1,7 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.AttendanceCreateDto;
+import com.schoolerp.dto.request.AttendanceUpdateDto;
 import com.schoolerp.dto.response.AttendanceResponseDto;
 import com.schoolerp.dto.response.attendance.AttendancePercentageDto;
 import com.schoolerp.dto.response.attendance.AttendanceSummaryDto;
@@ -10,6 +11,7 @@ import com.schoolerp.entity.*;
 import com.schoolerp.entity.SchoolClass;
 import com.schoolerp.enums.AttendanceStatus;
 import com.schoolerp.exception.DuplicateEntry;
+import com.schoolerp.exception.NoChangesDetectedException;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.AttendanceMapper;
 import com.schoolerp.repository.*;
@@ -45,13 +47,12 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     @Transactional
-    public AttendanceResponseDto markTodayAttendance(Long studentId,
+    public AttendanceResponseDto markDateAttendance(Long studentId,
                                                      AttendanceStatus attendanceStatus,
                                                      String remarks,
-                                                     Long teacherId) {
-        LocalDate today = LocalDate.now();
+                                                     Long teacherId, LocalDate date, Long userId) {
         log.info("Marking attendance for student ID: {} on date: {} with status: {}",
-                studentId, today, attendanceStatus);
+                studentId, date, attendanceStatus);
 
         // Validate student exists
         Student student = studentRepo.findById(studentId)
@@ -67,72 +68,35 @@ public class AttendanceServiceImpl implements AttendanceService {
         Teacher teacher = teacherRepo.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + teacherId));
         // Check if attendance already exists for today
-        Optional<Attendance> existingAttendance = repo
-                .findByStudentIdAndSectionIdAndDate(studentId, section.getId(), today);
+        boolean alreadyRecorded = repo.existsByStudentIdAndSectionIdAndDate(studentId, section.getId(), date);
 
-        if (existingAttendance.isPresent()) {
-            throw new DuplicateEntry("Attendance already marked for this student on " + today);
+        if (alreadyRecorded) {
+            throw new DuplicateEntry("Attendance already marked for this student on " + date);
         }
 
         // Create and save attendance
         Attendance attendance = Attendance.builder()
                 .student(student)
                 .section(section)
-                .date(today)
+                .date(date)
                 .status(attendanceStatus)
-                .remarks(remarks != null ? remarks : "Marked for " + today)
+                .remarks(remarks != null ? remarks : "Marked for " + date)
                 .recordedBy(teacher)
                 .build();
 
+        attendance.setCreatedAt(java.time.Instant.now());
+        attendance.setCreatedBy(userId);
+        // Save attendance
         Attendance saved = repo.save(attendance);
         log.info("Attendance marked successfully with ID: {} for student: {} on: {}",
-                saved.getId(), studentId, today);
+                saved.getId(), studentId, date);
 
         return mapper.toDto(saved);
     }
 
 
     @Override
-    @Transactional
-    public AttendanceResponseDto mark(AttendanceCreateDto dto) {
-        log.info("Marking attendance for student ID: {} on date: {}", dto.getStudentId(), dto.getDate());
-
-        // Validate entities exist
-        Student student = studentRepo.findById(dto.getStudentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + dto.getStudentId()));
-
-        Section section = sectionRepo.findById(dto.getSectionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Section not found with ID: " + dto.getSectionId()));
-
-        Teacher teacher = teacherRepo.findById(dto.getRecordedById())
-                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + dto.getRecordedById()));
-
-        // Check if attendance already exists
-        Optional<Attendance> existingAttendance = repo
-                .findByStudentIdAndSectionIdAndDate(dto.getStudentId(), dto.getSectionId(), dto.getDate());
-
-        if (existingAttendance.isPresent()) {
-            throw new DuplicateEntry("Attendance already marked for this student on " + dto.getDate());
-        }
-
-        // Create and save attendance
-        Attendance attendance = Attendance.builder()
-                .student(student)
-                .section(section)
-                .date(dto.getDate())
-                .status(dto.getStatus())
-                .remarks(dto.getRemarks())
-                .recordedBy(teacher)
-                .build();
-
-        Attendance saved = repo.save(attendance);
-        log.info("Attendance marked successfully with ID: {}", saved.getId());
-
-        return mapper.toDto(saved);
-    }
-
-    @Override
-    public List<AttendanceResponseDto> markBulk(List<AttendanceCreateDto> dtos) {
+    public List<AttendanceResponseDto> markBulk(List<AttendanceCreateDto> dtos, Long entityId, Long userId) {
         log.info("Marking bulk attendance for {} records", dtos.size());
 
         List<Attendance> attendances = new ArrayList<>();
@@ -142,15 +106,18 @@ public class AttendanceServiceImpl implements AttendanceService {
             Student student = studentRepo.findById(dto.getStudentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + dto.getStudentId()));
 
-            Section section = sectionRepo.findById(dto.getSectionId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Section not found with ID: " + dto.getSectionId()));
+            // Get section from student
+            Section section = student.getSection();
+            if (section == null) {
+                throw new ResourceNotFoundException("Student has no section assigned");
+            }
 
-            Teacher teacher = teacherRepo.findById(dto.getRecordedById())
-                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + dto.getRecordedById()));
+            Teacher teacher = teacherRepo.findById(entityId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + entityId));
 
             // Check if attendance already exists
             Optional<Attendance> existingAttendance = repo
-                    .findByStudentIdAndSectionIdAndDate(dto.getStudentId(), dto.getSectionId(), dto.getDate());
+                    .findByStudentIdAndSectionIdAndDate(student.getId(), section.getId(), dto.getDate());
 
             if (existingAttendance.isPresent()) {
                 log.warn("Attendance already exists for student {} on {}", dto.getStudentId(), dto.getDate());
@@ -166,6 +133,8 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .recordedBy(teacher)
                     .build();
 
+            attendance.setCreatedAt(java.time.Instant.now());
+            attendance.setCreatedBy(userId);
             attendances.add(attendance);
         }
 
@@ -316,27 +285,39 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public AttendanceResponseDto update(Long id, AttendanceCreateDto dto) {
-        log.info("Updating attendance with ID: {}", id);
+    public AttendanceResponseDto update(Long attendanceId, AttendanceUpdateDto dto, Long entityId, Long userId) {
+        log.info("Updating attendance with ID: {}", attendanceId);
 
-        Attendance attendance = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found with ID: " + id));
+        Attendance attendance = repo.findById(attendanceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found with ID: " + attendanceId));
 
+        Teacher teacher = teacherRepo.findById(entityId)
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + entityId));
+        attendance.setRecordedBy(teacher);
+
+        boolean hasChanges = false;
         // Update fields
-        attendance.setStatus(dto.getStatus());
-        attendance.setRemarks(dto.getRemarks());
-
-        // Update recorded by if provided
-        if (dto.getRecordedById() != null) {
-            Teacher teacher = teacherRepo.findById(dto.getRecordedById())
-                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + dto.getRecordedById()));
-            attendance.setRecordedBy(teacher);
+        if (dto.getStatus() != null) {
+            attendance.setStatus(dto.getStatus());
+            hasChanges = true;
         }
 
-        Attendance updated = repo.save(attendance);
-        log.info("Attendance updated successfully with ID: {}", updated.getId());
+        if (dto.getRemarks() != null && !dto.getRemarks().isEmpty()) {
+            attendance.setRemarks(dto.getRemarks());
+            hasChanges = true;
+        }
+        if (hasChanges){
+            attendance.setUpdatedAt(java.time.Instant.now());
+            attendance.setUpdatedBy(userId);
+            attendance.setRecordedBy(teacher);
 
-        return mapper.toDto(updated);
+            Attendance updated = repo.save(attendance);
+            log.info("Attendance updated successfully with ID: {}", updated.getId());
+            return mapper.toDto(updated);
+        }else {
+            log.info("No changes detected for attendance ID: {}", attendanceId);
+            throw new NoChangesDetectedException("No changes detected for attendance ID: " + attendanceId);
+        }
     }
 
     @Override

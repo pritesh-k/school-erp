@@ -43,6 +43,11 @@ public class GlobalExceptionHandler {
                 "Unexpected error: " + ex.getMessage());
     }
 
+    @ExceptionHandler(NoChangesDetectedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoChangesDetectedException(MethodArgumentNotValidException ex) {
+        return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     /* utility to add request-id header */
     private static ResponseEntity<ApiResponse<Void>> respond(HttpStatus status, String msg) {
         return ResponseEntity.status(status)

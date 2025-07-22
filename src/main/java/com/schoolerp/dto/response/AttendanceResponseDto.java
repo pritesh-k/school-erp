@@ -10,30 +10,9 @@ import java.time.LocalDate;
 
 public class AttendanceResponseDto extends BaseDTO {
 
-    private Student student;
-
-    private Section section;
-
     private LocalDate date;
     private AttendanceStatus status;
     private String remarks;
-    private Teacher recordedBy;
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Section getSection() {
-        return section;
-    }
-
-    public void setSection(Section section) {
-        this.section = section;
-    }
 
     public LocalDate getDate() {
         return date;
@@ -59,11 +38,4 @@ public class AttendanceResponseDto extends BaseDTO {
         this.remarks = remarks;
     }
 
-    public Teacher getRecordedBy() {
-        return recordedBy;
-    }
-
-    public void setRecordedBy(Teacher recordedBy) {
-        this.recordedBy = recordedBy;
-    }
 }

@@ -27,4 +27,5 @@ public interface SectionRepository extends JpaRepository<Section, Long> {
     """)
     Page<Section> findSectionsByClassTeacherId(@Param("teacherId") Long teacherId, Pageable pageable);
 
+    boolean existsBySchoolClassIdAndName(Long classId, SectionName name);
 }

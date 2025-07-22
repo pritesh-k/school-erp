@@ -138,6 +138,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long>, J
     List<Object[]> getMonthlyAttendancePercentage(@Param("studentId") Long studentId);
 
     Optional<Attendance> findByStudentIdAndSectionIdAndDate(Long studentId, Long sectionId, LocalDate date);
+    boolean existsByStudentIdAndSectionIdAndDate(Long studentId, Long sectionId, LocalDate date);
 
     Page<Attendance> findBySectionId(Long sectionId, Pageable pageable);
 

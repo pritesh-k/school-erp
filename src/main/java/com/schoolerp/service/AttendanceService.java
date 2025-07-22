@@ -1,6 +1,7 @@
 package com.schoolerp.service;
 
 import com.schoolerp.dto.request.AttendanceCreateDto;
+import com.schoolerp.dto.request.AttendanceUpdateDto;
 import com.schoolerp.dto.response.AttendanceResponseDto;
 import com.schoolerp.dto.response.attendance.AttendancePercentageDto;
 import com.schoolerp.dto.response.attendance.AttendanceSummaryDto;
@@ -17,9 +18,7 @@ import java.util.List;
 public interface AttendanceService {
 
 
-    AttendanceResponseDto mark(AttendanceCreateDto dto);
-
-    List<AttendanceResponseDto> markBulk(List<AttendanceCreateDto> dtos);
+    List<AttendanceResponseDto> markBulk(List<AttendanceCreateDto> dtos, Long entityId, Long userId);
 
     AttendanceResponseDto get(Long id);
     Page<AttendanceResponseDto> list(Pageable pageable);
@@ -44,7 +43,7 @@ public interface AttendanceService {
     @Transactional(readOnly = true)
     AttendancePercentageDto getStudentPercentage(Long studentId, LocalDate startDate, LocalDate endDate);
 
-    AttendanceResponseDto update(Long id, AttendanceCreateDto dto);
+    AttendanceResponseDto update(Long id, AttendanceUpdateDto dto, Long entityId, Long userId);
 
     void delete(Long id);
 
@@ -76,5 +75,6 @@ public interface AttendanceService {
                                               Long classId,
                                               Long studentId);
 
-    AttendanceResponseDto markTodayAttendance(Long studentId, AttendanceStatus attendanceStatus, String remarks, Long teacherId);
+    AttendanceResponseDto markDateAttendance(Long studentId, AttendanceStatus attendanceStatus,
+                                             String remarks, Long teacherId, LocalDate date, Long userId);
 }

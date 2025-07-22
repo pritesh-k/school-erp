@@ -13,10 +13,7 @@ import java.time.LocalDate;
 public class AttendanceCreateDto {
     @NotNull(message = "Student ID is required")
     private Long studentId;
-
-    @NotNull(message = "Section ID is required")
-    private Long sectionId;
-
+;
     @NotNull(message = "Date is required")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
@@ -24,11 +21,8 @@ public class AttendanceCreateDto {
     @NotNull(message = "Status is required")
     private AttendanceStatus status;
 
-    @Size(max = 500, message = "Remarks cannot exceed 500 characters")
+    @Size(max = 200, message = "Remarks cannot exceed 200 characters")
     private String remarks;
-
-    @NotNull(message = "Recorded by teacher ID is required")
-    private Long recordedById;
 
     public Long getStudentId() {
         return studentId;
@@ -36,14 +30,6 @@ public class AttendanceCreateDto {
 
     public void setStudentId(Long studentId) {
         this.studentId = studentId;
-    }
-
-    public Long getSectionId() {
-        return sectionId;
-    }
-
-    public void setSectionId(Long sectionId) {
-        this.sectionId = sectionId;
     }
 
     public LocalDate getDate() {
@@ -70,11 +56,4 @@ public class AttendanceCreateDto {
         this.remarks = remarks;
     }
 
-    public Long getRecordedById() {
-        return recordedById;
-    }
-
-    public void setRecordedById(Long recordedById) {
-        this.recordedById = recordedById;
-    }
 }

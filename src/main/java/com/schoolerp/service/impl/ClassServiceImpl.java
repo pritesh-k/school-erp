@@ -119,13 +119,17 @@ public class ClassServiceImpl implements ClassService {
         SchoolClass schoolClass = classRepo.findById(classId)
                 .orElseThrow(() -> new ResourceNotFoundException("Class with id " + classId + " not found"));
 
+        boolean sectionExists = sectionRepo.existsBySchoolClassIdAndName(classId, dto.getName());
+        if (sectionExists) {
+            throw new DuplicateEntry("Section with name " + dto.getName() + " already exists for class " + schoolClass.getName());
+        }
+
         // Optional class teacher
         Teacher teacher = null;
         if (dto.getClassTeacherId() != null && dto.getClassTeacherId() > 0) {
             teacher = teacherRepo.findById(dto.getClassTeacherId())
                     .orElseThrow(() -> new ResourceNotFoundException("Teacher with id " + dto.getClassTeacherId() + " not found"));
         }
-
         // Build Section only with valid fields
         Section.SectionBuilder sectionBuilder = Section.builder()
                 .schoolClass(schoolClass);
@@ -147,6 +151,13 @@ public class ClassServiceImpl implements ClassService {
         }
 
         Section section = sectionBuilder.build();
+
+        section.setUpdatedBy(userId);
+        section.setUpdatedAt(Instant.now());
+        section.setCreatedBy(userId);
+        section.setCreatedAt(Instant.now());
+        section.setActive(true);
+        section.setDeleted(false);
 
         return sectionMapper.toDto(sectionRepo.save(section));
     }

@@ -1,12 +1,18 @@
 package com.schoolerp.controller;
 
 import com.schoolerp.dto.request.AttendanceCreateDto;
+import com.schoolerp.dto.request.AttendanceUpdateDto;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.AttendanceResponseDto;
 import com.schoolerp.dto.response.StudentResponseDto;
 import com.schoolerp.dto.response.attendance.*;
+import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.enums.AttendanceStatus;
+import com.schoolerp.enums.Role;
+import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.service.AttendanceService;
+import com.schoolerp.service.RequestContextService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -27,42 +33,77 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceController {
     private final AttendanceService service;
+    private final RequestContextService requestContextService;
 
     // 1. Mark today's attendance for a student
-    @PostMapping("/students/{studentId}/today")
-    public ApiResponse<AttendanceResponseDto> attendanceToday(
-            @PathVariable @NotNull Long studentId,
+    @PostMapping("/students/{studentId}/attendances")
+    public ApiResponse<AttendanceResponseDto> markAttendance(
+            @PathVariable Long studentId,
             @RequestParam AttendanceStatus attendanceStatus,
             @RequestParam(required = false) String remarks,
-            @RequestParam(required = true) Long teacherId) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            HttpServletRequest request) {
 
-        return ApiResponse.ok(service.markTodayAttendance(studentId, attendanceStatus, remarks, teacherId));
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+
+        Long userId = userTypeInfo.getUserId();
+        Long entityId = userTypeInfo.getEntityId();
+        String role = userTypeInfo.getUserType();
+
+        if(role.equals(Role.TEACHER.name()) && entityId == null) {
+            throw new UnauthorizedException("Invalid Teacher");
+        }
+        return ApiResponse.ok(service.markDateAttendance(studentId, attendanceStatus, remarks, entityId, date, userId));
     }
 
-
-    // 2. Mark attendance for a student
-    @PostMapping("/students/{studentId}")
-    public ApiResponse<AttendanceResponseDto> attendance(@PathVariable @NotNull Long studentId, @RequestBody AttendanceCreateDto dto) {
-        return ApiResponse.ok(service.mark(dto));
-    }
 
     // 3. Mark bulk attendance
     @PostMapping("/bulk")
-    public ApiResponse<List<AttendanceResponseDto>> markBulk(@RequestBody List<AttendanceCreateDto> dtos) {
-        return ApiResponse.ok(service.markBulk(dtos));
+    public ApiResponse<List<AttendanceResponseDto>> markBulk(
+            @RequestBody List<AttendanceCreateDto> dtos, HttpServletRequest request) {
+
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+
+        Long userId = userTypeInfo.getUserId();
+        Long entityId = userTypeInfo.getEntityId();
+        String role = userTypeInfo.getUserType();
+
+        if(role.equals(Role.TEACHER.name()) && entityId == null) {
+            throw new UnauthorizedException("Invalid Teacher");
+        }
+        return ApiResponse.ok(service.markBulk(dtos, entityId, userId));
     }
 
     // 4. Update attendance
     @PutMapping("/{attendanceId}")
     public ApiResponse<AttendanceResponseDto> update(
             @PathVariable Long attendanceId,
-            @RequestBody AttendanceCreateDto dto)   {
-        return ApiResponse.ok(service.update(attendanceId, dto));
+            @RequestBody AttendanceUpdateDto dto, HttpServletRequest request)   {
+
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+
+        Long userId = userTypeInfo.getUserId();
+        Long entityId = userTypeInfo.getEntityId();
+        String role = userTypeInfo.getUserType();
+
+        if(role.equals(Role.TEACHER.name()) && entityId == null) {
+            throw new UnauthorizedException("Invalid Teacher");
+        }
+        return ApiResponse.ok(service.update(attendanceId, dto, entityId, userId));
     }
 
     // 4. Delete a attendance record
     @DeleteMapping("/{attendanceId}")
-    public ApiResponse<Void> delete(@PathVariable Long attendanceId) {
+    public ApiResponse<Void> delete(@PathVariable Long attendanceId, HttpServletRequest request) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+
+        Long userId = userTypeInfo.getUserId();
+        Long entityId = userTypeInfo.getEntityId();
+        String role = userTypeInfo.getUserType();
+
+        if(role.equals(Role.TEACHER.name()) && entityId == null) {
+            throw new UnauthorizedException("Invalid Teacher");
+        }
         service.delete(attendanceId);
         return ApiResponse.ok(null);
     }
@@ -209,7 +250,7 @@ public class AttendanceController {
     public ApiResponse<List<AttendanceResponseDto>> markAllPresent(
             @PathVariable Long classId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam @Valid Long teacherId){
+            @RequestParam @Valid Long teacherId, HttpServletRequest request){
         List<AttendanceResponseDto> result = service.markAllPresent(classId, date, teacherId);
         return ApiResponse.ok(result);
     }

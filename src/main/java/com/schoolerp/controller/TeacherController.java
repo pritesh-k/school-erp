@@ -90,12 +90,23 @@ public class TeacherController {
      * @return ApiResponse with success message
      */
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/{teacherId}/assignments/section/{sectionId}")
+    @PutMapping("/{teacherId}/assignments/section/{sectionId}")
     public ApiResponse<String> assignSection(
             @PathVariable Long teacherId,
-            @PathVariable Long sectionId) {
-        assignmentService.assignSection(teacherId, sectionId);
-        return ApiResponse.ok("Section assigned successfully");
+            @PathVariable Long sectionId, HttpServletRequest request) {
+
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        String token = userTypeInfo.getToken();
+        if (token != null) {
+            Long userId = userTypeInfo.getUserId();
+            if (userId == null) {
+                throw new UnauthorizedException("Invalid token");
+            }
+            assignmentService.assignSection(teacherId, sectionId, userId);
+            return ApiResponse.ok("Section assigned successfully");
+        }
+        throw new UnauthorizedException("No valid token found");
+
     }
 
     /** * Removes a teacher from a section.
@@ -109,9 +120,20 @@ public class TeacherController {
     @DeleteMapping("/{teacherId}/assignments/section/{sectionId}")
     public ApiResponse<String> removeSection(
             @PathVariable Long teacherId,
-            @PathVariable Long sectionId) {
-        assignmentService.removeTeacherFromSection(teacherId, sectionId);
-        return ApiResponse.ok("Section assignment removed successfully");
+            @PathVariable Long sectionId, HttpServletRequest request) {
+
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        String token = userTypeInfo.getToken();
+        if (token != null) {
+            Long userId = userTypeInfo.getUserId();
+            if (userId == null) {
+                throw new UnauthorizedException("Invalid token");
+            }
+            assignmentService.removeTeacherFromSection(teacherId, sectionId, userId);
+            return ApiResponse.ok("Section assignment removed successfully");
+        }
+        throw new UnauthorizedException("No valid token found");
+
     }
 
     /** * Assigns a subject to a teacher.
@@ -122,12 +144,22 @@ public class TeacherController {
      * @return ApiResponse with success message
      */
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/{teacherId}/assignments/subject/{subjectId}")
+    @PutMapping("/{teacherId}/assignments/subject/{subjectId}")
     public ApiResponse<String> assignSubject(
             @PathVariable Long teacherId,
-            @PathVariable Long subjectId) {
-        assignmentService.assignSubject(teacherId, subjectId);
-        return ApiResponse.ok("Subject assigned successfully");
+            @PathVariable Long subjectId, HttpServletRequest request) {
+
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        String token = userTypeInfo.getToken();
+        if (token != null) {
+            Long userId = userTypeInfo.getUserId();
+            if (userId == null) {
+                throw new UnauthorizedException("Invalid token");
+            }
+            assignmentService.assignSubject(teacherId, subjectId, userId);
+            return ApiResponse.ok("Subject assigned successfully");
+        }
+        throw new UnauthorizedException("No valid token found");
     }
 
     /** * Assigns a class teacher to a section.
@@ -141,9 +173,19 @@ public class TeacherController {
     @PostMapping("/{teacherId}/assignments/section/{sectionId}/class-teacher")
     public ApiResponse<String> assignClassTeacher(
             @PathVariable Long teacherId,
-            @PathVariable Long sectionId) {
-        assignmentService.assignClassTeacherToSection(teacherId, sectionId);
-        return ApiResponse.ok("Class teacher assigned successfully");
+            @PathVariable Long sectionId, HttpServletRequest request) {
+
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        String token = userTypeInfo.getToken();
+        if (token != null) {
+            Long userId = userTypeInfo.getUserId();
+            if (userId == null) {
+                throw new UnauthorizedException("Invalid token");
+            }
+            assignmentService.assignClassTeacherToSection(teacherId, sectionId, userId);
+            return ApiResponse.ok("Class teacher assigned successfully");
+        }
+        throw new UnauthorizedException("No valid token found");
     }
 
     /**
@@ -152,14 +194,25 @@ public class TeacherController {
      * @param sectionId
      * @return
      */
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping("/{teacherId}/assignments/section/{sectionId}/class-teacher")
-    public ApiResponse<String> updateClassTeacher(
-            @PathVariable Long teacherId,
-            @PathVariable Long sectionId) {
-        assignmentService.updateClassTeacherToSection(teacherId, sectionId);
-        return ApiResponse.ok("Class teacher updated successfully");
-    }
+    //I think not needed as we can follow simply assign and remove assign, can re-assign
+//    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PutMapping("/{teacherId}/assignments/section/{sectionId}/class-teacher")
+//    public ApiResponse<String> updateClassTeacher(
+//            @PathVariable Long teacherId,
+//            @PathVariable Long sectionId, HttpServletRequest request) {
+//
+//        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+//        String token = userTypeInfo.getToken();
+//        if (token != null) {
+//            Long userId = userTypeInfo.getUserId();
+//            if (userId == null) {
+//                throw new UnauthorizedException("Invalid token");
+//            }
+//            assignmentService.updateClassTeacherToSection(teacherId, sectionId, userId);
+//            return ApiResponse.ok("Class teacher updated successfully");
+//        }
+//        throw new UnauthorizedException("No valid token found");
+//    }
 
     /** * Removes a subject assignment from a teacher.
      * Only accessible by ADMIN role.
@@ -172,22 +225,44 @@ public class TeacherController {
     @DeleteMapping("/{teacherId}/assignments/subject/{subjectId}")
     public ApiResponse<String> removeSubject(
             @PathVariable Long teacherId,
-            @PathVariable Long subjectId) {
-        assignmentService.removeSubject(teacherId, subjectId);
-        return ApiResponse.ok("Subject assignment removed successfully");
+            @PathVariable Long subjectId, HttpServletRequest request) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        String token = userTypeInfo.getToken();
+        if (token != null) {
+            Long userId = userTypeInfo.getUserId();
+            if (userId == null) {
+                throw new UnauthorizedException("Invalid token");
+            }
+            assignmentService.removeSubject(teacherId, subjectId, userId);
+            return ApiResponse.ok("Subject assignment removed successfully");
+        }
+        throw new UnauthorizedException("No valid token found");
     }
 
-    /** * Retrieves all assignments for a specific teacher.
+    /** * Retrieves sections assignments for a specific teacher.
      * Accessible by ADMIN, TEACHER, and PRINCIPAL roles.
      *
      * @param teacherId the ID of the teacher to retrieve assignments for
      * @return ApiResponse with TeacherAssignmentDto containing assignments
      */
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
-    @GetMapping("/{teacherId}/assignments")
+    @GetMapping("/{teacherId}/SectionAssignments")
     public ApiResponse<TeacherAssignmentDto> getAssignments(@PathVariable Long teacherId) {
-        return ApiResponse.ok(assignmentService.getTeacherAssignments(teacherId));
+        return ApiResponse.ok(assignmentService.getTeacherAssignments(teacherId, false, true));
     }
+
+    /** * Retrieves all subject assignments for a specific teacher.
+     * Accessible by ADMIN, TEACHER, and PRINCIPAL roles.
+     *
+     * @param teacherId the ID of the teacher to retrieve subject assignments for
+     * @return ApiResponse with TeacherAssignmentDto containing subject assignments
+     */
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
+    @GetMapping("/{teacherId}/SubjectAssignments")
+    public ApiResponse<TeacherAssignmentDto> getSubjectAssignments(@PathVariable Long teacherId) {
+        return ApiResponse.ok(assignmentService.getTeacherAssignments(teacherId, true, false));
+    }
+
 
     /** * Retrieves all teachers assigned to a specific subject.
      * Accessible by ADMIN, TEACHER, and PRINCIPAL roles.
@@ -248,19 +323,19 @@ public class TeacherController {
     /** * Retrieves all sections taught by a specific class teacher.
      * Accessible by ADMIN, TEACHER, and PRINCIPAL roles.
      *
-     * @param teacherId the ID of the class teacher to retrieve sections for
+     * @param classTeacherId the ID of the class teacher to retrieve sections for
      * @param page the page number for pagination
      * @param size the number of items per page
      * @return ApiResponse with a paginated list of SectionResponseDto
      */
-    @GetMapping("/sections-by-teacher")
-    public ApiResponse<List<SectionResponseDto>> getSectionsByTeacher(
-            @RequestParam Long teacherId,
+    @GetMapping("/sections-by-class-teacher")
+    public ApiResponse<List<SectionResponseDto>> getSectionsByClassTeacher(
+            @RequestParam Long classTeacherId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<SectionResponseDto> sections = assignmentService.findSectionsByClassTeacherId(teacherId, pageable);
+        Page<SectionResponseDto> sections = assignmentService.findSectionsByClassTeacherId(classTeacherId, pageable);
         return ApiResponse.paged(sections);
     }
 }

@@ -11,6 +11,7 @@ import com.schoolerp.entity.Subject;
 import com.schoolerp.entity.Teacher;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.SectionMapper;
+import com.schoolerp.mapper.SubjectMapper;
 import com.schoolerp.mapper.TeacherMapper;
 import com.schoolerp.repository.SectionRepository;
 import com.schoolerp.repository.SubjectRepository;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,11 +37,11 @@ public class TeacherAssignmentService {
     private final SectionRepository sectionRepo;
     private final SubjectRepository subjectRepo;
     private final TeacherMapper mapper;
-
+    private final SubjectMapper subjectMapper;
     private final SectionMapper sectionMapper;
 
 
-    public void assignSection(Long teacherId, Long sectionId) {
+    public void assignSection(Long teacherId, Long sectionId, Long userId) {
         Teacher teacher = getTeacherById(teacherId);
         Section section = getSectionById(sectionId);
 
@@ -51,12 +53,13 @@ public class TeacherAssignmentService {
 
         // Assign teacher to section
         section.getAssignedTeachers().add(teacher);
+        section.setUpdatedAt(java.time.Instant.now());
         sectionRepo.save(section);
 
         log.info("Assigned teacher {} to section {}", teacherId, sectionId);
     }
 
-    public void assignClassTeacherToSection(Long teacherId, Long sectionId) {
+    public void assignClassTeacherToSection(Long teacherId, Long sectionId, Long userId) {
         Teacher teacher = getTeacherById(teacherId);
         Section section = getSectionById(sectionId);
 
@@ -69,12 +72,13 @@ public class TeacherAssignmentService {
         // Assign class teacher to section
         section.setClassTeacherId(teacherId);
         section.getAssignedTeachers().add(teacher);
+        section.setUpdatedAt(java.time.Instant.now());
         sectionRepo.save(section);
 
         log.info("Assigned teacher {} to section {}", teacherId, sectionId);
     }
 
-    public void updateClassTeacherToSection(Long teacherId, Long sectionId) {
+    public void updateClassTeacherToSection(Long teacherId, Long sectionId, Long userId) {
         Teacher teacher = getTeacherById(teacherId);
         Section section = getSectionById(sectionId);
 
@@ -87,12 +91,14 @@ public class TeacherAssignmentService {
         // Assign class teacher to section
         section.setClassTeacherId(teacherId);
         section.getAssignedTeachers().add(teacher);
+        section.setUpdatedAt(java.time.Instant.now());
+
         sectionRepo.save(section);
 
         log.info("Assigned teacher {} to section {}", teacherId, sectionId);
     }
 
-    public void removeTeacherFromSection(Long teacherId, Long sectionId) {
+    public void removeTeacherFromSection(Long teacherId, Long sectionId, Long userId) {
         Teacher teacher = getTeacherById(teacherId);
         Section section = getSectionById(sectionId);
 
@@ -103,12 +109,14 @@ public class TeacherAssignmentService {
 
         // Remove assignment
         section.getAssignedTeachers().remove(teacher);
+        section.setUpdatedAt(java.time.Instant.now());
+
         sectionRepo.save(section);
 
         log.info("Removed teacher {} from section {}", teacherId, sectionId);
     }
 
-    public void assignSubject(Long teacherId, Long subjectId) {
+    public void assignSubject(Long teacherId, Long subjectId, Long userId) {
         Teacher teacher = getTeacherById(teacherId);
         Subject subject = getSubjectById(subjectId);
 
@@ -119,12 +127,13 @@ public class TeacherAssignmentService {
 
         // Add teacher to subject's assigned teachers
         subject.getTeachersAssigned().add(teacher);
+        subject.setUpdatedAt(java.time.Instant.now());
         subjectRepo.save(subject);
 
         log.info("Assigned teacher {} to subject {}", teacherId, subject.getCode());
     }
 
-    public void removeSubject(Long teacherId, Long subjectId) {
+    public void removeSubject(Long teacherId, Long subjectId, Long userId) {
         Teacher teacher = getTeacherById(teacherId);
         Subject subject = getSubjectById(subjectId);
 
@@ -135,46 +144,45 @@ public class TeacherAssignmentService {
 
         // Remove teacher from subject
         subject.getTeachersAssigned().remove(teacher);
+        subject.setUpdatedAt(java.time.Instant.now());
+
         subjectRepo.save(subject);
 
         log.info("Removed teacher {} from subject {}", teacherId, subject.getCode());
     }
 
     @Transactional(readOnly = true)
-    public TeacherAssignmentDto getTeacherAssignments(Long teacherId) {
+    public TeacherAssignmentDto getTeacherAssignments(Long teacherId, boolean subectsOnly, boolean sectionsOnly) {
         Teacher teacher = getTeacherById(teacherId);
 
-        // Get sections where this teacher is class teacher
-        List<Section> sections = sectionRepo.findByClassTeacherIdAndDeletedFalse(teacherId);
-
+        List<Subject> subjects = new ArrayList<>();
+        List<Section> sections = new ArrayList<>();
+        TeacherAssignmentDto assignmentDto = null;
         // Get subjects where this teacher is assigned
-        List<Subject> subjects = subjectRepo.findByTeachersAssignedIdAndDeletedFalse(teacherId);
-
-        return TeacherAssignmentDto.builder()
-                .teacherId(teacherId)
-                .teacherName(teacher.getFirstName() + " " + teacher.getLastName())
-                .employeeCode(teacher.getEmployeeCode())
-                .assignedSections(sections.stream()
-                        .map(s -> SectionSummaryDto.builder()
-                                .id(s.getId())
-                                .sectionName(s.getName().name())
-                                .roomNo(s.getRoomNo())
-                                .capacity(s.getCapacity())
-                                .className(s.getSchoolClass().getName().name())
-                                .studentCount(s.getStudents().size())
-                                .build())
-                        .collect(Collectors.toList()))
-                .assignedSubjects(subjects.stream()
-                        .map(s -> SubjectSummaryDto.builder()
-                                .id(s.getId())
-                                .code(s.getCode().name())
-                                .category(s.getCategory().name())
-                                .assignedClasses(s.getClasses().stream()
-                                        .map(c -> c.getName().name())
-                                        .collect(Collectors.toList()))
-                                .build())
-                        .collect(Collectors.toList()))
-                .build();
+        if(subectsOnly) {
+            subjects = subjectRepo.findByTeachersAssignedIdAndDeletedFalse(teacherId);
+            assignmentDto = new TeacherAssignmentDto(
+                    teacher.getId(),
+                    teacher.getDisplayName(),
+                    teacher.getEmployeeCode(),
+                    new ArrayList<>(), // Assigned sections will be populated later
+                    subjects.stream()
+                            .map(subjectMapper::toSubjectSummary)
+                            .collect(Collectors.toList())
+            );
+        } else if (sectionsOnly) { // Get sections where this teacher is class teacher
+            sections = sectionRepo.findByClassTeacherIdAndDeletedFalse(teacherId);
+            assignmentDto = new TeacherAssignmentDto(
+                    teacher.getId(),
+                    teacher.getDisplayName(),
+                    teacher.getEmployeeCode(),
+                    sections.stream()
+                            .map(sectionMapper::toSectionSummary)
+                            .collect(Collectors.toList()),
+                    new ArrayList<>()
+            );
+        }
+        return assignmentDto;
     }
 
     // Helper methods
@@ -217,5 +225,9 @@ public class TeacherAssignmentService {
         return page.map(sectionMapper::toDto);
     }
 
+    public Page<SectionResponseDto> findSectionsByTeacherId(Long teacherId, Pageable pageable) {
+        Page<Section> page = sectionRepo.findSectionsByClassTeacherId(teacherId, pageable);
+        return page.map(sectionMapper::toDto);
+    }
 
 }

@@ -16,7 +16,6 @@ public class Subject extends BaseEntity {
     @Column(nullable = false, unique = true)
     private SubjectCode code;
 
-
     @ManyToMany
     @JoinTable(name = "subject_class",
             joinColumns = @JoinColumn(name = "subject_id"),

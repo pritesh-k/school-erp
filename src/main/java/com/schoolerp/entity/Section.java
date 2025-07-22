@@ -14,6 +14,8 @@ public class Section extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private SectionName name;
+
+    @Column(unique = true)
     private String roomNo;
     private Integer  capacity;
 

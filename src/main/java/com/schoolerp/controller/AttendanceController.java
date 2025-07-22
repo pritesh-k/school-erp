@@ -123,15 +123,15 @@ public class AttendanceController {
     }
 
     // 6. Get attendance by class
-    @GetMapping("/classes/{classId}")
-    public ApiResponse<List<AttendanceResponseDto>> byClass(
-            @PathVariable Long classId,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
-        Page<AttendanceResponseDto> pagedResult = service.byClassId(classId, pageable);
-        return ApiResponse.paged(pagedResult);
-    }
+//    @GetMapping("/classes/{classId}")
+//    public ApiResponse<List<AttendanceResponseDto>> byClass(
+//            @PathVariable Long classId,
+//            @RequestParam(required = false, defaultValue = "0") int page,
+//            @RequestParam(required = false, defaultValue = "10") int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+//        Page<AttendanceResponseDto> pagedResult = service.byClassId(classId, pageable);
+//        return ApiResponse.paged(pagedResult);
+//    }
 
     // 7. Get attendance by date
     @GetMapping("/dates/{date}")
@@ -201,7 +201,11 @@ public class AttendanceController {
         return ApiResponse.ok(service.getAttendancePercentageByStudent(studentId, startDate, endDate));
     }
 
-    // 14. Search attendance with filters
+    /**
+     * 14. Search attendance records
+     * This endpoint allows searching attendance records based on various criteria.
+     * It supports pagination and sorting by date in descending order.
+     */
     @GetMapping("/search")
     public ApiResponse<List<AttendanceResponseDto>> search(
             @RequestParam(required = false) Long studentId,
@@ -217,14 +221,18 @@ public class AttendanceController {
         return ApiResponse.paged(pagedResult);
     }
 
-    // 15. Get today's attendance, If classId is provided, return attendance for that class else return all classes
+    /**
+     * 15. Get today's attendance by section ID
+     * This endpoint retrieves today's attendance records for a specific section.
+     * If no section ID is provided, it returns all today's attendance records.
+     */
     @GetMapping("/today")
-    public ApiResponse<List<AttendanceResponseDto>> todayAttendance(
-            @RequestParam(required = false) Long classId,
+    public ApiResponse<List<AttendanceResponseDto>> todayAttendanceBySectionId(
+            @RequestParam(required = false) Long sectionId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
-        Page<AttendanceResponseDto> pagedResult = service.getTodayAttendance(classId, pageable);
+        Page<AttendanceResponseDto> pagedResult = service.bySectionId(sectionId, pageable);
         return ApiResponse.paged(pagedResult);
     }
 

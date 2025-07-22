@@ -1,5 +1,6 @@
 package com.schoolerp.repository;
 
+import com.schoolerp.dto.response.attendance.AttendanceStatsByStudentDto;
 import com.schoolerp.entity.Attendance;
 import com.schoolerp.entity.Teacher;
 import com.schoolerp.enums.AttendanceStatus;
@@ -47,7 +48,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long>, J
     FROM Attendance a
     WHERE a.student.id = :studentId
 """)
-    Object[] getAttendanceStatsByStudent(@Param("studentId") Long studentId);
+    List<Attendance> getAttendanceStatsByStudent(@Param("studentId") Long studentId);
 
     @Query("""
     SELECT
@@ -57,7 +58,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long>, J
     FROM Attendance a
     WHERE a.student.id = :studentId AND a.date BETWEEN :startDate AND :endDate
 """)
-    Object[] getAttendanceStatsByStudentAndDateRange(@Param("studentId") Long studentId,
+    List<Attendance> getAttendanceStatsByStudentAndDateRange(@Param("studentId") Long studentId,
                                                      @Param("startDate") LocalDate startDate,
                                                      @Param("endDate") LocalDate endDate);
 
@@ -169,4 +170,22 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long>, J
     boolean existsByStudentId(Long studentId);
 
     Page<Attendance> findByDateAndSection_SchoolClass_Id(LocalDate today, Long classId, Pageable pageable);
+
+    @Query("""
+    SELECT
+      a.student.id AS studentId,
+      COUNT(a) AS total,
+      SUM(CASE WHEN a.status = 'PRESENT' THEN 1 ELSE 0 END) AS present,
+      SUM(CASE WHEN a.status = 'ABSENT' THEN 1 ELSE 0 END) AS absent,
+      SUM(CASE WHEN a.status = 'LATE' THEN 1 ELSE 0 END) AS late,
+      SUM(CASE WHEN a.status = 'LEAVE' THEN 1 ELSE 0 END) AS leaveCount
+    FROM Attendance a
+    WHERE a.date BETWEEN :startDate AND :endDate
+    GROUP BY a.student.id
+""")
+    List<AttendanceStatsByStudentDto> getAttendanceStatsByDateRangeForAllStudents(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
 }

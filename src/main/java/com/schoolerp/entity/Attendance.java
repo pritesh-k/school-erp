@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
         name = "attendance",
         uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "section_id", "date"}),
         indexes = {
-                @Index(name = "idx_attendance_student", columnList = "student_id"),
+                @Index(name = "idx_attendance_date_student", columnList = "date, student_id"),
                 @Index(name = "idx_attendance_section", columnList = "section_id"),
-                @Index(name = "idx_attendance_date", columnList = "date")
+                @Index(name = "idx_attendance_status", columnList = "status")
         }
 )
 @NoArgsConstructor @AllArgsConstructor @Builder

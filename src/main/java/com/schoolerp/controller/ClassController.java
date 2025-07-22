@@ -34,32 +34,19 @@ public class ClassController {
     @PostMapping
     public ApiResponse<ClassResponseDto> create(@RequestBody ClassCreateDto dto, HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            return ApiResponse.ok(service.create(dto, userId));
-        }
 
-        throw new UnauthorizedException("No valid token found");
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.create(dto, userId));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/{classId}/sections")
-    public ApiResponse<SectionResponseDto> addSection(@PathVariable @NotNull Long classId, @RequestBody SectionCreateDto dto, HttpServletRequest request) {
+    public ApiResponse<SectionResponseDto> addSection(@PathVariable @NotNull Long classId, @RequestBody SectionCreateDto dto
+            , HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            return ApiResponse.ok(service.addSection(classId, dto, userId));
-        }
 
-        throw new UnauthorizedException("No valid token found");
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.addSection(classId, dto, userId));
     }
 
     @GetMapping("/{classId}/sections")
@@ -87,16 +74,9 @@ public class ClassController {
             @PathVariable Long classId,
             @RequestBody ClassCreateDto dto, HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            return ApiResponse.ok(service.updateClassOnly(classId, dto, userId));
-        }
 
-        throw new UnauthorizedException("No valid token found");
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.updateClassOnly(classId, dto, userId));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -106,15 +86,7 @@ public class ClassController {
             @PathVariable Long sectionId,
             @RequestBody SectionUpdateDto dto, HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            return ApiResponse.ok(service.updateSectionsOnly(classId, dto, userId, sectionId));
-        }
-
-        throw new UnauthorizedException("No valid token found");
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.updateSectionsOnly(classId, dto, userId, sectionId));
     }
 }

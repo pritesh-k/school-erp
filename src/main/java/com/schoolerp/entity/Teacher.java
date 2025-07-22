@@ -11,7 +11,12 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "teachers")
+@Table(name = "teachers",
+        indexes = {
+                @Index(name = "idx_teacher_user_id", columnList = "user_id"),
+                @Index(name = "idx_teacher_email", columnList = "email"),
+                @Index(name = "idx_teacher_class_teacher_section", columnList = "classTeacherOfSection")
+})
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Teacher extends BaseEntity {
     @OneToOne

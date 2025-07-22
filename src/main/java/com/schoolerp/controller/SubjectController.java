@@ -36,16 +36,9 @@ public class SubjectController {
 
         // Extract token from request
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            return ApiResponse.ok(service.create(dto, userId));
-        }
 
-        throw new UnauthorizedException("No valid token found");
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.create(dto, userId));
     }
 
 

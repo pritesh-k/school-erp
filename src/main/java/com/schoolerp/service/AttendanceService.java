@@ -45,7 +45,7 @@ public interface AttendanceService {
 
     AttendanceResponseDto update(Long id, AttendanceUpdateDto dto, Long entityId, Long userId);
 
-    void delete(Long id);
+    void delete(Long attendanceId, Long entityId, Long userId, String role);
 
     List<AttendanceResponseDto> markAllPresent(Long classId, LocalDate date, Long teacherId);
 

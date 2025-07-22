@@ -41,15 +41,8 @@ public class TeacherController {
     @PostMapping
     public ApiResponse<TeacherResponseDto> create(@RequestBody TeacherCreateDto dto, HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            return ApiResponse.ok(service.create(dto, userId));
-        }
-        throw new UnauthorizedException("No valid token found");
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.create(dto, userId));
     }
     /** * Lists all teachers with pagination.
      * Accessible by ADMIN, TEACHER, and PRINCIPAL roles.
@@ -96,17 +89,11 @@ public class TeacherController {
             @PathVariable Long sectionId, HttpServletRequest request) {
 
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            assignmentService.assignSection(teacherId, sectionId, userId);
-            return ApiResponse.ok("Section assigned successfully");
-        }
-        throw new UnauthorizedException("No valid token found");
 
+        Long userId = userTypeInfo.getUserId();
+
+        assignmentService.assignSection(teacherId, sectionId, userId);
+        return ApiResponse.ok("Section assigned successfully");
     }
 
     /** * Removes a teacher from a section.
@@ -123,17 +110,11 @@ public class TeacherController {
             @PathVariable Long sectionId, HttpServletRequest request) {
 
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            assignmentService.removeTeacherFromSection(teacherId, sectionId, userId);
-            return ApiResponse.ok("Section assignment removed successfully");
-        }
-        throw new UnauthorizedException("No valid token found");
 
+        Long userId = userTypeInfo.getUserId();
+
+        assignmentService.removeTeacherFromSection(teacherId, sectionId, userId);
+        return ApiResponse.ok("Section assignment removed successfully");
     }
 
     /** * Assigns a subject to a teacher.
@@ -150,16 +131,11 @@ public class TeacherController {
             @PathVariable Long subjectId, HttpServletRequest request) {
 
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            assignmentService.assignSubject(teacherId, subjectId, userId);
-            return ApiResponse.ok("Subject assigned successfully");
-        }
-        throw new UnauthorizedException("No valid token found");
+
+        Long userId = userTypeInfo.getUserId();
+
+        assignmentService.assignSubject(teacherId, subjectId, userId);
+        return ApiResponse.ok("Subject assigned successfully");
     }
 
     /** * Assigns a class teacher to a section.
@@ -176,16 +152,11 @@ public class TeacherController {
             @PathVariable Long sectionId, HttpServletRequest request) {
 
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            assignmentService.assignClassTeacherToSection(teacherId, sectionId, userId);
-            return ApiResponse.ok("Class teacher assigned successfully");
-        }
-        throw new UnauthorizedException("No valid token found");
+
+        Long userId = userTypeInfo.getUserId();
+
+        assignmentService.assignClassTeacherToSection(teacherId, sectionId, userId);
+        return ApiResponse.ok("Class teacher assigned successfully");
     }
 
     /**
@@ -227,16 +198,11 @@ public class TeacherController {
             @PathVariable Long teacherId,
             @PathVariable Long subjectId, HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        String token = userTypeInfo.getToken();
-        if (token != null) {
-            Long userId = userTypeInfo.getUserId();
-            if (userId == null) {
-                throw new UnauthorizedException("Invalid token");
-            }
-            assignmentService.removeSubject(teacherId, subjectId, userId);
-            return ApiResponse.ok("Subject assignment removed successfully");
-        }
-        throw new UnauthorizedException("No valid token found");
+
+        Long userId = userTypeInfo.getUserId();
+
+        assignmentService.removeSubject(teacherId, subjectId, userId);
+        return ApiResponse.ok("Subject assignment removed successfully");
     }
 
     /** * Retrieves sections assignments for a specific teacher.

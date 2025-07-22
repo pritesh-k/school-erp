@@ -14,6 +14,8 @@ import com.schoolerp.service.AttendanceService;
 import com.schoolerp.service.RequestContextService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -104,7 +106,7 @@ public class AttendanceController {
         if(role.equals(Role.TEACHER.name()) && entityId == null) {
             throw new UnauthorizedException("Invalid Teacher");
         }
-        service.delete(attendanceId);
+        service.delete(attendanceId, entityId, userId, role);
         return ApiResponse.ok(null);
     }
 
@@ -208,8 +210,8 @@ public class AttendanceController {
             @RequestParam(required = false) AttendanceStatus status, // PRESENT, ABSENT, LATE
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size){
+            @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         Page<AttendanceResponseDto> pagedResult = service.search(studentId, sectionId, classId, status, startDate, endDate, pageable);
         return ApiResponse.paged(pagedResult);

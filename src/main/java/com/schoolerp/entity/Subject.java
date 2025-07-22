@@ -9,7 +9,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "subjects")
+@Table(
+        name = "subjects",
+        indexes = {
+                @Index(name = "idx_subject_category", columnList = "category")
+        }
+)
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Subject extends BaseEntity {
     @Enumerated(EnumType.STRING)

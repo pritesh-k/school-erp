@@ -321,15 +321,14 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public void delete(Long id) {
-        log.info("Deleting attendance with ID: {}", id);
+    public void delete(Long attendanceId, Long entityId, Long userId, String role){
+        log.info("Deleting attendance with ID: {}", attendanceId);
 
-        if (!repo.existsById(id)) {
-            throw new ResourceNotFoundException("Attendance not found with ID: " + id);
+        if (!repo.existsById(attendanceId)) {
+            throw new ResourceNotFoundException("Attendance not found with ID: " + attendanceId);
         }
-
-        repo.deleteById(id);
-        log.info("Attendance deleted successfully with ID: {}", id);
+        repo.deleteById(attendanceId);
+        log.info("Attendance deleted successfully with ID: {}", attendanceId);
     }
 
     private AttendanceSummaryDto calculateSummary(List<Attendance> attendances, LocalDate startDate, LocalDate endDate) {

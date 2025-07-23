@@ -27,4 +27,7 @@ public interface FeeRecordRepository extends JpaRepository<FeeRecord, Long> {
     List<FeeRecord> findOverdueFees();
 
     boolean existsByStudentId(Long studentId);
+
+    List<FeeRecord> findByStudentFeeAssignmentId(Long assignmentId);
+
 }

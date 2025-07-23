@@ -10,11 +10,11 @@ import java.util.Set;
 
 
 public class ExamCreateDto{
-    @NotBlank String name;
-    @NotNull Term term;
-    @NotNull LocalDate startDate;
-    @NotNull LocalDate endDate;
-    @NotNull Long schoolClassId;
+    @NotBlank @NotNull String name;
+    @NotNull @NotBlank Term term;
+    @NotNull @NotBlank LocalDate startDate;
+    @NotNull @NotBlank LocalDate endDate;
+    @NotNull @NotBlank Long schoolClassId;
     @NotEmpty Set<@NotNull Long> subjectIds;
 
     public String getName() {

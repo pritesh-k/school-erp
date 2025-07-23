@@ -12,51 +12,39 @@ import java.time.LocalDate;
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class FeeRecord extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    private Student student;
-
+    private StudentFeeAssignment studentFeeAssignment;
     @ManyToOne(fetch = FetchType.LAZY)
-    private FeeType feeType;
-
-    private BigDecimal amount;
-    private LocalDate dueDate;
+    private FeeHead feeHead; // which component/head is being paid (e.g. tuition)
+    private BigDecimal paidAmount;
     private LocalDate paidDate;
-
-    @Enumerated(EnumType.STRING)
-    private FeeStatus status;
-
     private String receiptNo;
+    @Enumerated(EnumType.STRING)
+    private FeeStatus status; // PAID, PARTIAL, DUE, WAIVED, REFUNDED, etc.
+    private String note;
     private String receiptUrl;
 
-    public Student getStudent() {
-        return student;
+    public StudentFeeAssignment getStudentFeeAssignment() {
+        return studentFeeAssignment;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public void setStudentFeeAssignment(StudentFeeAssignment studentFeeAssignment) {
+        this.studentFeeAssignment = studentFeeAssignment;
     }
 
-    public FeeType getFeeType() {
-        return feeType;
+    public FeeHead getFeeHead() {
+        return feeHead;
     }
 
-    public void setFeeType(FeeType feeType) {
-        this.feeType = feeType;
+    public void setFeeHead(FeeHead feeHead) {
+        this.feeHead = feeHead;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public BigDecimal getPaidAmount() {
+        return paidAmount;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public LocalDate getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
+    public void setPaidAmount(BigDecimal paidAmount) {
+        this.paidAmount = paidAmount;
     }
 
     public LocalDate getPaidDate() {
@@ -67,6 +55,14 @@ public class FeeRecord extends BaseEntity {
         this.paidDate = paidDate;
     }
 
+    public String getReceiptNo() {
+        return receiptNo;
+    }
+
+    public void setReceiptNo(String receiptNo) {
+        this.receiptNo = receiptNo;
+    }
+
     public FeeStatus getStatus() {
         return status;
     }
@@ -75,12 +71,12 @@ public class FeeRecord extends BaseEntity {
         this.status = status;
     }
 
-    public String getReceiptNo() {
-        return receiptNo;
+    public String getNote() {
+        return note;
     }
 
-    public void setReceiptNo(String receiptNo) {
-        this.receiptNo = receiptNo;
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public String getReceiptUrl() {

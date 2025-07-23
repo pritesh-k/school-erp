@@ -4,7 +4,11 @@ import com.schoolerp.dto.request.LoginRequest;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.AuthResponse;
+import com.schoolerp.dto.response.StudentResponseDto;
+import com.schoolerp.dto.response.TeacherResponseDto;
+import com.schoolerp.entity.Parent;
 import com.schoolerp.entity.User;
+import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -42,14 +46,15 @@ public class AuthController {
         return ApiResponse.ok(service.refresh(request));
     }
 
-//    @GetMapping("/me")
-//    public ApiResponse<?> me(Authentication auth) {
-//        User user = (User) auth.getPrincipal();
-//        return switch (user.getRole()) {
-//            case STUDENT  -> studentService.getByUserId(user.getEntityId());
-//            case TEACHER  -> teacherService.getByUserId(user.getEntityId());
-//            case PARENT   -> parentService.getByUserId(user.getEntityId());
-//            default       -> user;   // ADMIN / PRINCIPAL
-//        };
-//    }
+    @GetMapping("/me")
+    public ApiResponse<?> me(Authentication auth) {
+        User user = (User) auth.getPrincipal();
+        return switch (user.getRole()) {
+            case STUDENT  -> ApiResponse.ok(studentService.get(user.getEntityId()));
+            case TEACHER  -> ApiResponse.ok(teacherService.getByTeacherId(user.getEntityId()));
+            case PARENT   -> ApiResponse.ok(parentService.getByUserId(user.getEntityId()));
+            case ADMIN    -> ApiResponse.ok(user);   // ADMIN / PRINCIPAL
+            case PRINCIPAL -> ApiResponse.ok(user);
+            default -> throw new UnauthorizedException("Unauthorized access");};
+    }
 }

@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ExamService {
-    ExamResponseDto create(ExamCreateDto dto);
-    ExamResponseDto get(Long id);
-    Page<ExamResponseDto> list(Pageable pageable);
-    ExamResponseDto update(Long id, ExamCreateDto dto);
-    void delete(Long id);
+    ExamResponseDto create(ExamCreateDto dto, Long userId, Long entityId, String role);
+    ExamResponseDto get(Long id, Long userId, Long entityId, String role);
+    Page<ExamResponseDto> list(Pageable pageable, Long userId, Long entityId, String role);
+    ExamResponseDto update(Long id, ExamCreateDto dto, Long userId, Long entityId, String role);
+    void delete(Long id, Long userId, Long entityId, String role);
 }

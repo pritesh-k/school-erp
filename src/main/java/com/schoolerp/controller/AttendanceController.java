@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,12 +39,14 @@ public class AttendanceController {
     private final RequestContextService requestContextService;
 
     // 1. Mark today's attendance for a student
+
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @PostMapping("/students/{studentId}/attendances")
     public ApiResponse<AttendanceResponseDto> markAttendance(
             @PathVariable Long studentId,
             @RequestParam AttendanceStatus attendanceStatus,
             @RequestParam(required = false) String remarks,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             HttpServletRequest request) {
 
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
@@ -60,6 +63,7 @@ public class AttendanceController {
 
 
     // 3. Mark bulk attendance
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @PostMapping("/bulk")
     public ApiResponse<List<AttendanceResponseDto>> markBulk(
             @RequestBody List<AttendanceCreateDto> dtos, HttpServletRequest request) {
@@ -77,6 +81,7 @@ public class AttendanceController {
     }
 
     // 4. Update attendance
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @PutMapping("/{attendanceId}")
     public ApiResponse<AttendanceResponseDto> update(
             @PathVariable Long attendanceId,
@@ -95,6 +100,7 @@ public class AttendanceController {
     }
 
     // 4. Delete a attendance record
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{attendanceId}")
     public ApiResponse<Void> delete(@PathVariable Long attendanceId, HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
@@ -114,8 +120,8 @@ public class AttendanceController {
     @GetMapping("/students/{studentId}")
     public ApiResponse<List<AttendanceResponseDto>> byStudent(
             @PathVariable Long studentId,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         Page<AttendanceResponseDto> pagedResult = service.byStudentId(studentId, pageable);
@@ -134,29 +140,32 @@ public class AttendanceController {
 //    }
 
     // 7. Get attendance by date
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/dates/{date}")
     public ApiResponse<List<AttendanceResponseDto>> byDate(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         Page<AttendanceResponseDto> pagedResult = service.byDate(date, pageable);
         return ApiResponse.paged(pagedResult);
     }
 
     // 8. Get attendance by date range
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/dates")
     public ApiResponse<List<AttendanceResponseDto>> byDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         Page<AttendanceResponseDto> pagedResult = service.byDateRange(startDate, endDate, pageable);
         return ApiResponse.paged(pagedResult);
     }
 
     // 10. Get attendance by class and date
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/classes/{classId}/dates/{date}")
     public ApiResponse<List<AttendanceResponseDto>> byClassAndDate(
             @PathVariable Long classId,
@@ -206,6 +215,7 @@ public class AttendanceController {
      * This endpoint allows searching attendance records based on various criteria.
      * It supports pagination and sorting by date in descending order.
      */
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/search")
     public ApiResponse<List<AttendanceResponseDto>> search(
             @RequestParam(required = false) Long studentId,
@@ -226,17 +236,19 @@ public class AttendanceController {
      * This endpoint retrieves today's attendance records for a specific section.
      * If no section ID is provided, it returns all today's attendance records.
      */
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/today")
     public ApiResponse<List<AttendanceResponseDto>> todayAttendanceBySectionId(
             @RequestParam(required = false) Long sectionId,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size){
+            @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         Page<AttendanceResponseDto> pagedResult = service.bySectionId(sectionId, pageable);
         return ApiResponse.paged(pagedResult);
     }
 
     // 16. Get monthly attendance report
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/reports/monthly")
     public ApiResponse<MonthlyAttendanceReportDto> monthlyReport(
             @RequestParam int year,
@@ -247,6 +259,7 @@ public class AttendanceController {
     }
 
     // 17. Get weekly attendance report
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/reports/weekly")
     public ApiResponse<WeeklyAttendanceReportDto> weeklyReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStartDate,
@@ -256,6 +269,7 @@ public class AttendanceController {
     }
 
     // 18. Mark all present for a class
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @PostMapping("/classes/{classId}/mark-all-present")
     public ApiResponse<List<AttendanceResponseDto>> markAllPresent(
             @PathVariable Long classId,

@@ -37,7 +37,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public ExamResponseDto create(ExamCreateDto dto) {
+    public ExamResponseDto create(ExamCreateDto dto, Long userId, Long entityId, String role) {
         log.info("Creating exam: {} for class ID: {}", dto.getName(), dto.getSchoolClassId());
 
         // Validate input
@@ -53,13 +53,45 @@ public class ExamServiceImpl implements ExamService {
         validateExamConflicts(dto, schoolClass.getId());
 
         // Create exam
-        Exam exam = createExam(dto, schoolClass, subjects);
+        Exam exam = createExam(dto, schoolClass, subjects, userId, entityId, role);
 
         Exam savedExam = repo.save(exam);
         log.info("Exam created successfully with ID: {} for class: {}",
                 savedExam.getId(), schoolClass.getName());
 
         return mapper.toDto(savedExam);
+    }
+
+
+    @Override
+    public ExamResponseDto get(Long id, Long userId, Long entityId, String role) {
+        return mapper.toDto(repo.findById(id).orElseThrow());
+    }
+
+    @Override
+    public Page<ExamResponseDto> list(Pageable pageable, Long userId, Long entityId, String role) {
+        return repo.findAll(pageable).map(mapper::toDto);
+    }
+
+    @Override
+    @Transactional
+    public ExamResponseDto update(Long id, ExamCreateDto dto, Long userId, Long entityId, String role) {
+        Exam e = repo.findById(id).orElseThrow();
+        e.setName(dto.getName());
+        e.setTerm(dto.getTerm());
+        e.setStartDate(dto.getStartDate());
+        e.setEndDate(dto.getEndDate());
+        e.setSchoolClass(classRepo.getReferenceById(dto.getSchoolClassId()));
+        return mapper.toDto(repo.save(e));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id, Long userId, Long entityId, String role) {
+        if (!repo.existsById(id)) {
+            throw new ResourceNotFoundException("Exam with id " + id + " not found");
+        }
+        repo.deleteById(id);
     }
 
     private void validateExamInput(ExamCreateDto dto) {
@@ -144,7 +176,7 @@ public class ExamServiceImpl implements ExamService {
         }
     }
 
-    private Exam createExam(ExamCreateDto dto, SchoolClass schoolClass, Set<Subject> subjects) {
+    private Exam createExam(ExamCreateDto dto, SchoolClass schoolClass, Set<Subject> subjects, Long userId, Long entityId, String role) {
         Exam exam = Exam.builder()
                 .name(dto.getName())
                 .term(dto.getTerm())
@@ -156,38 +188,9 @@ public class ExamServiceImpl implements ExamService {
                 .build();
         exam.setActive(true);  // Set via setter
         exam.setDeleted(false);
+        exam.setCreatedAt(java.time.Instant.now());
+        exam.setCreatedBy(userId);
         return exam;
     }
 
-
-    @Override
-    public ExamResponseDto get(Long id) {
-        return mapper.toDto(repo.findById(id).orElseThrow());
-    }
-
-    @Override
-    public Page<ExamResponseDto> list(Pageable pageable) {
-        return repo.findAll(pageable).map(mapper::toDto);
-    }
-
-    @Override
-    @Transactional
-    public ExamResponseDto update(Long id, ExamCreateDto dto) {
-        Exam e = repo.findById(id).orElseThrow();
-        e.setName(dto.getName());
-        e.setTerm(dto.getTerm());
-        e.setStartDate(dto.getStartDate());
-        e.setEndDate(dto.getEndDate());
-        e.setSchoolClass(classRepo.getReferenceById(dto.getSchoolClassId()));
-        return mapper.toDto(repo.save(e));
-    }
-
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        if (!repo.existsById(id)) {
-            throw new ResourceNotFoundException("Exam with id " + id + " not found");
-        }
-        repo.deleteById(id);
-    }
 }

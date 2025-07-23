@@ -12,6 +12,8 @@ import com.schoolerp.service.RequestContextService;
 import com.schoolerp.service.TeacherService;
 import com.schoolerp.service.impl.TeacherAssignmentService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,8 +57,8 @@ public class TeacherController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
     @GetMapping
     public ApiResponse<List<TeacherResponseDto>> list(
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size) {
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(service.list(pageable));
@@ -241,8 +243,8 @@ public class TeacherController {
     @GetMapping("/{subjectId}/teachers-assigned")
     public ApiResponse<List<TeachersAssignedDto>> getTeachersAssignedToSubject(
             @PathVariable Long subjectId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10")@Min(1) @Max(100) int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<TeachersAssignedDto> result = assignmentService.getAssignedTeachers(subjectId, pageable);
         return ApiResponse.paged(result);
@@ -259,8 +261,8 @@ public class TeacherController {
     @GetMapping("/by-section")
     public ApiResponse<List<TeachersAssignedDto>> getTeachersBySection(
             @RequestParam Long sectionId,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "0")@Min(0) Integer page,
+            @RequestParam(defaultValue = "10")@Min(1) @Max(100) Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(assignmentService.getTeachersBySectionId(sectionId, pageable));
@@ -277,8 +279,8 @@ public class TeacherController {
     @GetMapping("/by-subject")
     public ApiResponse<List<TeachersAssignedDto>> getTeachersBySubject(
             @RequestParam Long subjectId,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(defaultValue = "10")@Min(1) @Max(100) Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<TeachersAssignedDto> teachers = assignmentService.getTeachersBySubjectId(subjectId, pageable);
@@ -297,8 +299,8 @@ public class TeacherController {
     @GetMapping("/sections-by-class-teacher")
     public ApiResponse<List<SectionResponseDto>> getSectionsByClassTeacher(
             @RequestParam Long classTeacherId,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<SectionResponseDto> sections = assignmentService.findSectionsByClassTeacherId(classTeacherId, pageable);

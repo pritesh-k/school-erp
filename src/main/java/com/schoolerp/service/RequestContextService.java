@@ -1,6 +1,7 @@
 package com.schoolerp.service;
 
 import com.schoolerp.entity.UserTypeInfo;
+import com.schoolerp.enums.Role;
 import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.security.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -8,17 +9,20 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RequestContextService {
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public UserTypeInfo getCurrentUserContext(HttpServletRequest request) {
         try {
-            Long userId = JwtUtil.getUserIdFromRequest(request);
-            String role = JwtUtil.getRoleFromRequest(request);
-            Long entityId = JwtUtil.getEntityIdFromRequest(request);
-            String token = JwtUtil.getTokenFromRequest(request);
+            String token = jwtUtil.getTokenFromRequest(request);
+            Long userId = jwtUtil.extractUserId(token);
+            String role = jwtUtil.extractRole(token);
+            Long entityId = jwtUtil.extractEntityId(token);
 
             if (userId == null || role == null || token == null) {
                 throw new UnauthorizedException("Invalid or missing token details");
@@ -26,7 +30,7 @@ public class RequestContextService {
 
             UserTypeInfo userTypeInfo = new UserTypeInfo();
             userTypeInfo.setUserId(userId);
-            userTypeInfo.setUserType(role);
+            userTypeInfo.setUserType(Role.fromString(role));
             userTypeInfo.setEntityId(entityId);
             userTypeInfo.setToken(token);
             return userTypeInfo;

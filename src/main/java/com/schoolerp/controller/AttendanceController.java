@@ -53,7 +53,7 @@ public class AttendanceController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
 
         if(role.equals(Role.TEACHER.name()) && entityId == null) {
             throw new UnauthorizedException("Invalid Teacher");
@@ -72,7 +72,7 @@ public class AttendanceController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
 
         if(role.equals(Role.TEACHER.name()) && entityId == null) {
             throw new UnauthorizedException("Invalid Teacher");
@@ -91,7 +91,7 @@ public class AttendanceController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
 
         if(role.equals(Role.TEACHER.name()) && entityId == null) {
             throw new UnauthorizedException("Invalid Teacher");
@@ -107,7 +107,7 @@ public class AttendanceController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
 
         if(role.equals(Role.TEACHER.name()) && entityId == null) {
             throw new UnauthorizedException("Invalid Teacher");

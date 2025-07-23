@@ -30,10 +30,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-    public static final String JWT_TOKEN_ATTRIBUTE = "JWT_TOKEN";
-    public static final String USER_ID_ATTRIBUTE = "USER_ID";
-    public static final String ENTITY_ID_ATTRIBUTE = "ENTITY_ID";
-    public static final String USER_ROLE_ATTRIBUTE = "USER_ROLE";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -50,30 +46,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (header != null && header.startsWith("Bearer ") && header.length() > 7) {
                 String token = header.substring(7);
+                request.setAttribute(jwtUtil.JWT_TOKEN_ATTRIBUTE, token);    // <<< ADD THIS
+
                 String username = jwtUtil.extractUsername(token);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     authenticateUser(token, username, request);
-
-                    // Store token and claims in request attributes
-                    storeTokenDataInRequest(request, token);
                 }
             }
-
-        } catch (ExpiredJwtException e) {
-            log.warn("JWT token expired for request: {}", request.getRequestURI());
-            handleAuthError(response, "Token expired");
-            return;
-
-        } catch (MalformedJwtException e) {
-            log.warn("Invalid JWT token for request: {}", request.getRequestURI());
-            handleAuthError(response, "Invalid token");
-            return;
-
-        } catch (SignatureException e) {
-            log.warn("JWT signature validation failed for request: {}", request.getRequestURI());
-            handleAuthError(response, "Invalid token signature");
-            return;
 
         } catch (UsernameNotFoundException e) {
             log.warn("User not found: {}", e.getMessage());
@@ -89,25 +69,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void storeTokenDataInRequest(HttpServletRequest request, String token) {
-        try {
-            // Store the token
-            request.setAttribute(JWT_TOKEN_ATTRIBUTE, token);
-
-            // Extract and store claims
-            Long userId = jwtUtil.extractUserId(token);
-            String role = jwtUtil.extractRole(token);
-            Long entityId = jwtUtil.extractEntityId(token);
-
-            request.setAttribute(USER_ID_ATTRIBUTE, userId);
-            request.setAttribute(USER_ROLE_ATTRIBUTE, role);
-            request.setAttribute(ENTITY_ID_ATTRIBUTE, entityId); // null for ADMIN/PRINCIPAL
-
-        } catch (Exception e) {
-            log.warn("Failed to extract token claims", e);
-        }
-    }
-
     private void authenticateUser(String token, String username, HttpServletRequest request) {
         UserDetails user = userDetailsService.loadUserByUsername(username);
 
@@ -120,7 +81,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicEndpoint(String path) {
-        return path.startsWith("/api/v1/auth/") ||
+        return path.startsWith("/api/v1/auth/register") || path.startsWith("/api/v1/auth/login") ||
                 path.equals("/health") ||
                 path.startsWith("/actuator/");
     }

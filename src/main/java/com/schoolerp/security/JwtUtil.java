@@ -1,12 +1,13 @@
 package com.schoolerp.security;
 
-import com.schoolerp.entity.User;
+import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.enums.Role;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -23,19 +24,22 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    public final String JWT_TOKEN_ATTRIBUTE = "JWT_TOKEN";
+
     private SecretKey key() { return Keys.hmacShaKeyFor(secret.getBytes()); }
 
-    public String generateToken(User user) {
+    public String generateToken(UserTypeInfo user) {
         JwtBuilder builder = Jwts.builder()
                 .subject(user.getUsername())
-                .claim("role", user.getRole().name())
-                .claim("userId", user.getId())
+                .claim("role", user.getUserType())
+                .claim("userId", user.getUserId())
+                .claim("username", user.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key());
 
         // Only add entityId for roles that have it (not ADMIN or PRINCIPAL)
-        if (hasEntityId(user.getRole()) && user.getEntityId() != null) {
+        if (hasEntityId(user.getUserType()) && user.getEntityId() != null) {
             builder.claim("entityId", user.getEntityId());
         }
 
@@ -78,6 +82,7 @@ public class JwtUtil {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
+
     // Extract entity ID (null for ADMIN/PRINCIPAL)
     public Long extractEntityId(String token) {
         return extractClaim(token, claims -> {
@@ -107,28 +112,8 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public String extractTokenFromRequest(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header != null && header.startsWith("Bearer ") && header.length() > 7) {
-            return header.substring(7);
-        }
-        return null;
-    }
-    // Add these methods to your JwtUtil class
-    public static String getTokenFromRequest(HttpServletRequest request) {
-        return (String) request.getAttribute(JwtAuthFilter.JWT_TOKEN_ATTRIBUTE);
-    }
-
-    public static Long getUserIdFromRequest(HttpServletRequest request) {
-        return (Long) request.getAttribute(JwtAuthFilter.USER_ID_ATTRIBUTE);
-    }
-
-    public static String getRoleFromRequest(HttpServletRequest request) {
-        return (String) request.getAttribute(JwtAuthFilter.USER_ROLE_ATTRIBUTE);
-    }
-
-    public static Long getEntityIdFromRequest(HttpServletRequest request) {
-        return (Long) request.getAttribute(JwtAuthFilter.ENTITY_ID_ATTRIBUTE);
+    public String getTokenFromRequest(HttpServletRequest request) {
+        return (String) request.getAttribute(JWT_TOKEN_ATTRIBUTE);
     }
 
 }

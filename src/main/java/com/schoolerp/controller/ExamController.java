@@ -33,7 +33,7 @@ public class ExamController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
         return ApiResponse.ok(service.create(dto, userId, entityId, role));
     }
 
@@ -47,7 +47,7 @@ public class ExamController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
         return ApiResponse.paged(service.list(pageable, userId, entityId, role));
     }
 
@@ -60,7 +60,7 @@ public class ExamController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
         return ApiResponse.ok(service.update(examId, dto, userId, entityId, role));
     }
 
@@ -71,7 +71,7 @@ public class ExamController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
         return ApiResponse.ok(service.get(examId, userId, entityId, role));
     }
 
@@ -82,7 +82,7 @@ public class ExamController {
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType();
+        String role = userTypeInfo.getUserType().name();
         service.delete(examId, userId, entityId, role);
         return ApiResponse.ok(null);
     }

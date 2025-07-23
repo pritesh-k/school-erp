@@ -67,11 +67,12 @@ public class AuthServiceImpl implements AuthService {
         User user = (User) auth.getPrincipal();
         UserTypeInfo userTypeInfo = new UserTypeInfo();
         userTypeInfo.setUserId(user.getId());
-        userTypeInfo.setUserType(user.getRole().name());
+        userTypeInfo.setUsername(user.getUsername());
+        userTypeInfo.setUserType(user.getRole());
         userTypeInfo.setEntityId(user.getEntityId());
         userTypeInfo.setDisplayName(user.getDisplayName());
 
-        String token = jwtUtil.generateToken(user);
+        String token = jwtUtil.generateToken(userTypeInfo);
         userTypeInfo.setToken(token); // Set the token in UserTypeInfo
 
         return new AuthResponse(userTypeInfo);
@@ -87,12 +88,13 @@ public class AuthServiceImpl implements AuthService {
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
             UserTypeInfo userTypeInfo = new UserTypeInfo();
+            userTypeInfo.setUsername(user.getUsername());
             userTypeInfo.setUserId(user.getId());
-            userTypeInfo.setUserType(user.getRole().name());
+            userTypeInfo.setUserType(user.getRole());
             userTypeInfo.setEntityId(user.getEntityId());
             userTypeInfo.setDisplayName(user.getDisplayName());
 
-            String newToken = jwtUtil.generateToken(user);
+            String newToken = jwtUtil.generateToken(userTypeInfo);
             userTypeInfo.setToken(newToken); // Set the new token in UserTypeInfo
             return new AuthResponse(userTypeInfo);
         }

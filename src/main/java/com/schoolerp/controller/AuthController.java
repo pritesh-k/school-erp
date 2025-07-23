@@ -4,17 +4,18 @@ import com.schoolerp.dto.request.LoginRequest;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.AuthResponse;
-import com.schoolerp.dto.response.StudentResponseDto;
-import com.schoolerp.dto.response.TeacherResponseDto;
-import com.schoolerp.entity.Parent;
 import com.schoolerp.entity.User;
+import com.schoolerp.entity.UserTypeInfo;
+import com.schoolerp.enums.Role;
 import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.service.AuthService;
+import com.schoolerp.service.RequestContextService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import static com.schoolerp.enums.Role.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService service;
+    private final RequestContextService requestContextService;
 
     @Autowired
     private com.schoolerp.service.StudentService studentService;
@@ -47,14 +49,19 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ApiResponse<?> me(Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        return switch (user.getRole()) {
-            case STUDENT  -> ApiResponse.ok(studentService.get(user.getEntityId()));
-            case TEACHER  -> ApiResponse.ok(teacherService.getByTeacherId(user.getEntityId()));
-            case PARENT   -> ApiResponse.ok(parentService.getByUserId(user.getEntityId()));
-            case ADMIN    -> ApiResponse.ok(user);   // ADMIN / PRINCIPAL
-            case PRINCIPAL -> ApiResponse.ok(user);
+    public ApiResponse<?> me(HttpServletRequest request) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+
+        Long userId = userTypeInfo.getUserId();
+        Role role = userTypeInfo.getUserType();
+        Long entityId = userTypeInfo.getEntityId();
+
+        return switch (role) {
+            case STUDENT  -> ApiResponse.ok(studentService.get(entityId));
+            case TEACHER  -> ApiResponse.ok(teacherService.getByTeacherId(entityId));
+            case PARENT   -> ApiResponse.ok(parentService.getByUserId(entityId));
+            case ADMIN    -> ApiResponse.ok(userTypeInfo);   // ADMIN / PRINCIPAL
+            case PRINCIPAL -> ApiResponse.ok(userTypeInfo);
             default -> throw new UnauthorizedException("Unauthorized access");};
     }
 }

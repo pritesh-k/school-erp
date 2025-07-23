@@ -1,20 +1,31 @@
 package com.schoolerp.entity;
 
+import com.schoolerp.enums.Role;
 import lombok.Builder;
 
 public class UserTypeInfo {
     private Long userId;         // ID of the user
-    private String userType;     // "STUDENT", "TEACHER", "PARENT"
+    private Role userType;     // "STUDENT", "TEACHER", "PARENT"
     private Long entityId;       // ID of the specific entity
     private String displayName;  // Full name for display
 
     private String token;
 
-    public String getUserType() {
+    private String username;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Role getUserType() {
         return userType;
     }
 
-    public void setUserType(String userType) {
+    public void setUserType(Role userType) {
         this.userType = userType;
     }
 

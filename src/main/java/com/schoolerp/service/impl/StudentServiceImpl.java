@@ -195,7 +195,7 @@ public class StudentServiceImpl implements StudentService {
     private boolean hasActiveRecords(Long studentId) {
         return attendanceRepo.existsByStudentId(studentId) ||
                 examResultRepo.existsByStudentId(studentId) ||
-                feeRecordRepo.existsByStudentId(studentId);
+                feeRecordRepo.existsByStudentFeeAssignment_Student_Id(studentId);
     }
 
 

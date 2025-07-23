@@ -44,7 +44,7 @@ public class Student extends BaseEntity {
     private Set<ExamResult> examResults = new HashSet<>();
 
     @OneToMany(mappedBy = "student")
-    private Set<FeeRecord> feeRecords = new HashSet<>();
+    private Set<StudentFeeAssignment> feeAssignments = new HashSet<>();
 
     @OneToMany(mappedBy = "student")
     private Set<Document> documents = new HashSet<>();
@@ -137,14 +137,6 @@ public class Student extends BaseEntity {
         this.examResults = examResults;
     }
 
-    public Set<FeeRecord> getFeeRecords() {
-        return feeRecords;
-    }
-
-    public void setFeeRecords(Set<FeeRecord> feeRecords) {
-        this.feeRecords = feeRecords;
-    }
-
     public Set<Document> getDocuments() {
         return documents;
     }
@@ -167,5 +159,13 @@ public class Student extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Set<StudentFeeAssignment> getFeeAssignments() {
+        return feeAssignments;
+    }
+
+    public void setFeeAssignments(Set<StudentFeeAssignment> feeAssignments) {
+        this.feeAssignments = feeAssignments;
     }
 }

@@ -8,15 +8,15 @@ import com.schoolerp.enums.FeeStatus;
 import com.schoolerp.repository.FeeHeadRepository;
 import com.schoolerp.repository.FeeRecordRepository;
 import com.schoolerp.repository.StudentFeeAssignmentRepository;
+import com.schoolerp.service.FeeRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class FeeRecordService {
+public class FeeRecordServiceImpl implements FeeRecordService {
     @Autowired private StudentFeeAssignmentRepository assignmentRepo;
     @Autowired private FeeHeadRepository headRepo;
     @Autowired private FeeRecordRepository recordRepo;

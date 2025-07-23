@@ -7,7 +7,7 @@ import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.entity.*;
 import com.schoolerp.service.RequestContextService;
 import com.schoolerp.service.impl.FeeHeadService;
-import com.schoolerp.service.impl.FeeRecordService;
+import com.schoolerp.service.impl.FeeRecordServiceImpl;
 import com.schoolerp.service.impl.FeeStructureService;
 import com.schoolerp.service.impl.StudentFeeAssignmentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,7 @@ public class FeeController {
     private final FeeHeadService feeHeadService;
     private final FeeStructureService feeStructureService;
     private final StudentFeeAssignmentService assignmentService;
-    private final FeeRecordService feeRecordService;
+    private final FeeRecordServiceImpl feeRecordServiceImpl;
     private final RequestContextService requestContextService;
 
     // FeeHead CRUD
@@ -58,7 +58,7 @@ public class FeeController {
     @PostMapping("/pay")
     public ApiResponse<FeeRecord> payFee(@RequestBody FeePaymentDto dto, HttpServletRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
-        return ApiResponse.ok(feeRecordService.record(dto));
+        return ApiResponse.ok(feeRecordServiceImpl.record(dto));
     }
 
     // List assignments/payments for student
@@ -68,6 +68,6 @@ public class FeeController {
     }
     @GetMapping("/assignment/{id}/payments")
     public ApiResponse<List<FeeRecord>> listPayments(@PathVariable Long id) {
-        return ApiResponse.ok(feeRecordService.listByAssignment(id));
+        return ApiResponse.ok(feeRecordServiceImpl.listByAssignment(id));
     }
 }

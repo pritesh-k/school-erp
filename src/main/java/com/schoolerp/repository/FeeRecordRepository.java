@@ -14,19 +14,10 @@ import java.util.List;
 
 @Repository
 public interface FeeRecordRepository extends JpaRepository<FeeRecord, Long> {
-    List<FeeRecord> findByStudentIdOrderByDueDateDesc(Long studentId);
 
-    Page<FeeRecord> findByStudentId(Long studentId, Pageable pageable);
+    Page<FeeRecord> findByStudentFeeAssignment_Student_Id(Long studentId, Pageable pageable);
 
-    // Total paid by student
-    @Query("SELECT SUM(f.amount) FROM FeeRecord f WHERE f.student.id = :studentId AND f.status = 'PAID'")
-    BigDecimal totalPaidByStudent(@Param("studentId") Long studentId);
-
-    // Overdue unpaid fees
-    @Query("SELECT f FROM FeeRecord f WHERE f.status = 'UNPAID' AND f.dueDate < CURRENT_DATE")
-    List<FeeRecord> findOverdueFees();
-
-    boolean existsByStudentId(Long studentId);
+    boolean existsByStudentFeeAssignment_Student_Id(Long studentId);
 
     List<FeeRecord> findByStudentFeeAssignmentId(Long assignmentId);
 

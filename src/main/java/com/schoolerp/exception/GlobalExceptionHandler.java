@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -43,7 +44,7 @@ public class GlobalExceptionHandler {
                 "Unexpected error: " + ex.getMessage());
     }
 
-    @ExceptionHandler(NoChangesDetectedException.class)
+    @ExceptionHandler({NoChangesDetectedException.class, SQLException.class})
     public ResponseEntity<ApiResponse<Void>> handleNoChangesDetectedException(MethodArgumentNotValidException ex) {
         return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
     }

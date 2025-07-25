@@ -67,7 +67,6 @@ public class TeacherServiceImpl implements TeacherService {
                 .joiningDate(dto.joiningDate())
                 .build();
         teacher.setCreatedAt(java.time.Instant.now());
-        teacher.setUpdatedAt(java.time.Instant.now());
         teacher.setActive(true);
         teacher.setDeleted(false);
         teacher.setCreatedBy(userId);
@@ -214,6 +213,8 @@ public class TeacherServiceImpl implements TeacherService {
         // Recreate full name if name changed
         if (userChanged) {
             user.createFullName();
+            user.setUpdatedAt(java.time.Instant.now());
+
             userRepo.save(user);
         }
 

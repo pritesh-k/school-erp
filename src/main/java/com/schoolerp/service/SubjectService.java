@@ -11,6 +11,6 @@ public interface SubjectService {
     SubjectResponseDto create(SubjectCreateDto dto,Long userId);
     SubjectResponseDto get(Long id);
     Page<SubjectResponseDto> list(Pageable pageable);
-    SubjectResponseDto update(Long id, SubjectUpdateDto dto);
+    SubjectResponseDto update(Long id, SubjectUpdateDto dto, Long userId);
     void delete(Long id);
 }

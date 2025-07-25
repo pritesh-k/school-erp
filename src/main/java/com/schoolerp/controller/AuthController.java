@@ -50,7 +50,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ApiResponse<?> me(HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Role role = userTypeInfo.getUserType();

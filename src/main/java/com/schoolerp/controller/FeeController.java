@@ -12,6 +12,7 @@ import com.schoolerp.service.impl.FeeStructureService;
 import com.schoolerp.service.impl.StudentFeeAssignmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public class FeeController {
     private final FeeStructureService feeStructureService;
     private final StudentFeeAssignmentService assignmentService;
     private final FeeRecordServiceImpl feeRecordServiceImpl;
+
+    @Autowired
     private final RequestContextService requestContextService;
 
     // FeeHead CRUD
@@ -39,7 +42,7 @@ public class FeeController {
     // FeeStructure CRUD
     @PostMapping("/structure")
     public ApiResponse<FeeStructure> createStructure(@RequestBody FeeStructureDto dto, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         return ApiResponse.ok(feeStructureService.create(dto));
     }
     @GetMapping("/structure/{id}")
@@ -50,14 +53,14 @@ public class FeeController {
     // Assign fee to student
     @PostMapping("/assign")
     public ApiResponse<StudentFeeAssignment> assignFee(@RequestBody FeeAssignDto dto, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         return ApiResponse.ok(assignmentService.assign(dto));
     }
 
     // Record a payment
     @PostMapping("/pay")
     public ApiResponse<FeeRecord> payFee(@RequestBody FeePaymentDto dto, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         return ApiResponse.ok(feeRecordServiceImpl.record(dto));
     }
 

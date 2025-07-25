@@ -11,14 +11,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class RequestContextService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public UserTypeInfo getCurrentUserContext(HttpServletRequest request) {
+    public UserTypeInfo getCurrentUserContext() {
         try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes == null) {
+                throw new UnauthorizedException("No request context available");
+            }
+
+            HttpServletRequest request = attributes.getRequest();
+
             String token = jwtUtil.getTokenFromRequest(request);
             Long userId = jwtUtil.extractUserId(token);
             String role = jwtUtil.extractRole(token);

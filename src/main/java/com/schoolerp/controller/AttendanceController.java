@@ -49,7 +49,7 @@ public class AttendanceController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             HttpServletRequest request) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
@@ -68,7 +68,7 @@ public class AttendanceController {
     public ApiResponse<List<AttendanceResponseDto>> markBulk(
             @RequestBody List<AttendanceCreateDto> dtos, HttpServletRequest request) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
@@ -87,7 +87,7 @@ public class AttendanceController {
             @PathVariable Long attendanceId,
             @RequestBody AttendanceUpdateDto dto, HttpServletRequest request)   {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
@@ -103,7 +103,7 @@ public class AttendanceController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{attendanceId}")
     public ApiResponse<Void> delete(@PathVariable Long attendanceId, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();

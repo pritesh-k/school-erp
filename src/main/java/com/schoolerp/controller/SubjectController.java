@@ -12,6 +12,7 @@ import com.schoolerp.service.SubjectService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,16 +27,16 @@ import java.util.List;
 public class SubjectController {
     private final SubjectService service;
 
+    @Autowired
     private final RequestContextService requestContextService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ApiResponse<SubjectResponseDto> create(
-            @RequestBody SubjectCreateDto dto,
-            HttpServletRequest request) {
+            @RequestBody SubjectCreateDto dto) {
 
         // Extract token from request
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.create(dto, userId));
@@ -46,6 +47,7 @@ public class SubjectController {
     public ApiResponse<List<SubjectResponseDto>> list(
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(service.list(pageable));
@@ -53,6 +55,8 @@ public class SubjectController {
 
     @GetMapping("/{subjectId}")
     public ApiResponse<SubjectResponseDto> getById(@PathVariable Long subjectId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
         return ApiResponse.ok(service.get(subjectId));
     }
 
@@ -61,6 +65,8 @@ public class SubjectController {
     public ApiResponse<SubjectResponseDto> updateSubject(
             @PathVariable Long subjectId,
             @RequestBody SubjectUpdateDto dto) {
-        return ApiResponse.ok(service.update(subjectId, dto));
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
+        return ApiResponse.ok(service.update(subjectId, dto, userTypeInfo.getUserId()));
     }
 }

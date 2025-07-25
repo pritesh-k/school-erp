@@ -1,7 +1,6 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.ClassCreateDto;
-import com.schoolerp.dto.request.ClassUpdateDto;
 import com.schoolerp.dto.request.SectionCreateDto;
 import com.schoolerp.dto.request.SectionUpdateDto;
 import com.schoolerp.dto.response.ClassResponseDto;
@@ -10,7 +9,6 @@ import com.schoolerp.entity.SchoolClass;
 import com.schoolerp.entity.Section;
 import com.schoolerp.entity.Teacher;
 import com.schoolerp.enums.ClassStandard;
-import com.schoolerp.enums.SectionName;
 import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.ClassMapper;
@@ -27,11 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,11 +45,9 @@ public class ClassServiceImpl implements ClassService {
         SchoolClass sc = SchoolClass.builder()
                 .name(dto.getName()).build();
         sc.setCreatedBy(userId);
-        sc.setUpdatedBy(userId);
         sc.setCreatedAt(java.time.Instant.now());
         sc.setActive(true);
         sc.setDeleted(false);
-        sc.setUpdatedAt(java.time.Instant.now());
         return classMapper.toDto(classRepo.save(sc));
     }
 
@@ -152,8 +144,6 @@ public class ClassServiceImpl implements ClassService {
 
         Section section = sectionBuilder.build();
 
-        section.setUpdatedBy(userId);
-        section.setUpdatedAt(Instant.now());
         section.setCreatedBy(userId);
         section.setCreatedAt(Instant.now());
         section.setActive(true);

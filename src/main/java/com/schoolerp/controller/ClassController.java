@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +33,8 @@ public class ClassController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ApiResponse<ClassResponseDto> create(@RequestBody ClassCreateDto dto, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+    public ApiResponse<ClassResponseDto> create(@RequestBody ClassCreateDto dto) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.create(dto, userId));
@@ -41,9 +42,8 @@ public class ClassController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/{classId}/sections")
-    public ApiResponse<SectionResponseDto> addSection(@PathVariable @NotNull Long classId, @RequestBody SectionCreateDto dto
-            , HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+    public ApiResponse<SectionResponseDto> addSection(@PathVariable @NotNull Long classId, @RequestBody SectionCreateDto dto) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.addSection(classId, dto, userId));
@@ -51,11 +51,15 @@ public class ClassController {
 
     @GetMapping("/{classId}/sections")
     public ApiResponse<List<SectionResponseDto>> sections(@PathVariable @NotNull Long classId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
         return ApiResponse.ok(service.sectionsByClass(classId));
     }
 
     @GetMapping("/{classId}")
     public ApiResponse<ClassResponseDto> getClass(@PathVariable @NotNull Long classId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
         return ApiResponse.ok(service.get(classId));
     }
 
@@ -63,8 +67,9 @@ public class ClassController {
     public ApiResponse<List<ClassResponseDto>> list(
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "name");
         return ApiResponse.paged(service.list(pageable));
     }
 
@@ -72,8 +77,8 @@ public class ClassController {
     @PutMapping("/{classId}")
     public ApiResponse<ClassResponseDto> updateClass(
             @PathVariable Long classId,
-            @RequestBody ClassCreateDto dto, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+            @RequestBody ClassCreateDto dto) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.updateClassOnly(classId, dto, userId));
@@ -84,8 +89,8 @@ public class ClassController {
     public ApiResponse<SectionResponseDto> updateSection(
             @PathVariable Long classId,
             @PathVariable Long sectionId,
-            @RequestBody SectionUpdateDto dto, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+            @RequestBody SectionUpdateDto dto) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.updateSectionsOnly(classId, dto, userId, sectionId));
     }

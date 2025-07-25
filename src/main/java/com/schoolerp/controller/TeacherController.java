@@ -42,7 +42,7 @@ public class TeacherController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ApiResponse<TeacherResponseDto> create(@RequestBody TeacherCreateDto dto, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.create(dto, userId));
     }
@@ -59,6 +59,7 @@ public class TeacherController {
     public ApiResponse<List<TeacherResponseDto>> list(
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
             @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(service.list(pageable));
@@ -73,6 +74,8 @@ public class TeacherController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
     @GetMapping("/{id}")
     public ApiResponse<TeacherResponseDto> getById(@PathVariable Long id) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
         return ApiResponse.ok(service.getByTeacherId(id));
     }
 
@@ -88,9 +91,9 @@ public class TeacherController {
     @PutMapping("/{teacherId}/assignments/section/{sectionId}")
     public ApiResponse<String> assignSection(
             @PathVariable Long teacherId,
-            @PathVariable Long sectionId, HttpServletRequest request) {
+            @PathVariable Long sectionId) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
 
@@ -109,9 +112,9 @@ public class TeacherController {
     @DeleteMapping("/{teacherId}/assignments/section/{sectionId}")
     public ApiResponse<String> removeSection(
             @PathVariable Long teacherId,
-            @PathVariable Long sectionId, HttpServletRequest request) {
+            @PathVariable Long sectionId) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
 
@@ -130,9 +133,9 @@ public class TeacherController {
     @PutMapping("/{teacherId}/assignments/subject/{subjectId}")
     public ApiResponse<String> assignSubject(
             @PathVariable Long teacherId,
-            @PathVariable Long subjectId, HttpServletRequest request) {
+            @PathVariable Long subjectId) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
 
@@ -151,9 +154,9 @@ public class TeacherController {
     @PostMapping("/{teacherId}/assignments/section/{sectionId}/class-teacher")
     public ApiResponse<String> assignClassTeacher(
             @PathVariable Long teacherId,
-            @PathVariable Long sectionId, HttpServletRequest request) {
+            @PathVariable Long sectionId) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
 
@@ -198,8 +201,8 @@ public class TeacherController {
     @DeleteMapping("/{teacherId}/assignments/subject/{subjectId}")
     public ApiResponse<String> removeSubject(
             @PathVariable Long teacherId,
-            @PathVariable Long subjectId, HttpServletRequest request) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+            @PathVariable Long subjectId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
 
@@ -216,6 +219,8 @@ public class TeacherController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
     @GetMapping("/{teacherId}/SectionAssignments")
     public ApiResponse<TeacherAssignmentDto> getAssignments(@PathVariable Long teacherId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
         return ApiResponse.ok(assignmentService.getTeacherAssignments(teacherId, false, true));
     }
 
@@ -228,6 +233,8 @@ public class TeacherController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
     @GetMapping("/{teacherId}/SubjectAssignments")
     public ApiResponse<TeacherAssignmentDto> getSubjectAssignments(@PathVariable Long teacherId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
         return ApiResponse.ok(assignmentService.getTeacherAssignments(teacherId, true, false));
     }
 
@@ -245,6 +252,8 @@ public class TeacherController {
             @PathVariable Long subjectId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10")@Min(1) @Max(100) int size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
         Pageable pageable = PageRequest.of(page, size);
         Page<TeachersAssignedDto> result = assignmentService.getAssignedTeachers(subjectId, pageable);
         return ApiResponse.paged(result);
@@ -263,6 +272,7 @@ public class TeacherController {
             @RequestParam Long sectionId,
             @RequestParam(defaultValue = "0")@Min(0) Integer page,
             @RequestParam(defaultValue = "10")@Min(1) @Max(100) Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(assignmentService.getTeachersBySectionId(sectionId, pageable));
@@ -281,6 +291,7 @@ public class TeacherController {
             @RequestParam Long subjectId,
             @RequestParam(defaultValue = "0") @Min(0) Integer page,
             @RequestParam(defaultValue = "10")@Min(1) @Max(100) Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Pageable pageable = PageRequest.of(page, size);
         Page<TeachersAssignedDto> teachers = assignmentService.getTeachersBySubjectId(subjectId, pageable);
@@ -301,6 +312,7 @@ public class TeacherController {
             @RequestParam Long classTeacherId,
             @RequestParam(defaultValue = "0") @Min(0) Integer page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Pageable pageable = PageRequest.of(page, size);
         Page<SectionResponseDto> sections = assignmentService.findSectionsByClassTeacherId(classTeacherId, pageable);

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,12 +25,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExamController {
     private final ExamService service;
+
+    @Autowired
     private final RequestContextService requestContextService;
 
     @PostMapping
-    public ApiResponse<ExamResponseDto> create(@RequestBody ExamCreateDto dto, HttpServletRequest request) {
+    public ApiResponse<ExamResponseDto> create(@RequestBody ExamCreateDto dto) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
@@ -42,7 +45,7 @@ public class ExamController {
             @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
             @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size, HttpServletRequest request) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
 
         Long userId = userTypeInfo.getUserId();
@@ -54,9 +57,9 @@ public class ExamController {
     @PutMapping("/{examId}")
     public ApiResponse<ExamResponseDto> update(
             @PathVariable Long examId,
-            @RequestBody ExamCreateDto dto, HttpServletRequest request) {
+            @RequestBody ExamCreateDto dto) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
@@ -65,9 +68,9 @@ public class ExamController {
     }
 
     @GetMapping("/{examId}")
-    public ApiResponse<ExamResponseDto> get(@PathVariable Long examId, HttpServletRequest request) {
+    public ApiResponse<ExamResponseDto> get(@PathVariable Long examId) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
@@ -76,9 +79,9 @@ public class ExamController {
     }
 
     @DeleteMapping("/{examId}")
-    public ApiResponse<String> delete(@PathVariable Long examId, HttpServletRequest request) {
+    public ApiResponse<String> delete(@PathVariable Long examId) {
 
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext(request);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();

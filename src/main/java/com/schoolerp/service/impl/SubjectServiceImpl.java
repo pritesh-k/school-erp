@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class SubjectServiceImpl implements SubjectService {
@@ -26,6 +28,8 @@ public class SubjectServiceImpl implements SubjectService {
     public SubjectResponseDto create(SubjectCreateDto dto, Long userId) {
         Subject s = Subject.builder().code(dto.code()).category(dto.category()).build();
         s.setCreatedBy(userId);
+        s.setCreatedAt(Instant.now());
+        s.setActive(true);
         return mapper.toDto(repo.save(s));
     }
 
@@ -51,7 +55,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional
-    public SubjectResponseDto update(Long id, SubjectUpdateDto dto) {
+    public SubjectResponseDto update(Long id, SubjectUpdateDto dto, Long userId) {
         Subject subject = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject with ID " + id + " not found"));
 
@@ -66,6 +70,8 @@ public class SubjectServiceImpl implements SubjectService {
         if (dto.category() != null) {
             subject.setCategory(dto.category());
         }
+        subject.setUpdatedAt(Instant.now());
+        subject.setUpdatedBy(userId);
 
         return mapper.toDto(repo.save(subject));
     }

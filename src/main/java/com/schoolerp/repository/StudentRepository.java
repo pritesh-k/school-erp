@@ -26,4 +26,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     long countBySchoolClassId(Long classId);
 
     Optional<Student> findByUserId(Long userId);
+
+    boolean existsByIdAndUser_Id(Long id, Long userId);
 }

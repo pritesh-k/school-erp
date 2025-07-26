@@ -213,4 +213,9 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found for user ID: " + userId));
     }
 
+    public void existsByIdAndUser_Id(Long studentId, Long userId){
+        if (!repo.existsByIdAndUser_Id(studentId, userId)) {
+            throw new ResourceNotFoundException("Student not found with ID: " + studentId + " and User ID: " + userId);
+        }
+    }
 }

@@ -19,4 +19,6 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     // Search teachers by name
     @Query("SELECT t FROM Teacher t WHERE LOWER(t.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Teacher> searchByName(@Param("keyword") String keyword, Pageable pageable);
+
+    boolean existsByIdAndUser_Id(Long id, Long userId);
 }

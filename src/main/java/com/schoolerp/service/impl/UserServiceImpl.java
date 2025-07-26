@@ -2,7 +2,10 @@ package com.schoolerp.service.impl;
 
 import com.schoolerp.entity.User;
 import com.schoolerp.enums.Role;
+import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.repository.UserRepository;
+import com.schoolerp.service.StudentService;
+import com.schoolerp.service.TeacherService;
 import com.schoolerp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +21,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final TeacherService teacherService;
+    private final StudentService studentService;
     @Override
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -74,5 +79,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void validateUserAccess(Long userId, Long entityId, Role fromString){
+        try {
+            switch (fromString) {
+                case TEACHER -> teacherService.existsByIdAndUser_Id(entityId, userId);
+                case STUDENT -> studentService.existsByIdAndUser_Id(entityId, userId);
+                default -> throw new UnauthorizedException("Invalid role for access validation: " + fromString);
+            }
+        } catch (Exception e) {
+            throw new UnauthorizedException("Access validation failed for user ID: " + userId + " with entity ID: " + entityId, e);
+        }
     }
 }

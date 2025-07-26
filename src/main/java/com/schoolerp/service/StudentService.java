@@ -16,4 +16,7 @@ public interface StudentService {
     void bulkUpload(MultipartFile file);
 
     Student getByUserId(Long id);
+
+    void existsByIdAndUser_Id(Long studentId, Long userId);
+
 }

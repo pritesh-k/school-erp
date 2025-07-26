@@ -93,9 +93,9 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Override
     @Transactional
-    public TeacherResponseDto update(Long id, TeacherUpdateDto dto) {
-        Teacher teacher = teacherRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
+    public TeacherResponseDto update(Long teacherId, TeacherUpdateDto dto, Long userId) {
+        Teacher teacher = teacherRepo.findById(teacherId)
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + teacherId));
 
         boolean hasChanges = false;
 
@@ -219,5 +219,11 @@ public class TeacherServiceImpl implements TeacherService {
         }
 
         return userChanged;
+    }
+
+    public void existsByIdAndUser_Id(Long teacherId, Long userId){
+        if (!teacherRepo.existsByIdAndUser_Id(teacherId, userId)) {
+            throw new ResourceNotFoundException("Teacher not found with ID: " + teacherId + " and User ID: " + userId);
+        }
     }
 }

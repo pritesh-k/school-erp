@@ -12,7 +12,8 @@ public interface TeacherService {
     TeacherResponseDto create(TeacherCreateDto dto, Long userId);
     TeacherResponseDto getByTeacherId(Long id);
     Page<TeacherResponseDto> list(Pageable pageable);
-    TeacherResponseDto update(Long id, TeacherUpdateDto dto);
+    TeacherResponseDto update(Long teacherId, TeacherUpdateDto dto, Long userId);
     void delete(Long id);
 
+    void existsByIdAndUser_Id(Long teacherId, Long userId);
 }

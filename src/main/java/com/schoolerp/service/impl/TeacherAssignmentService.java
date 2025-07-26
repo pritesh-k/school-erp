@@ -9,6 +9,7 @@ import com.schoolerp.dto.response.TeachersAssignedDto;
 import com.schoolerp.entity.Section;
 import com.schoolerp.entity.Subject;
 import com.schoolerp.entity.Teacher;
+import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.SectionMapper;
 import com.schoolerp.mapper.SubjectMapper;
@@ -47,7 +48,7 @@ public class TeacherAssignmentService {
 
         // Check if section already has a class teacher
         if (section.getAssignedTeachers() != null && section.getAssignedTeachers().contains(teacher)) {
-            throw new IllegalStateException("Section already has this teacher assigned: " +
+            throw new DuplicateEntry("Section already has this teacher assigned: " +
                     teacher.getDisplayName());
         }
 

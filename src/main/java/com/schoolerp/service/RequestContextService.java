@@ -19,6 +19,9 @@ public class RequestContextService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    UserService userService;
+
     public UserTypeInfo getCurrentUserContext() {
         try {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -36,7 +39,9 @@ public class RequestContextService {
             if (userId == null || role == null || token == null) {
                 throw new UnauthorizedException("Invalid or missing token details");
             }
-
+            if (role.equals(Role.TEACHER.name()) || role.equals(Role.STUDENT.name())) {
+                userService.validateUserAccess(userId, entityId, Role.fromString(role));
+            }
             UserTypeInfo userTypeInfo = new UserTypeInfo();
             userTypeInfo.setUserId(userId);
             userTypeInfo.setUserType(Role.fromString(role));

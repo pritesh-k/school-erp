@@ -19,4 +19,6 @@ public interface UserService {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     PasswordEncoder getPasswordEncoder();
+
+    void validateUserAccess(Long userId, Long entityId, Role fromString);
 }

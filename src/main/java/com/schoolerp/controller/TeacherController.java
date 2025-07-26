@@ -2,16 +2,15 @@ package com.schoolerp.controller;
 
 import com.schoolerp.dto.request.TeacherAssignmentDto;
 import com.schoolerp.dto.request.TeacherCreateDto;
+import com.schoolerp.dto.request.TeacherUpdateDto;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.SectionResponseDto;
 import com.schoolerp.dto.response.TeacherResponseDto;
 import com.schoolerp.dto.response.TeachersAssignedDto;
 import com.schoolerp.entity.UserTypeInfo;
-import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.service.RequestContextService;
 import com.schoolerp.service.TeacherService;
 import com.schoolerp.service.impl.TeacherAssignmentService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -36,23 +35,28 @@ public class TeacherController {
      * Only accessible by ADMIN role.
      *
      * @param dto the data transfer object containing teacher details
-     * @param request the HTTP request containing user context
      * @return ApiResponse with the created TeacherResponseDto
      */
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ApiResponse<TeacherResponseDto> create(@RequestBody TeacherCreateDto dto, HttpServletRequest request) {
+    public ApiResponse<TeacherResponseDto> create(@RequestBody TeacherCreateDto dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.create(dto, userId));
     }
-    /** * Lists all teachers with pagination.
-     * Accessible by ADMIN, TEACHER, and PRINCIPAL roles.
+    /** * Updates the basic information of a teacher.
+     * Only accessible by ADMIN role.
      *
-     * @param page the page number to retrieve
-     * @param size the number of items per page
-     * @return ApiResponse with a list of TeacherResponseDto
+     * @param dto the data transfer object containing updated teacher details
+     * @return ApiResponse with the updated TeacherResponseDto
      */
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{teacherId}")
+    public ApiResponse<TeacherResponseDto> updateTeacherBasics(@PathVariable Long teacherId, @RequestBody TeacherUpdateDto dto) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.update(teacherId, dto, userId));
+    }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
     @GetMapping
@@ -220,7 +224,6 @@ public class TeacherController {
     @GetMapping("/{teacherId}/SectionAssignments")
     public ApiResponse<TeacherAssignmentDto> getAssignments(@PathVariable Long teacherId) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
         return ApiResponse.ok(assignmentService.getTeacherAssignments(teacherId, false, true));
     }
 

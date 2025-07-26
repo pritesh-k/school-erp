@@ -1,18 +1,40 @@
 package com.schoolerp.dto.request;
+import com.schoolerp.entity.User;
 import com.schoolerp.enums.Gender;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 public class StudentCreateDto {
-    @NotBlank @NotNull String admissionNumber;
-    @NotBlank @NotNull String rollNumber;
-    @NotBlank @NotNull String firstName;
-    String lastName;
-    @NotNull @NotNull LocalDate dob;
-    @NotNull Gender gender;
-    Long schoolClassId;
-    Long sectionId;
+    @NotBlank @NotNull private String admissionNumber;
+    @NotBlank @NotNull private String rollNumber;
+    @NotBlank @NotNull private String firstName;
+    private String lastName;
+    @NotNull @NotNull private LocalDate dob;
+    private Long schoolClassId;
+    private Long sectionId;
+
+    private Gender gender;
+
     @Email
-    String email;
+    private String email;
+
+    private ParentCreateDto parentCreateDto;
+
+    public ParentCreateDto getParentCreateDto() {
+        return parentCreateDto;
+    }
+
+    public void setParentCreateDto(ParentCreateDto parentCreateDto) {
+        this.parentCreateDto = parentCreateDto;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
 
     public String getAdmissionNumber() {
         return admissionNumber;
@@ -54,13 +76,6 @@ public class StudentCreateDto {
         this.dob = dob;
     }
 
-    public Gender getGender() {
-        return gender;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
 
     public Long getSchoolClassId() {
         return schoolClassId;

@@ -3,8 +3,10 @@ package com.schoolerp.service.impl;
 import com.schoolerp.dto.request.ParentCreateDto;
 import com.schoolerp.dto.response.ParentResponseDto;
 import com.schoolerp.entity.Parent;
+import com.schoolerp.entity.Student;
 import com.schoolerp.entity.User;
 import com.schoolerp.enums.Role;
+import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.ParentMapper;
 import com.schoolerp.repository.ParentRepository;
@@ -30,28 +32,23 @@ public class ParentServiceImpl implements ParentService {
 
     @Override
     @Transactional
-    public ParentResponseDto create(ParentCreateDto dto) {
-        if (userRepo.existsByUsername(dto.username()))
-            throw new IllegalArgumentException("Username exists");
-        User user = User.builder()
-                .username(dto.username())
-                .email(dto.email())
-                .password(encoder.encode(dto.password()))
-                .role(Role.PARENT)
-                .build();
-        user = userRepo.save(user);
-
+    public ParentResponseDto create(ParentCreateDto dto, Long createdById, User savedUser) {
         Parent parent = Parent.builder()
-                .user(user)
-                .firstName(dto.firstName())
-                .lastName(dto.lastName())
-                .phone(dto.phone())
-                .email(dto.email())
-                .occupation(dto.occupation())
-                .relation(dto.relation())
+                .user(savedUser)  // or fill from dto, but NOT from student.getUser(), since student not created yet
+                .firstName(dto.getFatherFirstName())
+                .lastName(dto.getFatherLastName())
+                .phone(dto.getFatherPhone())
+                .email(dto.getEmail())
+                .occupation(dto.getFatherOccupation())
+                .relation(dto.getRelation())
                 .build();
-        return mapper.toDto(parentRepo.save(parent));
+        parent.setCreatedAt(java.time.Instant.now());
+        parent.setCreatedBy(createdById);
+
+        Parent saved = parentRepo.save(parent);
+        return mapper.toDto(saved);
     }
+
 
     @Override
     public ParentResponseDto get(Long id) {
@@ -66,13 +63,14 @@ public class ParentServiceImpl implements ParentService {
     @Override
     @Transactional
     public ParentResponseDto update(Long id, ParentCreateDto dto) {
-        Parent p = parentRepo.findById(id).orElseThrow();
-        p.setFirstName(dto.firstName());
-        p.setLastName(dto.lastName());
-        p.setPhone(dto.phone());
-        p.setEmail(dto.email());
-        p.setOccupation(dto.occupation());
-        p.setRelation(dto.relation());
+        Parent p = parentRepo.findById(id).orElseThrow(() ->
+            new ResourceNotFoundException("Parent not found with id: " + id));
+        p.setFirstName(dto.getFatherFirstName());
+        p.setLastName(dto.getFatherLastName());
+        p.setPhone(dto.getFatherPhone());
+        p.setEmail(dto.getEmail());
+        p.setOccupation(dto.getFatherOccupation());
+        p.setRelation(dto.getRelation());
         return mapper.toDto(parentRepo.save(p));
     }
 
@@ -87,4 +85,9 @@ public class ParentServiceImpl implements ParentService {
         //parentRepo.getByUserId
         return null;
     }
+
+    public Parent getReferenceById(Long id){
+        return parentRepo.getReferenceById(id);
+    }
+
 }

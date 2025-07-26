@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface StudentService {
-    StudentResponseDto create(StudentCreateDto dto);
+    StudentResponseDto create(StudentCreateDto dto, Long userId);
     Page<StudentResponseDto> list(Pageable pageable);
     StudentResponseDto get(Long id);
     StudentResponseDto update(Long id, StudentCreateDto dto);

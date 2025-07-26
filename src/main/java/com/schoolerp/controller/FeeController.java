@@ -3,6 +3,7 @@ package com.schoolerp.controller;
 import com.schoolerp.dto.request.FeeAssignDto;
 import com.schoolerp.dto.request.FeePaymentDto;
 import com.schoolerp.dto.request.FeeStructureDto;
+import com.schoolerp.dto.request.feeHead.FeeHeadRequest;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.entity.*;
 import com.schoolerp.service.RequestContextService;
@@ -11,8 +12,13 @@ import com.schoolerp.service.impl.FeeRecordServiceImpl;
 import com.schoolerp.service.impl.FeeStructureService;
 import com.schoolerp.service.impl.StudentFeeAssignmentService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,13 +36,24 @@ public class FeeController {
     private final RequestContextService requestContextService;
 
     // FeeHead CRUD
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/head")
-    public ApiResponse<FeeHead> createFeeHead(@RequestBody FeeHead feeHead) {
-        return ApiResponse.ok(feeHeadService.create(feeHead));
+    public ApiResponse<FeeHeadRequest> createFeeHead(@RequestBody FeeHeadRequest head) {
+        return ApiResponse.ok(feeHeadService.create(head));
     }
-    @GetMapping("/head/{id}")
-    public ApiResponse<FeeHead> getFeeHead(@PathVariable Long id) {
-        return ApiResponse.ok(feeHeadService.get(id));
+
+    @GetMapping("/head/{feeHeadId}")
+    public ApiResponse<FeeHead> getFeeHead(@PathVariable Long feeHeadId) {
+        return ApiResponse.ok(feeHeadService.get(feeHeadId));
+    }
+
+    @GetMapping("/head}")
+    public ApiResponse<List<FeeHeadRequest>> getAllFeeHead(
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(feeHeadService.list(pageable));
     }
 
     // FeeStructure CRUD

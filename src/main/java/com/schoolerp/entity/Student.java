@@ -1,6 +1,7 @@
 package com.schoolerp.entity;
 
 import com.schoolerp.enums.Gender;
+import com.schoolerp.enums.Relation;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,11 +32,10 @@ public class Student extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Section section;
 
-    @ManyToMany
-    @JoinTable(name = "student_parent",
-            joinColumns = @JoinColumn(name = "student_id"),
-            inverseJoinColumns = @JoinColumn(name = "parent_id"))
-    private Set<Parent> parents = new HashSet<>();
+    // Student entity
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")  // FK in Student table
+    private Parent parent;
 
     @OneToMany(mappedBy = "student")
     private Set<Attendance> attendances = new HashSet<>();
@@ -113,12 +113,11 @@ public class Student extends BaseEntity {
         this.section = section;
     }
 
-    public Set<Parent> getParents() {
-        return parents;
+    public Parent getParent() {
+        return parent;
     }
-
-    public void setParents(Set<Parent> parents) {
-        this.parents = parents;
+    public void setParent(Parent parent) {
+        this.parent = parent;
     }
 
     public Set<Attendance> getAttendances() {

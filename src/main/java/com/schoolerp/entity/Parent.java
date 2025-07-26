@@ -17,14 +17,18 @@ public class Parent extends BaseEntity {
     private User user;
     private String firstName;
     private String lastName;
+
+    @Column(unique = true)
     private String phone;
+    @Column(unique = true)
     private String email;
     private String occupation;
 
     @Enumerated(EnumType.STRING)
     private Relation relation;
 
-    @ManyToMany(mappedBy = "parents")
+    // Parent entity
+    @OneToMany(mappedBy = "parent")
     private Set<Student> students = new HashSet<>();
 
     public User getUser() {

@@ -50,7 +50,8 @@ public class TeacherServiceImpl implements TeacherService {
                 dto.password(),
                 Role.TEACHER,
                 dto.firstName(),
-                dto.lastName()
+                dto.lastName(),
+                userId
         );
 
         User savedUser = authService.register(req);

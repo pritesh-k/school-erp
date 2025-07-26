@@ -26,9 +26,7 @@ import java.time.Instant;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final JwtAuthFilter jwtAuthFilter;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
         return http
@@ -44,7 +42,6 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
 
     @Bean
     public AuthenticationEntryPoint customAuthenticationEntryPoint(ObjectMapper objectMapper) {
@@ -67,8 +64,6 @@ public class SecurityConfig {
             objectMapper.writeValue(response.getWriter(), apiResponse);
         };
     }
-
-
     @Bean public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
     @Bean public AuthenticationManager authMgr(AuthenticationConfiguration cfg) throws Exception { return cfg.getAuthenticationManager(); }
 }

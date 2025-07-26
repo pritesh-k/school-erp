@@ -1,13 +1,17 @@
 package com.schoolerp.service.impl;
 
+import com.schoolerp.dto.request.ParentCreateDto;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.request.StudentCreateDto;
+import com.schoolerp.dto.response.ParentResponseDto;
 import com.schoolerp.dto.response.StudentResponseDto;
 import com.schoolerp.entity.*;
 import com.schoolerp.enums.Role;
+import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.StudentMapper;
 import com.schoolerp.repository.*;
+import com.schoolerp.service.ParentService;
 import com.schoolerp.service.StudentService;
 import com.schoolerp.utils.ExcelUtil;
 import lombok.RequiredArgsConstructor;
@@ -48,11 +52,13 @@ public class StudentServiceImpl implements StudentService {
     private final AuthServiceImpl authService;
 
     private final UserRepository userRepo;
+
+    private final ParentService parentService;
     @Override
     @Transactional
-    public StudentResponseDto create(StudentCreateDto dto) {
+    public StudentResponseDto create(StudentCreateDto dto, Long userId) {
         if (repo.findByAdmissionNumber(dto.getAdmissionNumber()).isPresent())
-            throw new IllegalArgumentException("Admission number already exists");
+            throw new DuplicateEntry("Admission number already exists");
 
         // 1. Create and save User first (using admission number as username)
         RegisterRequest req = new RegisterRequest(
@@ -61,14 +67,25 @@ public class StudentServiceImpl implements StudentService {
                 dto.getAdmissionNumber(),  // default password = admission number
                 Role.STUDENT,
                 dto.getFirstName(),
-                dto.getLastName()
+                dto.getLastName(),
+                userId  // created by current user
         );
 
         User savedUser = authService.register(req);
 
-        // 2. Create Student with saved User
+        // 2. Create Parent first and save it, associate to student
+        Parent parent = null;
+        ParentCreateDto parentDto = dto.getParentCreateDto();
+        if (parentDto != null) {
+            ParentResponseDto parentResponseDto = parentService.create(parentDto, userId, savedUser);
+            parent = parentService.getReferenceById(parentResponseDto.getId()); // or fetch from DB
+        } else {
+            throw new ResourceNotFoundException("Parent information is required");
+        }
+
+        // 3. Create Student with saved User and set parent
         Student student = Student.builder()
-                .user(savedUser)  // User with proper ID
+                .user(savedUser)
                 .admissionNumber(dto.getAdmissionNumber())
                 .rollNumber(dto.getRollNumber())
                 .firstName(dto.getFirstName())
@@ -76,18 +93,32 @@ public class StudentServiceImpl implements StudentService {
                 .dob(dto.getDob())
                 .gender(dto.getGender())
                 .email(dto.getEmail())
-                .schoolClass(classRepo.getReferenceById(dto.getSchoolClassId()))
-                .section(sectionRepo.getReferenceById(dto.getSectionId()))
+                .parent(parent)  // Set parent here
                 .build();
+        student.setCreatedAt(java.time.Instant.now());
+        student.setCreatedBy(userId);
+
+        if (dto.getSchoolClassId() != null) {
+            student.setSchoolClass(classRepo.getReferenceById(dto.getSchoolClassId()));
+        }
+        if (dto.getSectionId() != null) {
+            student.setSection(sectionRepo.getReferenceById(dto.getSectionId()));
+        }
 
         Student savedStudent = repo.save(student);
 
-        // 3. Update User with Student's ID
+        // 4. Update User with Student's ID
         savedUser.setEntityId(savedStudent.getId());
         userRepo.save(savedUser);
 
+        // Optional: Add student to parent's student set to keep both sides in sync
+        if (parent != null) {
+            parent.getStudents().add(savedStudent);
+        }
+
         return mapper.toDto(savedStudent);
     }
+
 
 
     @Override
@@ -202,7 +233,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional
     public void bulkUpload(MultipartFile file) {
-        excelUtil.parseExcel(file, StudentCreateDto.class).forEach(this::create);
+//        excelUtil.parseExcel(file, StudentCreateDto.class).forEach(this::create);
     }
 
     @Override

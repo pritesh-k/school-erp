@@ -32,26 +32,28 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public User register(RegisterRequest req) {
-        log.info("Registering new user: {} with role: {}", req.username(), req.role());
+        log.info("Registering new user: {} with role: {}", req.getUsername(), req.getRole());
 
         // Validate user doesn't exist
-        if (repo.existsByUsername(req.username()) || repo.existsByEmail(req.email())) {
+        if (repo.existsByUsername(req.getUsername()) || repo.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("Username or email already taken");
         }
 
         // Create User with enhanced fields
         User user = User.builder()
-                .username(req.username())
-                .email(req.email())
-                .password(encoder.encode(req.password()))
-                .role(req.role())
-                .firstName(req.firstName())
-                .lastName(req.lastName())
-                .identifier(req.username())
+                .username(req.getUsername())
+                .email(req.getEmail())
+                .password(encoder.encode(req.getPassword()))
+                .role(req.getRole())
+                .firstName(req.getFirstName())
+                .lastName(req.getLastName())
+                .identifier(req.getUsername())
                 .entityId(null)  // Will be set later when creating specific entities
                 .build();
         user.setActive(true);
         user.setDeleted(false);
+        user.setCreatedAt(java.time.Instant.now());
+        user.setCreatedBy(req.getCreatedById());
         user.createFullName();
         User savedUser = repo.save(user);
 

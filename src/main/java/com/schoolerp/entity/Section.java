@@ -14,28 +14,37 @@ public class Section extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private SectionName name;
-
     @Column(unique = true)
     private String roomNo;
     private Integer  capacity;
 
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SubjectAssignment> subjectAssignments = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     private SchoolClass schoolClass;
 
-    //Store ClassTeacher Id only and add the real teacher to teacher table, and we can get that from below column assignedTeachers
-    @Column(name = "class_teacher_id")
-    private Long classTeacherId;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "section_teacher",
-            joinColumns = @JoinColumn(name = "section_id"),
-            inverseJoinColumns = @JoinColumn(name = "teacher_id")
-    )
-    private Set<Teacher> assignedTeachers = new HashSet<>();
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SectionTeacherAssignment> teacherAssignments = new HashSet<>();
 
     @OneToMany(mappedBy = "section")
     private Set<Student> students = new HashSet<>();
+
+    public Set<SectionTeacherAssignment> getTeacherAssignments() {
+        return teacherAssignments;
+    }
+
+    public void setTeacherAssignments(Set<SectionTeacherAssignment> teacherAssignments) {
+        this.teacherAssignments = teacherAssignments;
+    }
+
+    public Set<SubjectAssignment> getSubjectAssignments() {
+        return subjectAssignments;
+    }
+
+    public void setSubjectAssignments(Set<SubjectAssignment> subjectAssignments) {
+        this.subjectAssignments = subjectAssignments;
+    }
 
     public SectionName getName() {
         return name;
@@ -67,22 +76,6 @@ public class Section extends BaseEntity {
 
     public void setSchoolClass(SchoolClass schoolClass) {
         this.schoolClass = schoolClass;
-    }
-
-    public Long getClassTeacherId() {
-        return classTeacherId;
-    }
-
-    public void setClassTeacherId(Long classTeacherId) {
-        this.classTeacherId = classTeacherId;
-    }
-
-    public Set<Teacher> getAssignedTeachers() {
-        return assignedTeachers;
-    }
-
-    public void setAssignedTeachers(Set<Teacher> assignedTeachers) {
-        this.assignedTeachers = assignedTeachers;
     }
 
     public Set<Student> getStudents() {

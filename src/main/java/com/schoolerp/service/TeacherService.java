@@ -16,4 +16,6 @@ public interface TeacherService {
     void delete(Long id);
 
     void existsByIdAndUser_Id(Long teacherId, Long userId);
+
+    Long getTotalCount();
 }

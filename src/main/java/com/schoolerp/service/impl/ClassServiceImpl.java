@@ -138,10 +138,6 @@ public class ClassServiceImpl implements ClassService {
             sectionBuilder.capacity(dto.getCapacity());
         }
 
-        if (teacher != null) {
-            sectionBuilder.classTeacherId(teacher.getId());
-        }
-
         Section section = sectionBuilder.build();
 
         section.setCreatedBy(userId);
@@ -155,18 +151,13 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SectionResponseDto> sectionsByClass(Long classId) {
-
-        List<Section> sections = sectionRepo.findBySchoolClassId(classId);
-
+    public Page<SectionResponseDto> sectionsByClass(Long classId, Pageable pageable) {
+        Page<Section> sections = sectionRepo.findBySchoolClassId(classId, pageable);
         if (sections.isEmpty()) {
             log.debug("No sections found for class ID: {}", classId);
             throw new ResourceNotFoundException("No sections found for class with ID: " + classId);
         }
-
-        return sections.stream()
-                .map(sectionMapper::toDto)
-                .toList();
+        return sections.map(sectionMapper::toDto);
     }
 
 
@@ -194,14 +185,6 @@ public class ClassServiceImpl implements ClassService {
         if (dto.getCapacity() != null && dto.getCapacity() > 0)
             section.setCapacity(dto.getCapacity());
 
-        // 4. Update class teacher, if specified
-        if (dto.getClassTeacherId() != null && dto.getClassTeacherId() > 0
-                && !dto.getClassTeacherId().equals(section.getClassTeacherId() != null ? section.getClassTeacherId() : null)) {
-            Teacher teacher = teacherRepo.findById(dto.getClassTeacherId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + dto.getClassTeacherId()));
-            section.setClassTeacherId(teacher.getId());
-        }
-
         // 5. Set audit fields
         section.setUpdatedAt(Instant.now());
         section.setUpdatedBy(userId);
@@ -210,6 +193,10 @@ public class ClassServiceImpl implements ClassService {
         sectionRepo.save(section);
 
         return sectionMapper.toDto(section);
+    }
+
+    public Long getTotalCount() {
+        return classRepo.count(); // this returns the total number of rows
     }
 
     private void validateUpdateInput(Long id, ClassCreateDto dto) {

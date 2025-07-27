@@ -19,4 +19,6 @@ public interface StudentService {
 
     void existsByIdAndUser_Id(Long studentId, Long userId);
 
+    Long getTotalStudentCount();
+
 }

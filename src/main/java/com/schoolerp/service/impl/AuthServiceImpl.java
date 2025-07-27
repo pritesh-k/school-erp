@@ -3,9 +3,11 @@ package com.schoolerp.service.impl;
 import com.schoolerp.dto.request.LoginRequest;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.response.AuthResponse;
+import com.schoolerp.dto.response.UserDTO;
 import com.schoolerp.entity.User;
 import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.exception.ResourceNotFoundException;
+import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.repository.UserRepository;
 import com.schoolerp.security.JwtUtil;
 import com.schoolerp.service.AuthService;
@@ -13,8 +15,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public User register(RegisterRequest req) {
+    public UserDTO register(RegisterRequest req) {
         log.info("Registering new user: {} with role: {}", req.getUsername(), req.getRole());
 
         // Validate user doesn't exist
@@ -58,26 +63,52 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = repo.save(user);
 
         log.info("User registered successfully with ID: {}", savedUser.getId());
-        return savedUser;
+
+        UserDTO userDTO = new UserDTO(
+                savedUser.getId(),
+                savedUser.getCreatedAt(),
+                savedUser.getUpdatedAt(),
+                savedUser.getCreatedBy(),
+                savedUser.getUpdatedBy(),
+                savedUser.isDeleted(),
+                savedUser.isActive(),
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                savedUser.getRole(),
+                savedUser.isEnabled(),
+                null // JWT token will be set during login
+                , savedUser.getDisplayName()
+        );
+        return userDTO;
     }
     @Override
     public AuthResponse login(LoginRequest req) {
-        Authentication auth = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.username(), req.password())
-        );
+        try {
+            Authentication auth = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.username(), req.password())
+            );
 
-        User user = (User) auth.getPrincipal();
-        UserTypeInfo userTypeInfo = new UserTypeInfo();
-        userTypeInfo.setUserId(user.getId());
-        userTypeInfo.setUsername(user.getUsername());
-        userTypeInfo.setUserType(user.getRole());
-        userTypeInfo.setEntityId(user.getEntityId());
-        userTypeInfo.setDisplayName(user.getDisplayName());
+            User user = (User) auth.getPrincipal();
+            UserTypeInfo userTypeInfo = new UserTypeInfo();
+            userTypeInfo.setUserId(user.getId());
+            userTypeInfo.setUsername(user.getUsername());
+            userTypeInfo.setUserType(user.getRole());
+            userTypeInfo.setEntityId(user.getEntityId());
+            userTypeInfo.setDisplayName(user.getDisplayName());
 
-        String token = jwtUtil.generateToken(userTypeInfo);
-        userTypeInfo.setToken(token); // Set the token in UserTypeInfo
+            String token = jwtUtil.generateToken(userTypeInfo);
+            userTypeInfo.setToken(token); // Set the token in UserTypeInfo
 
-        return new AuthResponse(userTypeInfo);
+            return new AuthResponse(userTypeInfo);
+        } catch (BadCredentialsException ex) {
+            throw new UnauthorizedException("Invalid username or password");
+        } catch (DisabledException ex) {
+            throw new UnauthorizedException("Account is disabled. Contact admin.");
+        } catch (AuthenticationException ex) {
+            throw new UnauthorizedException("Authentication failed");
+        } catch (Exception ex) {
+            throw new RuntimeException("An unexpected error occurred during login");
+        }
     }
 
     @Override
@@ -101,5 +132,11 @@ public class AuthServiceImpl implements AuthService {
             return new AuthResponse(userTypeInfo);
         }
         throw new IllegalArgumentException("Invalid refresh request");
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        return repo.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
     }
 }

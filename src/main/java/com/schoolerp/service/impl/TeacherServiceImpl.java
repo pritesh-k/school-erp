@@ -54,7 +54,8 @@ public class TeacherServiceImpl implements TeacherService {
                 userId
         );
 
-        User savedUser = authService.register(req);
+        authService.register(req);
+        User savedUser = authService.getUserByUsername(dto.username());
 
 
         // 1. Create Teacher with saved User
@@ -156,7 +157,7 @@ public class TeacherServiceImpl implements TeacherService {
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
 
         // Check if teacher has active assignments
-        validateTeacherCanBeDeleted(teacher);
+        //validateTeacherCanBeDeleted(teacher);
 
         // Soft delete the teacher
         teacher.setDeleted(true);
@@ -172,23 +173,23 @@ public class TeacherServiceImpl implements TeacherService {
         }
     }
 
-    private void validateTeacherCanBeDeleted(Teacher teacher) {
-        // Check if teacher is assigned to any sections as class teacher
-        boolean hasActiveSections = sectionRepo.existsByClassTeacherIdAndDeletedFalse(teacher.getId());
-        if (hasActiveSections) {
-            throw new IllegalStateException("Cannot delete teacher. Teacher is assigned as class teacher to active sections.");
-        }
-
-        // Check if teacher is assigned to any subjects
-        boolean hasActiveSubjects = subjectRepository.existsByTeachersAssignedIdAndDeletedFalse(teacher.getId());
-        if (hasActiveSubjects) {
-            throw new IllegalStateException("Cannot delete teacher. Teacher is assigned to active subjects.");
-        }
-
-        // Add more validations as needed
-        // - Check if teacher has created any exam results
-        // - Check if teacher has marked any attendance
-    }
+//    private void validateTeacherCanBeDeleted(Teacher teacher) {
+//        // Check if teacher is assigned to any sections as class teacher
+//        boolean hasActiveSections = sectionRepo.existsByClassTeacherIdAndDeletedFalse(teacher.getId());
+//        if (hasActiveSections) {
+//            throw new IllegalStateException("Cannot delete teacher. Teacher is assigned as class teacher to active sections.");
+//        }
+//
+//        // Check if teacher is assigned to any subjects
+//        boolean hasActiveSubjects = subjectRepository.existsByTeachersAssignedIdAndDeletedFalse(teacher.getId());
+//        if (hasActiveSubjects) {
+//            throw new IllegalStateException("Cannot delete teacher. Teacher is assigned to active subjects.");
+//        }
+//
+//        // Add more validations as needed
+//        // - Check if teacher has created any exam results
+//        // - Check if teacher has marked any attendance
+//    }
 
     private boolean updateAssociatedUser(User user, TeacherUpdateDto dto) {
         boolean userChanged = false;
@@ -226,5 +227,9 @@ public class TeacherServiceImpl implements TeacherService {
         if (!teacherRepo.existsByIdAndUser_Id(teacherId, userId)) {
             throw new ResourceNotFoundException("Teacher not found with ID: " + teacherId + " and User ID: " + userId);
         }
+    }
+
+    public Long getTotalCount() {
+        return teacherRepo.count(); // this returns the total number of rows
     }
 }

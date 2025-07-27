@@ -29,12 +29,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DuplicateEntry.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateEntries(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateEntries(DuplicateEntry ex) {
         return respond(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(UnauthorizedException ex) {
         return respond(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
@@ -44,8 +44,18 @@ public class GlobalExceptionHandler {
                 "Unexpected error: " + ex.getMessage());
     }
 
-    @ExceptionHandler({NoChangesDetectedException.class, SQLException.class})
-    public ResponseEntity<ApiResponse<Void>> handleNoChangesDetectedException(MethodArgumentNotValidException ex) {
+    @ExceptionHandler({NoChangesDetectedException.class})
+    public ResponseEntity<ApiResponse<Void>> handleNoChangesDetectedException(NoChangesDetectedException ex) {
+        return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSQLException(SQLException ex) {
+        return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler({ValidationException.class})
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(ValidationException ex) {
         return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

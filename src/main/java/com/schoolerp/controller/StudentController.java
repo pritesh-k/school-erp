@@ -37,9 +37,19 @@ public class StudentController {
     }
 
     @GetMapping
-    public ApiResponse<List<StudentResponseDto>> list(Pageable p) {
+    public ApiResponse<List<StudentResponseDto>> list(
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        return ApiResponse.paged(service.list(p));
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(service.list(pageable));
+    }
+
+    @GetMapping("/total")
+    public ApiResponse<Long> totalStudents() {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        return ApiResponse.ok(service.getTotalStudentCount());
     }
 
     @GetMapping("/{id}")

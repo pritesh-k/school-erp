@@ -15,6 +15,17 @@ public class TeacherResponseDto extends BaseDTO {
     private String phone;
     private String email;
     private LocalDate joiningDate;
+
+    private String displayName;
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public String getEmployeeCode() {
         return employeeCode;
     }

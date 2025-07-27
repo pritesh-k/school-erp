@@ -47,7 +47,7 @@ public class FeeController {
         return ApiResponse.ok(feeHeadService.get(feeHeadId));
     }
 
-    @GetMapping("/head}")
+    @GetMapping("/head")
     public ApiResponse<List<FeeHeadRequest>> getAllFeeHead(
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
             @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {

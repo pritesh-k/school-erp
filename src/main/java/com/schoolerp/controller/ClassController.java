@@ -40,6 +40,12 @@ public class ClassController {
         return ApiResponse.ok(service.create(dto, userId));
     }
 
+    @GetMapping("/total")
+    public ApiResponse<Long> getTotalClassCount() {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        return ApiResponse.ok(service.getTotalCount());
+    }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/{classId}/sections")
     public ApiResponse<SectionResponseDto> addSection(@PathVariable @NotNull Long classId, @RequestBody SectionCreateDto dto) {
@@ -50,16 +56,18 @@ public class ClassController {
     }
 
     @GetMapping("/{classId}/sections")
-    public ApiResponse<List<SectionResponseDto>> sections(@PathVariable @NotNull Long classId) {
+    public ApiResponse<List<SectionResponseDto>> sections(
+            @PathVariable @NotNull Long classId,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size)  {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
-        return ApiResponse.ok(service.sectionsByClass(classId));
+        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "name");
+        return ApiResponse.paged(service.sectionsByClass(classId, pageable));
     }
 
     @GetMapping("/{classId}")
     public ApiResponse<ClassResponseDto> getClass(@PathVariable @NotNull Long classId) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
         return ApiResponse.ok(service.get(classId));
     }
 
@@ -68,7 +76,6 @@ public class ClassController {
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
         Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "name");
         return ApiResponse.paged(service.list(pageable));
     }

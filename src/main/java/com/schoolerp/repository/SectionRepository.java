@@ -13,19 +13,9 @@ import java.util.List;
 
 @Repository
 public interface SectionRepository extends JpaRepository<Section, Long> {
-    List<Section> findBySchoolClassId(Long classId);
-
-    boolean existsByClassTeacherIdAndDeletedFalse(Long teacherId);
-
-    List<Section> findByClassTeacherIdAndDeletedFalse(Long teacherId);
+    Page<Section> findBySchoolClassId(Long classId, Pageable pageable);
 
     boolean existsByNameAndSchoolClassId(SectionName name, Long classId);
-
-    @Query("""
-        SELECT s FROM Section s
-        WHERE s.classTeacherId = :teacherId
-    """)
-    Page<Section> findSectionsByClassTeacherId(@Param("teacherId") Long teacherId, Pageable pageable);
 
     boolean existsBySchoolClassIdAndName(Long classId, SectionName name);
 }

@@ -19,7 +19,8 @@ public interface ClassService {
     void delete(Long id);
 
     SectionResponseDto addSection(Long classId, SectionCreateDto dto, Long userId);
-    List<SectionResponseDto> sectionsByClass(Long classId);
+    Page<SectionResponseDto> sectionsByClass(Long classId, Pageable pageable);
 
     SectionResponseDto updateSectionsOnly(Long classId, SectionUpdateDto dto, Long userId, Long sectionId);
+    Long getTotalCount();
 }

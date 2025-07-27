@@ -16,14 +16,15 @@ public class StudentResponseDto extends BaseDTO {
     private String lastName;
     private Gender gender;
     private LocalDate dob;
-    private SchoolClass aSchoolClass;
-    private Section section;
-    private Set<Parent> parents = new HashSet<>();
+    private Parent parents;
 
-    private Set<Attendance> attendances = new HashSet<>();
-    private Set<ExamResult> examResults = new HashSet<>();
-    private Set<FeeRecord> feeRecords = new HashSet<>();
-    private Set<Document> documents = new HashSet<>();
+    public Parent getParents() {
+        return parents;
+    }
+
+    public void setParents(Parent parents) {
+        this.parents = parents;
+    }
 
     public String getAdmissionNumber() {
         return admissionNumber;
@@ -73,61 +74,6 @@ public class StudentResponseDto extends BaseDTO {
         this.dob = dob;
     }
 
-    public SchoolClass getSchoolClass() {
-        return aSchoolClass;
-    }
-
-    public void setSchoolClass(SchoolClass aSchoolClass) {
-        this.aSchoolClass = aSchoolClass;
-    }
-
-    public Section getSection() {
-        return section;
-    }
-
-    public void setSection(Section section) {
-        this.section = section;
-    }
-
-    public Set<Parent> getParents() {
-        return parents;
-    }
-
-    public void setParents(Set<Parent> parents) {
-        this.parents = parents;
-    }
-
-    public Set<Attendance> getAttendances() {
-        return attendances;
-    }
-
-    public void setAttendances(Set<Attendance> attendances) {
-        this.attendances = attendances;
-    }
-
-    public Set<ExamResult> getExamResults() {
-        return examResults;
-    }
-
-    public void setExamResults(Set<ExamResult> examResults) {
-        this.examResults = examResults;
-    }
-
-    public Set<FeeRecord> getFeeRecords() {
-        return feeRecords;
-    }
-
-    public void setFeeRecords(Set<FeeRecord> feeRecords) {
-        this.feeRecords = feeRecords;
-    }
-
-    public Set<Document> getDocuments() {
-        return documents;
-    }
-
-    public void setDocuments(Set<Document> documents) {
-        this.documents = documents;
-    }
     public String getEmail() {
         return email;
     }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +50,7 @@ public class SubjectController {
             @RequestParam(required = false, defaultValue = "10") Integer size) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "code");
         return ApiResponse.paged(service.list(pageable));
     }
 

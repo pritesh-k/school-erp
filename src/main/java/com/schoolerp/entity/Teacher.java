@@ -15,7 +15,6 @@ import java.util.Set;
         indexes = {
                 @Index(name = "idx_teacher_user_id", columnList = "user_id"),
                 @Index(name = "idx_teacher_email", columnList = "email"),
-                @Index(name = "idx_teacher_class_teacher_section", columnList = "classTeacherOfSection")
 })
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Teacher extends BaseEntity {
@@ -27,22 +26,20 @@ public class Teacher extends BaseEntity {
     private String firstName;
     private String lastName;
     private String displayName;
+    private String phone;
+    private String email;
+    private LocalDate joiningDate;
+
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SectionTeacherAssignment> sectionAssignments = new HashSet<>();
+
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SubjectAssignment> subjectAssignments = new HashSet<>();
 
     public void createFullName() {
         this.displayName = ((firstName != null ? firstName : "") +
                 " " + (lastName != null ? lastName : "")).trim();
     }
-    private String phone;
-    private String email;
-    private LocalDate joiningDate;
-
-    private Long classTeacherOfSection;
-
-    @ManyToMany(mappedBy = "assignedTeachers")
-    private Set<Section> assignedSections = new HashSet<>();
-
-    @ManyToMany(mappedBy = "teachersAssigned")
-    private Set<Subject> subjects = new HashSet<>();
 
     public User getUser() {
         return user;
@@ -100,28 +97,20 @@ public class Teacher extends BaseEntity {
         this.joiningDate = joiningDate;
     }
 
-    public Long getClassTeacherOfSection() {
-        return classTeacherOfSection;
+    public Set<SectionTeacherAssignment> getSectionAssignments() {
+        return sectionAssignments;
     }
 
-    public void setClassTeacherOfSection(Long classTeacherOfSection) {
-        this.classTeacherOfSection = classTeacherOfSection;
+    public void setSectionAssignments(Set<SectionTeacherAssignment> sectionAssignments) {
+        this.sectionAssignments = sectionAssignments;
     }
 
-    public Set<Section> getAssignedSections() {
-        return assignedSections;
+    public Set<SubjectAssignment> getSubjectAssignments() {
+        return subjectAssignments;
     }
 
-    public void setAssignedSections(Set<Section> assignedSections) {
-        this.assignedSections = assignedSections;
-    }
-
-    public Set<Subject> getSubjects() {
-        return subjects;
-    }
-
-    public void setSubjects(Set<Subject> subjects) {
-        this.subjects = subjects;
+    public void setSubjectAssignments(Set<SubjectAssignment> subjectAssignments) {
+        this.subjectAssignments = subjectAssignments;
     }
 
     public String getDisplayName() {

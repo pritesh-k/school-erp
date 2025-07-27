@@ -71,9 +71,10 @@ public class StudentServiceImpl implements StudentService {
                 userId  // created by current user
         );
 
-        User savedUser = authService.register(req);
+        authService.register(req);
+        User savedUser = authService.getUserByUsername(dto.getAdmissionNumber()); // Fetch the saved user by username
 
-        // 2. Create Parent first and save it, associate to student
+                // 2. Create Parent first and save it, associate to student
         Parent parent = null;
         ParentCreateDto parentDto = dto.getParentCreateDto();
         if (parentDto != null) {
@@ -248,5 +249,9 @@ public class StudentServiceImpl implements StudentService {
         if (!repo.existsByIdAndUser_Id(studentId, userId)) {
             throw new ResourceNotFoundException("Student not found with ID: " + studentId + " and User ID: " + userId);
         }
+    }
+
+    public Long getTotalStudentCount() {
+        return repo.count(); // this returns the total number of rows
     }
 }

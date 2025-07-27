@@ -4,6 +4,7 @@ import com.schoolerp.dto.request.LoginRequest;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.AuthResponse;
+import com.schoolerp.dto.response.UserDTO;
 import com.schoolerp.entity.User;
 import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.enums.Role;
@@ -33,9 +34,10 @@ public class AuthController {
     private com.schoolerp.service.ParentService parentService;
 
     @PostMapping("/register")
-    public ApiResponse<Object> register(@RequestBody RegisterRequest req) {
-        User user = service.register(req);
-        return ApiResponse.ok(user);
+    public ApiResponse<String> register(@RequestBody RegisterRequest req) {
+        UserDTO user = service.register(req);
+        return ApiResponse.ok(
+            "User registered successfully: " + user.getDisplayName() + " with role: " + user.getRole());
     }
 
     @PostMapping("/login")

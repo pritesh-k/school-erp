@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 public record TeacherUpdateDto(
         @Email String email,
-        String password,
         String employeeCode,
         String firstName,
         String lastName,

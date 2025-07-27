@@ -27,11 +27,8 @@ public class Subject extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "class_id"))
     private Set<SchoolClass> classes = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "subject_teacher",
-            joinColumns = @JoinColumn(name = "subject_id"),
-            inverseJoinColumns = @JoinColumn(name = "teacher_id"))
-    private Set<Teacher> teachersAssigned = new HashSet<>();
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SubjectAssignment> assignments = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category")
@@ -61,11 +58,11 @@ public class Subject extends BaseEntity {
         this.classes = classes;
     }
 
-    public Set<Teacher> getTeachersAssigned() {
-        return teachersAssigned;
+    public Set<SubjectAssignment> getAssignments() {
+        return assignments;
     }
 
-    public void setTeachersAssigned(Set<Teacher> teachersAssigned) {
-        this.teachersAssigned = teachersAssigned;
+    public void setAssignments(Set<SubjectAssignment> assignments) {
+        this.assignments = assignments;
     }
 }

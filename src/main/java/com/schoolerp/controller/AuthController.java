@@ -36,8 +36,7 @@ public class AuthController {
     @PostMapping("/register")
     public ApiResponse<String> register(@RequestBody RegisterRequest req) {
         UserDTO user = service.register(req);
-        return ApiResponse.ok(
-            "User registered successfully: " + user.getDisplayName() + " with role: " + user.getRole());
+        return ApiResponse.ok("User registered successfully");
     }
 
     @PostMapping("/login")

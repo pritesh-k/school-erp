@@ -1,6 +1,7 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.SubjectAssignmentCreateDto;
+import com.schoolerp.dto.request.SubjectAssignmentUpdateDto;
 import com.schoolerp.dto.response.SubjectAssignmentResponseDto;
 import com.schoolerp.entity.Section;
 import com.schoolerp.entity.Subject;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Service
@@ -31,6 +33,10 @@ public class SubjectAssignmentService {
     private final SubjectAssignmentMapper mapper;
 
     public SubjectAssignmentResponseDto create(SubjectAssignmentCreateDto dto, Long createdByUserId) {
+        if (repo.findByTeacherIdAndSubjectIdAndSectionId(dto.getTeacherId(), dto.getSubjectId(), dto.getSectionId()).isPresent()) {
+            throw new ValidationException("This subject is already assigned to this teacher in this section.");
+        }
+
         Teacher teacher = teacherRepo.findById(dto.getTeacherId())
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
         Subject subject = subjectRepo.findById(dto.getSubjectId())
@@ -38,20 +44,50 @@ public class SubjectAssignmentService {
         Section section = sectionRepo.findById(dto.getSectionId())
                 .orElseThrow(() -> new ResourceNotFoundException("Section not found"));
 
-        boolean exists = repo.findByTeacherIdAndSubjectIdAndSectionId(
-                dto.getTeacherId(), dto.getSubjectId(), dto.getSectionId()).isPresent();
-        if (exists)
-            throw new ValidationException("This subject is already assigned to this teacher in the section");
-
         SubjectAssignment assignment = SubjectAssignment.builder()
                 .teacher(teacher)
                 .subject(subject)
                 .section(section)
                 .assignedDate(LocalDate.now())
                 .build();
+        assignment.setCreatedBy(createdByUserId);
+        assignment.setCreatedAt(Instant.now());
+        assignment.setActive(true);
+        assignment.setDeleted(false);
 
         repo.save(assignment);
         return mapper.toDto(assignment);
+    }
+
+    public SubjectAssignmentResponseDto update(SubjectAssignmentUpdateDto dto, Long updatedByUserId) {
+        SubjectAssignment assignment = repo.findById(dto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
+
+        if (!assignment.getTeacher().getId().equals(dto.getTeacherId())) {
+            Teacher newTeacher = teacherRepo.findById(dto.getTeacherId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+
+            boolean duplicate = repo.findByTeacherIdAndSubjectIdAndSectionId(dto.getTeacherId(),
+                    assignment.getSubject().getId(), assignment.getSection().getId()).isPresent();
+
+            if (duplicate) {
+                throw new ValidationException("This assignment already exists with another teacher.");
+            }
+
+            assignment.setTeacher(newTeacher);
+        }
+
+        assignment.setUpdatedAt(Instant.now());
+        assignment.setUpdatedBy(updatedByUserId);
+
+        return mapper.toDto(repo.save(assignment));
+    }
+
+    public void delete(Long id) {
+        SubjectAssignment assignment = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
+
+        repo.delete(assignment);
     }
 
     public Page<SubjectAssignmentResponseDto> list(Pageable pageable) {
@@ -59,10 +95,17 @@ public class SubjectAssignmentService {
                 .map(mapper::toDto);
     }
 
-    public void delete(Long id) {
-        if (!repo.existsById(id))
-            throw new ResourceNotFoundException("Assignment not found");
-        repo.deleteById(id);
+    public Page<SubjectAssignmentResponseDto> listByTeacher(Long teacherId, Pageable pageable) {
+        return repo.findByTeacher_Id(teacherId, pageable)
+                .map(mapper::toDto);
+    }
+
+    public Page<SubjectAssignmentResponseDto> listBySection(Long sectionId, Pageable pageable) {
+        return repo.findBySection_Id(sectionId, pageable).map(mapper::toDto);
+    }
+
+    public Page<SubjectAssignmentResponseDto> listBySubject(Long subjectId, Pageable pageable) {
+        return repo.findBySubject_Id(subjectId, pageable).map(mapper::toDto);
     }
 }
 

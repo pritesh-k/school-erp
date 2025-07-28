@@ -31,58 +31,32 @@ public class ClassController {
     private final ClassService service;
     private final RequestContextService requestContextService;
 
+    @GetMapping
+    public ApiResponse<List<ClassResponseDto>> listAllClasses(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(service.list(pageable));
+    }
+    @GetMapping("/{classId}")
+    public ApiResponse<ClassResponseDto> getClassByClassId(@PathVariable @NotNull Long classId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        return ApiResponse.ok(service.get(classId));
+    }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public ApiResponse<ClassResponseDto> create(@RequestBody ClassCreateDto dto) {
+    public ApiResponse<ClassResponseDto> createClass(@RequestBody ClassCreateDto dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.create(dto, userId));
     }
 
-    @GetMapping("/total")
-    public ApiResponse<Long> getTotalClassCount() {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        return ApiResponse.ok(service.getTotalCount());
-    }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/{classId}/sections")
-    public ApiResponse<SectionResponseDto> addSection(@PathVariable @NotNull Long classId, @RequestBody SectionCreateDto dto) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
-        Long userId = userTypeInfo.getUserId();
-        return ApiResponse.ok(service.addSection(classId, dto, userId));
-    }
-
-    @GetMapping("/{classId}/sections")
-    public ApiResponse<List<SectionResponseDto>> sections(
-            @PathVariable @NotNull Long classId,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size)  {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "name");
-        return ApiResponse.paged(service.sectionsByClass(classId, pageable));
-    }
-
-    @GetMapping("/{classId}")
-    public ApiResponse<ClassResponseDto> getClass(@PathVariable @NotNull Long classId) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        return ApiResponse.ok(service.get(classId));
-    }
-
-    @GetMapping
-    public ApiResponse<List<ClassResponseDto>> list(
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "name");
-        return ApiResponse.paged(service.list(pageable));
-    }
-
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{classId}")
-    public ApiResponse<ClassResponseDto> updateClass(
+    public ApiResponse<ClassResponseDto> updateClassByClassId(
             @PathVariable Long classId,
             @RequestBody ClassCreateDto dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
@@ -90,10 +64,35 @@ public class ClassController {
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.updateClassOnly(classId, dto, userId));
     }
+    @GetMapping("/total")
+    public ApiResponse<Long> getTotalClassCount() {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        return ApiResponse.ok(service.getTotalCount());
+    }
+
+    // For sections
 
     @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/{classId}/sections")
+    public ApiResponse<SectionResponseDto> addSectionToAClass(@PathVariable @NotNull Long classId, @RequestBody SectionCreateDto dto) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+
+        Long userId = userTypeInfo.getUserId();
+        return ApiResponse.ok(service.addSection(classId, dto, userId));
+    }
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/{classId}/sections")
+    public ApiResponse<List<SectionResponseDto>> getAllSectionsOfAClass(
+            @PathVariable @NotNull Long classId,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size)  {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "name");
+        return ApiResponse.paged(service.sectionsByClass(classId, pageable));
+    }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{classId}/sections/{sectionId}")
-    public ApiResponse<SectionResponseDto> updateSection(
+    public ApiResponse<SectionResponseDto> updateSectionOfAClass(
             @PathVariable Long classId,
             @PathVariable Long sectionId,
             @RequestBody SectionUpdateDto dto) {

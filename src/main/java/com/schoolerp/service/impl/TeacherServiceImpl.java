@@ -156,9 +156,6 @@ public class TeacherServiceImpl implements TeacherService {
         Teacher teacher = teacherRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
 
-        // Check if teacher has active assignments
-        //validateTeacherCanBeDeleted(teacher);
-
         // Soft delete the teacher
         teacher.setDeleted(true);
         teacher.setActive(false);
@@ -172,24 +169,6 @@ public class TeacherServiceImpl implements TeacherService {
             userRepo.save(user);
         }
     }
-
-//    private void validateTeacherCanBeDeleted(Teacher teacher) {
-//        // Check if teacher is assigned to any sections as class teacher
-//        boolean hasActiveSections = sectionRepo.existsByClassTeacherIdAndDeletedFalse(teacher.getId());
-//        if (hasActiveSections) {
-//            throw new IllegalStateException("Cannot delete teacher. Teacher is assigned as class teacher to active sections.");
-//        }
-//
-//        // Check if teacher is assigned to any subjects
-//        boolean hasActiveSubjects = subjectRepository.existsByTeachersAssignedIdAndDeletedFalse(teacher.getId());
-//        if (hasActiveSubjects) {
-//            throw new IllegalStateException("Cannot delete teacher. Teacher is assigned to active subjects.");
-//        }
-//
-//        // Add more validations as needed
-//        // - Check if teacher has created any exam results
-//        // - Check if teacher has marked any attendance
-//    }
 
     private boolean updateAssociatedUser(User user, TeacherUpdateDto dto) {
         boolean userChanged = false;

@@ -1,6 +1,7 @@
 package com.schoolerp.controller;
 
 import com.schoolerp.dto.request.SubjectAssignmentCreateDto;
+import com.schoolerp.dto.request.SubjectAssignmentUpdateDto;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.SubjectAssignmentResponseDto;
 import com.schoolerp.entity.UserTypeInfo;
@@ -26,9 +27,16 @@ public class SubjectAssignmentController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<SubjectAssignmentResponseDto> create(@RequestBody SubjectAssignmentCreateDto dto) {
+    public ApiResponse<String> createAssignment(@RequestBody SubjectAssignmentCreateDto dto) {
         UserTypeInfo user = requestContextService.getCurrentUserContext();
-        return ApiResponse.ok(service.create(dto, user.getUserId()));
+        service.create(dto, user.getUserId());
+        return ApiResponse.ok("Subject assignment created successfully.");
+    }
+
+    @PutMapping
+    public ApiResponse<SubjectAssignmentResponseDto> update(@RequestBody SubjectAssignmentUpdateDto dto) {
+        Long userId = requestContextService.getCurrentUserContext().getUserId();
+        return ApiResponse.ok(service.update(dto, userId));
     }
 
     @GetMapping
@@ -37,6 +45,39 @@ public class SubjectAssignmentController {
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(service.list(pageable));
+    }
+
+    @GetMapping
+    public ApiResponse<List<SubjectAssignmentResponseDto>> listBySubject(
+            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(service.list(pageable));
+    }
+    @GetMapping("/teacher/{teacherId}")
+    public ApiResponse<List<SubjectAssignmentResponseDto>> byTeacher(
+            @PathVariable Long teacherId,
+            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(service.listByTeacher(teacherId, pageable));
+    }
+
+    @GetMapping("/section/{sectionId}")
+    public ApiResponse<List<SubjectAssignmentResponseDto>> bySection(
+            @PathVariable Long sectionId,@RequestParam(defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(service.listBySection(sectionId, pageable));
+    }
+
+    @GetMapping("/subject/{subjectId}")
+    public ApiResponse<List<SubjectAssignmentResponseDto>> bySubject(
+            @PathVariable Long subjectId,
+            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(service.listBySubject(subjectId, pageable));
     }
 
     @DeleteMapping("/{id}")

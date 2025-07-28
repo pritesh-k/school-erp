@@ -3,8 +3,6 @@ package com.schoolerp.dto.request;
 public class AssignmentRequest {
     private Long teacherId;
     private Boolean isClassTeacher;
-
-
     public Long getTeacherId() {
         return teacherId;
     }

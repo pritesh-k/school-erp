@@ -1,8 +1,11 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.AssignmentRequest;
+import com.schoolerp.dto.request.ClassTeacherAssignmentDto;
+import com.schoolerp.dto.request.SectionTeacherAssignmentListDto;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.AssignmentResponse;
+import com.schoolerp.dto.response.TeachingSectionDto;
 import com.schoolerp.entity.SchoolClass;
 import com.schoolerp.entity.Section;
 import com.schoolerp.entity.SectionTeacherAssignment;
@@ -19,8 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -52,25 +56,39 @@ public class SectionTeacherAssignmentService {
                 .section(section)
                 .assignedDate(LocalDate.now())
                 .isClassTeacher(Boolean.TRUE.equals(request.getClassTeacher()))
+                .teacherName(teacher.getDisplayName())
                 .build();
 
         assignmentRepo.save(assignment);
         return mapper.toDto(assignment);
     }
 
-    public Page<AssignmentResponse> listAll(Pageable pageable) {
+    public Page<SectionTeacherAssignmentListDto> listAll(Pageable pageable) {
         Page<SectionTeacherAssignment> list = assignmentRepo.findAll(pageable);
-        Page<AssignmentResponse> responsePage = list.map(mapper::toDto);
+        Page<SectionTeacherAssignmentListDto> responsePage = list.map(mapper::onlyData);
         return responsePage;
     }
 
-    public ApiResponse<AssignmentResponse> getById(Long id) {
-        SectionTeacherAssignment assignment = assignmentRepo.findById(id)
+    public AssignmentResponse getById(Long assignmentId) {
+        SectionTeacherAssignment assignment = assignmentRepo.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
-        return ApiResponse.ok(mapper.toDto(assignment));
+        return mapper.toDto(assignment);
     }
 
-    public ApiResponse<AssignmentResponse> update(Long id, AssignmentRequest request) {
+    public Page<AssignmentResponse> getByTeacherId(Long teacherId, Pageable pageable) {
+        Page<SectionTeacherAssignment> assignments = assignmentRepo.findByTeacher_Id(teacherId, pageable);
+        if (assignments.isEmpty()) {
+            throw new ResourceNotFoundException("No assignments found for this teacher");
+        }
+        return assignments.map(mapper::toDto);
+    }
+
+    public Page<TeachingSectionDto> getTeachingSections(Long teacherId, Pageable pageable) {
+        return assignmentRepo.findTeachingSectionsByTeacherId(teacherId, pageable);
+    }
+
+
+    public AssignmentResponse update(Long id, AssignmentRequest request) {
         SectionTeacherAssignment assignment = assignmentRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
 
@@ -78,11 +96,38 @@ public class SectionTeacherAssignmentService {
         assignment.setAssignedDate(LocalDate.now());
 
         assignmentRepo.save(assignment);
-        return ApiResponse.ok(mapper.toDto(assignment));
+        return mapper.toDto(assignment);
     }
 
     public ApiResponse<Void> delete(Long id) {
         assignmentRepo.deleteById(id);
         return ApiResponse.ok(null);
     }
+
+    public void assignClassTeacher(ClassTeacherAssignmentDto dto, Long userId) {
+        Section section = sectionRepo.findById(dto.getSectionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Section not found"));
+        Teacher teacher = teacherRepo.findById(dto.getTeacherId())
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+
+        // Check if assignment exists
+        Optional<SectionTeacherAssignment> existing = assignmentRepo.findByTeacherIdAndSectionId(dto.getTeacherId(), dto.getSectionId());
+        if (existing.isPresent()) {
+            existing.get().setClassTeacher(true);
+            existing.get().setUpdatedBy(userId);
+            existing.get().setUpdatedAt(Instant.now());
+            assignmentRepo.save(existing.get());
+        } else {
+            SectionTeacherAssignment assignment = SectionTeacherAssignment.builder()
+                    .teacher(teacher)
+                    .section(section)
+                    .isClassTeacher(true)
+                    .assignedDate(LocalDate.now())
+                    .build();
+            assignment.setCreatedBy(userId);
+            assignment.setCreatedAt(Instant.now());
+            assignmentRepo.save(assignment);
+        }
+    }
+
 }

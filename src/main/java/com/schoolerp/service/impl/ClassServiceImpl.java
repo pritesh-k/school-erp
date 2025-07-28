@@ -20,11 +20,13 @@ import com.schoolerp.service.ClassService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -58,8 +60,20 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     public Page<ClassResponseDto> list(Pageable pageable) {
-        return classRepo.findAll(pageable).map(classMapper::toDto);
+        Page<SchoolClass> unsortedPage = classRepo.findAll(pageable);
+
+        // Sort the content only
+        List<SchoolClass> sortedList = unsortedPage.getContent().stream()
+                .sorted(Comparator.comparingInt(SchoolClass::getSortOrder))
+                .toList();
+
+        return new PageImpl<>(
+                sortedList.stream().map(classMapper::toDto).toList(),
+                pageable,
+                unsortedPage.getTotalElements()
+        );
     }
+
 
     @Override
     @Transactional

@@ -20,6 +20,7 @@ public class BaseDTO {
     private boolean active = true;
 
 
+
     public boolean isActive() {
         return active;
     }

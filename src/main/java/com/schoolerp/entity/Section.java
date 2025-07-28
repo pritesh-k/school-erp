@@ -85,4 +85,21 @@ public class Section extends BaseEntity {
     public void setStudents(Set<Student> students) {
         this.students = students;
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Section section = (Section) o;
+
+        return roomNo != null && roomNo.equals(section.roomNo);
+    }
+
+    @Override
+    public int hashCode() {
+        return roomNo != null ? roomNo.hashCode() : 0;
+    }
+
 }

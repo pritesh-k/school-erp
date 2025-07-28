@@ -1,48 +1,32 @@
-package com.schoolerp.entity;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Builder;
+package com.schoolerp.dto.request;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "section_teacher_assignment")
-@Builder
-public class SectionTeacherAssignment extends BaseEntity {
+public class SectionTeacherAssignmentListDto {
 
-    @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    private Teacher teacher;
+    private Long teacher_id;
 
-    @ManyToOne
-    @JoinColumn(name = "section_id")
-    private Section section;
+    private Long section_id;
 
     private Boolean isClassTeacher;  // true if this teacher is the class teacher of the section
     private LocalDate assignedDate;
 
     private String teacherName; // Optional: to store a display name for the teacher in this context
 
-    // any other fields (subject?, notes?, creator?)
-
-
-    public Teacher getTeacher() {
-        return teacher;
+    public Long getTeacher_id() {
+        return teacher_id;
     }
 
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
+    public void setTeacher_id(Long teacher_id) {
+        this.teacher_id = teacher_id;
     }
 
-    public Section getSection() {
-        return section;
+    public Long getSection_id() {
+        return section_id;
     }
 
-    public void setSection(Section section) {
-        this.section = section;
+    public void setSection_id(Long section_id) {
+        this.section_id = section_id;
     }
 
     public Boolean getClassTeacher() {
@@ -69,4 +53,3 @@ public class SectionTeacherAssignment extends BaseEntity {
         this.teacherName = teacherName;
     }
 }
-

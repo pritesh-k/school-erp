@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "school_classes")
@@ -19,7 +21,7 @@ public class SchoolClass extends BaseEntity {
     private ClassStandard name;
 
     @OneToMany(mappedBy = "schoolClass")
-    private List<Section> sections = new ArrayList<>();
+    private Set<Section> sections = new HashSet<>();
 
     public ClassStandard getName() {
         return name;
@@ -29,11 +31,17 @@ public class SchoolClass extends BaseEntity {
         this.name = name;
     }
 
-    public List<Section> getSections() {
+    public Set<Section> getSections() {
         return sections;
     }
 
-    public void setSections(List<Section> sections) {
+    public void setSections(Set<Section> sections) {
         this.sections = sections;
     }
+
+    @Transient
+    public int getSortOrder() {
+        return name.getOrder(); // 'name' is your enum field
+    }
+
 }

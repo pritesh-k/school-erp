@@ -1,19 +1,15 @@
 package com.schoolerp.controller;
 
-import com.schoolerp.dto.request.TeacherAssignmentDto;
 import com.schoolerp.dto.request.TeacherCreateDto;
 import com.schoolerp.dto.request.TeacherUpdateDto;
 import com.schoolerp.dto.response.ApiResponse;
-import com.schoolerp.dto.response.SectionResponseDto;
 import com.schoolerp.dto.response.TeacherResponseDto;
-import com.schoolerp.dto.response.TeachersAssignedDto;
 import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.service.RequestContextService;
 import com.schoolerp.service.TeacherService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,7 +51,7 @@ public class TeacherController {
         return ApiResponse.ok(service.update(teacherId, dto, userId));
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER') or hasAuthority('PRINCIPAL')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('PRINCIPAL')")
     @GetMapping
     public ApiResponse<List<TeacherResponseDto>> list(
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
@@ -85,4 +81,6 @@ public class TeacherController {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         return ApiResponse.ok(service.getTotalCount());
     }
+
+
 }

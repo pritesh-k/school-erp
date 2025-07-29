@@ -11,23 +11,19 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "subject_assignments")
+@Table(name = "teacher_subject_assignments")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SubjectAssignment extends BaseEntity {
+public class TeacherSubjectAssignment extends BaseEntity {
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "teacher_id")
     private Teacher teacher;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
+    private SectionSubjectAssignment sectionSubjectAssignment;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "section_id")
-    private Section section;
+    private Boolean isClassTeacher;
 
     private LocalDate assignedDate;
 
@@ -39,20 +35,20 @@ public class SubjectAssignment extends BaseEntity {
         this.teacher = teacher;
     }
 
-    public Subject getSubject() {
-        return subject;
+    public SectionSubjectAssignment getSectionSubjectAssignment() {
+        return sectionSubjectAssignment;
     }
 
-    public void setSubject(Subject subject) {
-        this.subject = subject;
+    public void setSectionSubjectAssignment(SectionSubjectAssignment sectionSubjectAssignment) {
+        this.sectionSubjectAssignment = sectionSubjectAssignment;
     }
 
-    public Section getSection() {
-        return section;
+    public Boolean getClassTeacher() {
+        return isClassTeacher;
     }
 
-    public void setSection(Section section) {
-        this.section = section;
+    public void setClassTeacher(Boolean classTeacher) {
+        isClassTeacher = classTeacher;
     }
 
     public LocalDate getAssignedDate() {
@@ -63,4 +59,5 @@ public class SubjectAssignment extends BaseEntity {
         this.assignedDate = assignedDate;
     }
 }
+
 

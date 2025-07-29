@@ -5,11 +5,17 @@ import com.schoolerp.entity.SchoolClass;
 import com.schoolerp.entity.Teacher;
 import com.schoolerp.enums.SubjectCategory;
 import com.schoolerp.enums.SubjectCode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SubjectResponseDto extends BaseDTO{
     private SubjectCode code;
     private SubjectCategory category;

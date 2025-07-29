@@ -21,14 +21,16 @@ public class Subject extends BaseEntity {
     @Column(nullable = false, unique = true)
     private SubjectCode code;
 
+    // This shows which classes can study this subject
     @ManyToMany
     @JoinTable(name = "subject_class",
             joinColumns = @JoinColumn(name = "subject_id"),
             inverseJoinColumns = @JoinColumn(name = "class_id"))
     private Set<SchoolClass> classes = new HashSet<>();
 
+    // Section-level subject offerings (e.g., 9A offers Physics)
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SubjectAssignment> assignments = new HashSet<>();
+    private Set<SectionSubjectAssignment> sectionSubjectAssignments = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category")
@@ -58,11 +60,11 @@ public class Subject extends BaseEntity {
         this.classes = classes;
     }
 
-    public Set<SubjectAssignment> getAssignments() {
-        return assignments;
+    public Set<SectionSubjectAssignment> getSectionSubjectAssignments() {
+        return sectionSubjectAssignments;
     }
 
-    public void setAssignments(Set<SubjectAssignment> assignments) {
-        this.assignments = assignments;
+    public void setSectionSubjectAssignments(Set<SectionSubjectAssignment> sectionSubjectAssignments) {
+        this.sectionSubjectAssignments = sectionSubjectAssignments;
     }
 }

@@ -30,11 +30,9 @@ public class Teacher extends BaseEntity {
     private String email;
     private LocalDate joiningDate;
 
+    // Teacher teaches this subject in this section
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SectionTeacherAssignment> sectionAssignments = new HashSet<>();
-
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SubjectAssignment> subjectAssignments = new HashSet<>();
+    private Set<TeacherSubjectAssignment> teacherSubjectAssignments = new HashSet<>();
 
     public void createFullName() {
         this.displayName = ((firstName != null ? firstName : "") +
@@ -97,20 +95,12 @@ public class Teacher extends BaseEntity {
         this.joiningDate = joiningDate;
     }
 
-    public Set<SectionTeacherAssignment> getSectionAssignments() {
-        return sectionAssignments;
+    public Set<TeacherSubjectAssignment> getTeacherSubjectAssignments() {
+        return teacherSubjectAssignments;
     }
 
-    public void setSectionAssignments(Set<SectionTeacherAssignment> sectionAssignments) {
-        this.sectionAssignments = sectionAssignments;
-    }
-
-    public Set<SubjectAssignment> getSubjectAssignments() {
-        return subjectAssignments;
-    }
-
-    public void setSubjectAssignments(Set<SubjectAssignment> subjectAssignments) {
-        this.subjectAssignments = subjectAssignments;
+    public void setTeacherSubjectAssignments(Set<TeacherSubjectAssignment> teacherSubjectAssignments) {
+        this.teacherSubjectAssignments = teacherSubjectAssignments;
     }
 
     public String getDisplayName() {

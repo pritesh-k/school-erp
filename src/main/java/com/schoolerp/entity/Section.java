@@ -14,36 +14,42 @@ public class Section extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private SectionName name;
+
     @Column(unique = true)
     private String roomNo;
-    private Integer  capacity;
 
-    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SubjectAssignment> subjectAssignments = new HashSet<>();
+    private Integer capacity;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_class_id")
     private SchoolClass schoolClass;
 
+    // This maps subjects assigned to the section
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SectionTeacherAssignment> teacherAssignments = new HashSet<>();
+    private Set<SectionSubjectAssignment> sectionSubjectAssignments = new HashSet<>();
+
+    // This maps teacher assignments (with section & subject)
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TeacherSubjectAssignment> teacherSubjectAssignments = new HashSet<>();
 
     @OneToMany(mappedBy = "section")
     private Set<Student> students = new HashSet<>();
 
-    public Set<SectionTeacherAssignment> getTeacherAssignments() {
-        return teacherAssignments;
+
+    public Set<TeacherSubjectAssignment> getTeacherSubjectAssignments() {
+        return teacherSubjectAssignments;
     }
 
-    public void setTeacherAssignments(Set<SectionTeacherAssignment> teacherAssignments) {
-        this.teacherAssignments = teacherAssignments;
+    public void setTeacherSubjectAssignments(Set<TeacherSubjectAssignment> teacherSubjectAssignments) {
+        this.teacherSubjectAssignments = teacherSubjectAssignments;
     }
 
-    public Set<SubjectAssignment> getSubjectAssignments() {
-        return subjectAssignments;
+    public Set<SectionSubjectAssignment> getSectionSubjectAssignments() {
+        return sectionSubjectAssignments;
     }
 
-    public void setSubjectAssignments(Set<SubjectAssignment> subjectAssignments) {
-        this.subjectAssignments = subjectAssignments;
+    public void setSectionSubjectAssignments(Set<SectionSubjectAssignment> sectionSubjectAssignments) {
+        this.sectionSubjectAssignments = sectionSubjectAssignments;
     }
 
     public SectionName getName() {

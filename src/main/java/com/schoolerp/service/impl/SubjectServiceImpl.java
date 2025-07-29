@@ -3,7 +3,10 @@ package com.schoolerp.service.impl;
 import com.schoolerp.dto.request.SubjectCreateDto;
 import com.schoolerp.dto.request.SubjectUpdateDto;
 import com.schoolerp.dto.response.SubjectResponseDto;
+import com.schoolerp.entity.Section;
+import com.schoolerp.entity.SectionSubjectAssignment;
 import com.schoolerp.entity.Subject;
+import com.schoolerp.entity.Teacher;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.SubjectMapper;
 import com.schoolerp.repository.SubjectRepository;
@@ -15,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,14 +47,8 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public Page<SubjectResponseDto> list(Pageable pageable) {
-        // Get a page of Subject entities from the repository
         Page<Subject> subjects = repo.findAll(pageable);
-
-        // Convert each Subject entity to a SubjectResponseDto
-        Page<SubjectResponseDto> dtoPage = subjects.map(mapper::toDto);
-
-        // Return the page of DTOs
-        return dtoPage;
+        return subjects.map(mapper::toDto);
     }
 
 
@@ -76,8 +75,6 @@ public class SubjectServiceImpl implements SubjectService {
         return mapper.toDto(repo.save(subject));
     }
 
-
-
     @Override
     @Transactional
     public void delete(Long id) {
@@ -86,5 +83,4 @@ public class SubjectServiceImpl implements SubjectService {
         }
         repo.deleteById(id);
     }
-
 }

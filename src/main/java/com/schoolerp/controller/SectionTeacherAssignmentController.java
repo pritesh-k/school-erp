@@ -28,7 +28,7 @@ public class SectionTeacherAssignmentController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/classes/{classId}/sections/{sectionId}/assign-teacher")
-    public ApiResponse<Void> assignTeacherToTheSection(
+    public ApiResponse<Void> assignTeacherToSection(
             @PathVariable Long classId,
             @PathVariable Long sectionId,
             @RequestBody AssignmentRequest request) {
@@ -52,7 +52,7 @@ public class SectionTeacherAssignmentController {
     }
 
     @GetMapping("/{teacherId}")
-    public ApiResponse<List<TeachingSectionDto>> getSectionAssignedForATeacherByTeacherId(
+    public ApiResponse<List<TeachingSectionDto>> getSectionsAssignedToTeacher(
             @PathVariable Long teacherId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10")@Min(1) @Max(100) int size) {
@@ -61,9 +61,20 @@ public class SectionTeacherAssignmentController {
         return ApiResponse.paged(service.getTeachingSections(teacherId, pageable));
     }
 
+    @GetMapping("/section/{sectionId}")
+    public ApiResponse<List<AssignmentResponse>> getTeachersAssignedToSection(
+            @PathVariable Long sectionId,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10")@Min(1) @Max(100) int size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Pageable pageable = PageRequest.of(page, size);
+        return ApiResponse.paged(service.getBySection(sectionId, pageable));
+    }
+
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{assignmentId}")
-    public ApiResponse<Void> update(
+    public ApiResponse<Void> updateAssignment(
             @PathVariable Long assignmentId,
             @RequestBody AssignmentRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();

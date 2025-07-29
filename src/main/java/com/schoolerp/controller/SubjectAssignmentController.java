@@ -32,23 +32,13 @@ public class SubjectAssignmentController {
         service.create(dto, user.getUserId());
         return ApiResponse.ok("Subject assignment created successfully.");
     }
-
     @PutMapping
     public ApiResponse<SubjectAssignmentResponseDto> update(@RequestBody SubjectAssignmentUpdateDto dto) {
         Long userId = requestContextService.getCurrentUserContext().getUserId();
         return ApiResponse.ok(service.update(dto, userId));
     }
-
     @GetMapping
-    public ApiResponse<List<SubjectAssignmentResponseDto>> list(
-            @RequestParam(defaultValue = "0") @Min(0) Integer page,
-            @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ApiResponse.paged(service.list(pageable));
-    }
-
-    @GetMapping
-    public ApiResponse<List<SubjectAssignmentResponseDto>> listBySubject(
+    public ApiResponse<List<SubjectAssignmentResponseDto>> listAllSubjectAssignments(
             @RequestParam(defaultValue = "0") @Min(0) Integer page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -62,7 +52,6 @@ public class SubjectAssignmentController {
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(service.listByTeacher(teacherId, pageable));
     }
-
     @GetMapping("/section/{sectionId}")
     public ApiResponse<List<SubjectAssignmentResponseDto>> bySection(
             @PathVariable Long sectionId,@RequestParam(defaultValue = "0") @Min(0) Integer page,
@@ -70,7 +59,6 @@ public class SubjectAssignmentController {
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(service.listBySection(sectionId, pageable));
     }
-
     @GetMapping("/subject/{subjectId}")
     public ApiResponse<List<SubjectAssignmentResponseDto>> bySubject(
             @PathVariable Long subjectId,
@@ -79,11 +67,10 @@ public class SubjectAssignmentController {
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.paged(service.listBySubject(subjectId, pageable));
     }
-
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{subjectAssignmentId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
-        service.delete(id);
+    public ApiResponse<Void> deleteBySubjectAssignmentId(@PathVariable Long subjectAssignmentId) {
+        service.delete(subjectAssignmentId);
         return ApiResponse.ok(null);
     }
 }

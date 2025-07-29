@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface SectionTeacherAssignmentRepository extends JpaRepository<SectionTeacherAssignment, Long> {
-    List<SectionTeacherAssignment> findBySectionId(Long sectionId);
+    Page<SectionTeacherAssignment> findBySection_Id(Long sectionId, Pageable pageable);
     Page<SectionTeacherAssignment> findByTeacher_Id(Long teacherId, Pageable pageable);
     Optional<SectionTeacherAssignment> findByTeacherIdAndSectionId(Long teacherId, Long sectionId);
 

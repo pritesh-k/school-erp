@@ -104,6 +104,10 @@ public class SectionTeacherAssignmentService {
         return ApiResponse.ok(null);
     }
 
+    public Page<AssignmentResponse> getBySection(Long sectionId, Pageable pageable) {
+        return assignmentRepo.findBySection_Id(sectionId, pageable).map(mapper::toDto);
+    }
+
     public void assignClassTeacher(ClassTeacherAssignmentDto dto, Long userId) {
         Section section = sectionRepo.findById(dto.getSectionId())
                 .orElseThrow(() -> new ResourceNotFoundException("Section not found"));

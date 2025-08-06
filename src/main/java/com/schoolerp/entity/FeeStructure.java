@@ -14,9 +14,11 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FeeStructure extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "session_id")
     private AcademicSession session;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "school_class_id")
     private SchoolClass schoolClass; // Or add section if you need
     @OneToMany(mappedBy = "feeStructure", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FeeStructureItem> items = new HashSet<>();

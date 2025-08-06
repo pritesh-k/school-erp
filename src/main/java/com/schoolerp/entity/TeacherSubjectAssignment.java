@@ -18,9 +18,11 @@ import java.time.LocalDate;
 public class TeacherSubjectAssignment extends BaseEntity {
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "section_subject_assignment_id", nullable = false)
     private SectionSubjectAssignment sectionSubjectAssignment;
 
     private Boolean isClassTeacher;

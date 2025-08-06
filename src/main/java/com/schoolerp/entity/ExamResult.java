@@ -11,10 +11,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class ExamResult extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    private Student student;
-
+    @JoinColumn(name = "student_enrollment_id", nullable = false)
+    private StudentEnrollment studentEnrollment;
     @ManyToOne(fetch = FetchType.LAZY)
     private Exam exam;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private AcademicSession academicSession;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Subject subject;
@@ -28,12 +31,20 @@ public class ExamResult extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ResultStatus status;
 
-    public Student getStudent() {
-        return student;
+    public StudentEnrollment getStudentEnrollment() {
+        return studentEnrollment;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public void setStudentEnrollment(StudentEnrollment studentEnrollment) {
+        this.studentEnrollment = studentEnrollment;
+    }
+
+    public AcademicSession getAcademicSession() {
+        return academicSession;
+    }
+
+    public void setAcademicSession(AcademicSession academicSession) {
+        this.academicSession = academicSession;
     }
 
     public Exam getExam() {

@@ -6,7 +6,7 @@ public class SectionSubjectAssignmentCreateDto {
 
     @NotBlank
     private Long subjectId;
-    private Boolean isMandatory;
+    private boolean isMandatory;
     private Integer weeklyHours;
 
     public Long getSubjectId() {
@@ -17,11 +17,11 @@ public class SectionSubjectAssignmentCreateDto {
         this.subjectId = subjectId;
     }
 
-    public Boolean getMandatory() {
+    public boolean  getMandatory() {
         return isMandatory;
     }
 
-    public void setMandatory(Boolean mandatory) {
+    public void setMandatory(boolean mandatory) {
         isMandatory = mandatory;
     }
 

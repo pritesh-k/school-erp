@@ -8,7 +8,7 @@ import com.schoolerp.entity.SectionSubjectAssignment;
 import com.schoolerp.entity.TeacherSubjectAssignment;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring", uses = {TeacherMapper.class})
+@Mapper(componentModel = "spring", uses = {TeacherMapper.class, SubjectMapper.class})
 public interface AssignmentMapper {
     SectionSubjectAssignment toEntity(SectionSubjectAssignmentCreateDto dto);
     SectionSubjectAssignmentResponseDto toDto(SectionSubjectAssignment entity);

@@ -35,7 +35,7 @@ public class RequestContextService {
             Long userId = jwtUtil.extractUserId(token);
             String role = jwtUtil.extractRole(token);
             Long entityId = jwtUtil.extractEntityId(token);
-
+            String academicSessionIdFromRequest = request.getHeader(jwtUtil.ACADEMIC_SESSION_ID);
             if (userId == null || role == null || token == null) {
                 throw new UnauthorizedException("Invalid or missing token details");
             }
@@ -47,6 +47,7 @@ public class RequestContextService {
             userTypeInfo.setUserType(Role.fromString(role));
             userTypeInfo.setEntityId(entityId);
             userTypeInfo.setToken(token);
+            userTypeInfo.setAcademicSession(academicSessionIdFromRequest);
             return userTypeInfo;
 
         } catch (ExpiredJwtException e) {

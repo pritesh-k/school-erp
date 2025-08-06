@@ -4,10 +4,13 @@ import com.schoolerp.dto.request.LoginRequest;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.response.AuthResponse;
 import com.schoolerp.dto.response.UserDTO;
+import com.schoolerp.entity.AcademicSession;
 import com.schoolerp.entity.User;
 import com.schoolerp.entity.UserTypeInfo;
+import com.schoolerp.enums.Role;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.exception.UnauthorizedException;
+import com.schoolerp.repository.AcademicSessionRepository;
 import com.schoolerp.repository.UserRepository;
 import com.schoolerp.security.JwtUtil;
 import com.schoolerp.service.AuthService;
@@ -24,6 +27,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -33,6 +38,8 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder encoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authManager;
+
+    private final AcademicSessionRepository academicSessionRepository;
 
     @Override
     @Transactional
@@ -64,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("User registered successfully with ID: {}", savedUser.getId());
 
-        UserDTO userDTO = new UserDTO(
+        return new UserDTO(
                 savedUser.getId(),
                 savedUser.getCreatedAt(),
                 savedUser.getUpdatedAt(),
@@ -79,7 +86,6 @@ public class AuthServiceImpl implements AuthService {
                 null // JWT token will be set during login
                 , savedUser.getDisplayName()
         );
-        return userDTO;
     }
     @Override
     public AuthResponse login(LoginRequest req) {
@@ -96,8 +102,15 @@ public class AuthServiceImpl implements AuthService {
             userTypeInfo.setEntityId(user.getEntityId());
             userTypeInfo.setDisplayName(user.getDisplayName());
 
+//            Optional<AcademicSession> academicSession = academicSessionRepository.findByIsCurrentTrue();
+//            if (academicSession.isPresent()){
+//                userTypeInfo.setAcademicSessionId(academicSession.get().getId());
+//            } else {
+//                throw new ResourceNotFoundException("No active academic session found");
+//            }
+
             String token = jwtUtil.generateToken(userTypeInfo);
-            userTypeInfo.setToken(token); // Set the token in UserTypeInfo
+            userTypeInfo.setToken(token);
 
             return new AuthResponse(userTypeInfo);
         } catch (BadCredentialsException ex) {
@@ -126,6 +139,16 @@ public class AuthServiceImpl implements AuthService {
             userTypeInfo.setUserType(user.getRole());
             userTypeInfo.setEntityId(user.getEntityId());
             userTypeInfo.setDisplayName(user.getDisplayName());
+
+//            Optional<AcademicSession> academicSession = academicSessionRepository.findByIsCurrentTrue();
+//            if (academicSession.isPresent()){
+//                userTypeInfo.setAcademicSessionId(academicSession.get().getId());
+//            } else {
+//                throw new ResourceNotFoundException("No active academic session found");
+//            }
+
+            String token = jwtUtil.generateToken(userTypeInfo);
+            userTypeInfo.setToken(token);
 
             String newToken = jwtUtil.generateToken(userTypeInfo);
             userTypeInfo.setToken(newToken); // Set the new token in UserTypeInfo

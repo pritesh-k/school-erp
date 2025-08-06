@@ -2,12 +2,14 @@ package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.TeacherSubjectAssignmentCreateDto;
 import com.schoolerp.dto.response.TeacherSubjectAssignmentResponseDto;
+import com.schoolerp.entity.AcademicSession;
 import com.schoolerp.entity.SectionSubjectAssignment;
 import com.schoolerp.entity.Teacher;
 import com.schoolerp.entity.TeacherSubjectAssignment;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.exception.ValidationException;
 import com.schoolerp.mapper.AssignmentMapper;
+import com.schoolerp.repository.AcademicSessionRepository;
 import com.schoolerp.repository.SectionSubjectAssignmentRepository;
 import com.schoolerp.repository.TeacherRepository;
 import com.schoolerp.repository.TeacherSubjectAssignmentRepository;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class TeacherSubjectAssignmentService {
@@ -28,13 +31,22 @@ public class TeacherSubjectAssignmentService {
     private SectionSubjectAssignmentRepository sectionSubjRepo;
     @Autowired
     private TeacherSubjectAssignmentRepository repo;
+
+    @Autowired
+    private AcademicSessionRepository academicSessionRepository;
+
     @Autowired
     private AssignmentMapper mapper;
 
     @Transactional
-    public void create(TeacherSubjectAssignmentCreateDto dto, Long teacherId) {
+    public void create(TeacherSubjectAssignmentCreateDto dto, Long teacherId, String academicSessionName) {
         Teacher teacher = teacherRepo.findById(teacherId).orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
         SectionSubjectAssignment sectionSubject = sectionSubjRepo.findById(dto.getSectionSubjectAssignmentId()).orElseThrow(() -> new ResourceNotFoundException("SectionSubjectAssignment not found"));
+
+        Optional<AcademicSession> academicSession = academicSessionRepository.findByName(academicSessionName);
+        if (academicSession.isEmpty()){
+            throw new ResourceNotFoundException("Academic Session is not present");
+        }
 
         boolean exists = repo.findBySectionSubjectAssignment_IdAndTeacher_Id(sectionSubject.getId(), teacher.getId()).isPresent();
         if (exists) throw new ValidationException("This subject in section is already assigned to this teacher");
@@ -54,7 +66,8 @@ public class TeacherSubjectAssignmentService {
     }
     public Page<TeacherSubjectAssignmentResponseDto> listBySectionSubjectAssignmentId
             (Long sectionSubjectAssignmentId, Pageable pageable) {
-        return repo.findBySectionSubjectAssignment_Id(sectionSubjectAssignmentId, pageable).map(mapper::toDto);
+        Page<TeacherSubjectAssignment> page =  repo.findBySectionSubjectAssignment_Id(sectionSubjectAssignmentId, pageable);
+        return page.map(mapper::toDto);
     }
 
     public void delete(Long id) {

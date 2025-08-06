@@ -3,6 +3,7 @@ package com.schoolerp.controller;
 import com.schoolerp.dto.request.TeacherSubjectAssignmentCreateDto;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.TeacherSubjectAssignmentResponseDto;
+import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.service.RequestContextService;
 import com.schoolerp.service.impl.TeacherSubjectAssignmentService;
 import jakarta.validation.constraints.Max;
@@ -26,16 +27,16 @@ public class TeacherSubjectAssignmentController {
     private final RequestContextService requestContextService;
 
 
-    @PostMapping("/teacherId")
+    @PostMapping("/teacherId/{teacherId}")
     public ApiResponse<Void> assignSectionSubjectToTeacher(
             @PathVariable Long teacherId,
             @RequestBody TeacherSubjectAssignmentCreateDto dto) {
-        requestContextService.getCurrentUserContext();
-        service.create(dto, teacherId);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        service.create(dto, teacherId, userTypeInfo.getAcademicSession());
         return ApiResponse.ok(null);
     }
 
-    @GetMapping("/{teacherId}")
+    @GetMapping("/byTeacherId/{teacherId}")
     public ApiResponse<List<TeacherSubjectAssignmentResponseDto>> listByTeacher(
             @PathVariable Long teacherId,
             @RequestParam(defaultValue = "0") @Min(0) int page,

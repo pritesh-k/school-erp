@@ -21,6 +21,9 @@ public class Exam extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private SchoolClass schoolClass;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private AcademicSession academicSession;
+
     @ManyToMany
     @JoinTable(name = "exam_subject",
             joinColumns = @JoinColumn(name = "exam_id"),

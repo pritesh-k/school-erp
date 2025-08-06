@@ -5,26 +5,16 @@ import com.schoolerp.entity.Section;
 import com.schoolerp.entity.Subject;
 
 public class SectionSubjectAssignmentResponseDto extends BaseDTO {
-    private Section section;
-    private Subject subject;
 
+    private SubjectResponseDto subject;
     private Boolean isMandatory;
-
     private Integer weeklyHours;
 
-    public Section getSection() {
-        return section;
-    }
-
-    public void setSection(Section section) {
-        this.section = section;
-    }
-
-    public Subject getSubject() {
+    public SubjectResponseDto getSubject() {
         return subject;
     }
 
-    public void setSubject(Subject subject) {
+    public void setSubject(SubjectResponseDto subject) {
         this.subject = subject;
     }
 

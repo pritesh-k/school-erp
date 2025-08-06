@@ -1,8 +1,12 @@
 package com.schoolerp.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TeacherSubjectAssignmentCreateDto {
     private Long sectionSubjectAssignmentId;
-    private Boolean isClassTeacher;
+
+    @JsonProperty("isClassTeacher")
+    private boolean isClassTeacher;
 
     public Long getSectionSubjectAssignmentId() {
         return sectionSubjectAssignmentId;
@@ -12,11 +16,11 @@ public class TeacherSubjectAssignmentCreateDto {
         this.sectionSubjectAssignmentId = sectionSubjectAssignmentId;
     }
 
-    public Boolean getClassTeacher() {
+    public boolean getClassTeacher() {
         return isClassTeacher;
     }
 
-    public void setClassTeacher(Boolean classTeacher) {
+    public void setClassTeacher(boolean classTeacher) {
         isClassTeacher = classTeacher;
     }
 }

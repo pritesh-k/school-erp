@@ -21,6 +21,10 @@ public class SectionSubjectAssignment extends BaseEntity {
     @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "academic_session_id", nullable = false)
+    private AcademicSession academicSession;
+
     @Column(nullable = false)
     private Boolean isMandatory;
     private Integer weeklyHours; // Optional metadata
@@ -55,6 +59,14 @@ public class SectionSubjectAssignment extends BaseEntity {
 
     public void setWeeklyHours(Integer weeklyHours) {
         this.weeklyHours = weeklyHours;
+    }
+
+    public AcademicSession getAcademicSession() {
+        return academicSession;
+    }
+
+    public void setAcademicSession(AcademicSession academicSession) {
+        this.academicSession = academicSession;
     }
 }
 

@@ -10,15 +10,15 @@ import java.time.LocalDate;
 public class TeacherSubjectAssignmentResponseDto extends BaseDTO {
 
     private TeacherResponseDto teacher;
-    private Boolean isClassTeacher;
+    private boolean isClassTeacher;
     private LocalDate assignedDate;
 
 
-    public Boolean getClassTeacher() {
+    public boolean getClassTeacher() {
         return isClassTeacher;
     }
 
-    public void setClassTeacher(Boolean classTeacher) {
+    public void setClassTeacher(boolean classTeacher) {
         isClassTeacher = classTeacher;
     }
 
@@ -28,6 +28,14 @@ public class TeacherSubjectAssignmentResponseDto extends BaseDTO {
 
     public void setAssignedDate(LocalDate assignedDate) {
         this.assignedDate = assignedDate;
+    }
+
+    public TeacherResponseDto getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(TeacherResponseDto teacher) {
+        this.teacher = teacher;
     }
 }
 

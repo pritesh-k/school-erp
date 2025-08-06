@@ -9,9 +9,6 @@ public class StudentCreateDto {
     @NotBlank @NotNull private String firstName;
     private String lastName;
     @NotNull @NotNull private LocalDate dob;
-    private Long schoolClassId;
-    private Long sectionId;
-
     private Gender gender;
 
     @Email
@@ -74,23 +71,6 @@ public class StudentCreateDto {
 
     public void setDob(LocalDate dob) {
         this.dob = dob;
-    }
-
-
-    public Long getSchoolClassId() {
-        return schoolClassId;
-    }
-
-    public void setSchoolClassId(Long schoolClassId) {
-        this.schoolClassId = schoolClassId;
-    }
-
-    public Long getSectionId() {
-        return sectionId;
-    }
-
-    public void setSectionId(Long sectionId) {
-        this.sectionId = sectionId;
     }
 
     public String getEmail() {

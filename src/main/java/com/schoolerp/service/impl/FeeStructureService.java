@@ -35,7 +35,6 @@ public class FeeStructureService {
             FeeStructureItem item = new FeeStructureItem();
             item.setFeeStructure(structure);
             item.setFeeHead(head);
-            item.setAmount(itemDto.getAmount());
             items.add(item);
         });
         structure.setItems(items);

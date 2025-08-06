@@ -38,8 +38,6 @@ public class AttendanceController {
     private final AttendanceService service;
     private final RequestContextService requestContextService;
 
-    // 1. Mark today's attendance for a student
-
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @PostMapping("/students/{studentId}/attendances")
     public ApiResponse<AttendanceResponseDto> markAttendance(
@@ -60,9 +58,6 @@ public class AttendanceController {
         }
         return ApiResponse.ok(service.markDateAttendance(studentId, attendanceStatus, remarks, entityId, date, userId));
     }
-
-
-    // 3. Mark bulk attendance
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @PostMapping("/bulk")
     public ApiResponse<List<AttendanceResponseDto>> markBulk(
@@ -79,8 +74,6 @@ public class AttendanceController {
         }
         return ApiResponse.ok(service.markBulk(dtos, entityId, userId));
     }
-
-    // 4. Update attendance
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @PutMapping("/{attendanceId}")
     public ApiResponse<AttendanceResponseDto> update(
@@ -98,8 +91,6 @@ public class AttendanceController {
         }
         return ApiResponse.ok(service.update(attendanceId, dto, entityId, userId));
     }
-
-    // 4. Delete a attendance record
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{attendanceId}")
     public ApiResponse<Void> delete(@PathVariable Long attendanceId, HttpServletRequest request) {
@@ -115,8 +106,6 @@ public class AttendanceController {
         service.delete(attendanceId, entityId, userId, role);
         return ApiResponse.ok(null);
     }
-
-    // 5. Get attendance by student (already implemented)
     @GetMapping("/students/{studentId}")
     public ApiResponse<List<AttendanceResponseDto>> byStudent(
             @PathVariable Long studentId,
@@ -128,18 +117,6 @@ public class AttendanceController {
         return ApiResponse.paged(pagedResult);
     }
 
-    // 6. Get attendance by class
-//    @GetMapping("/classes/{classId}")
-//    public ApiResponse<List<AttendanceResponseDto>> byClass(
-//            @PathVariable Long classId,
-//            @RequestParam(required = false, defaultValue = "0") int page,
-//            @RequestParam(required = false, defaultValue = "10") int size) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
-//        Page<AttendanceResponseDto> pagedResult = service.byClassId(classId, pageable);
-//        return ApiResponse.paged(pagedResult);
-//    }
-
-    // 7. Get attendance by date
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/dates/{date}")
     public ApiResponse<List<AttendanceResponseDto>> byDate(
@@ -150,8 +127,6 @@ public class AttendanceController {
         Page<AttendanceResponseDto> pagedResult = service.byDate(date, pageable);
         return ApiResponse.paged(pagedResult);
     }
-
-    // 8. Get attendance by date range
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
     @GetMapping("/dates")
     public ApiResponse<List<AttendanceResponseDto>> byDateRange(
@@ -164,72 +139,21 @@ public class AttendanceController {
         return ApiResponse.paged(pagedResult);
     }
 
-    // 10. Get attendance by class and date
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
-    @GetMapping("/classes/{classId}/dates/{date}")
-    public ApiResponse<List<AttendanceResponseDto>> byClassAndDate(
-            @PathVariable Long classId,
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        List<AttendanceResponseDto> result = service.byClassAndDate(classId, date);
-        return ApiResponse.ok(result);
-    }
-
-//    // 10. Get attendance summary for a student
-//    @GetMapping("/student/{id}/summary")
-//    public ApiResponse<AttendanceSummaryDto> studentSummary(
-//            @PathVariable Long id,
+//    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
+//    @GetMapping("/search")
+//    public ApiResponse<List<AttendanceResponseDto>> search(
+//            @RequestParam(required = false) Long studentId,
+//            @RequestParam(required = false) Long sectionId,
+//            @RequestParam(required = false) Long classId,
+//            @RequestParam(required = false) AttendanceStatus status, // PRESENT, ABSENT, LATE
 //            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-//
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+//            @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
+//            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size){
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+//        Page<AttendanceResponseDto> pagedResult = service.search(studentId, sectionId, classId, status, startDate, endDate, pageable);
+//        return ApiResponse.paged(pagedResult);
 //    }
-//
-//    // 11. Get attendance summary for a class
-//    @GetMapping("/class/{classId}/summary")
-//    public ApiResponse<AttendanceSummaryDto> classSummary(
-//            @PathVariable Long classId,
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
-//
-//    }
-//
-//    // 12. Get low attendance students
-//    @GetMapping("/low-attendance")
-//    public ApiResponse<List<StudentAttendanceDto>> lowAttendanceStudents(
-//            @RequestParam(required = false, defaultValue = "75") double threshold,
-//            @RequestParam(required = false, defaultValue = "0") int page,
-//            @RequestParam(required = false, defaultValue = "10") int size){
-//
-//    }
-
-    // 13. Get attendance percentage by student
-    @GetMapping("/students/{studentId}/percentage")
-    public ApiResponse<AttendancePercentageDto> studentAttendancePercentage(
-            @PathVariable Long studentId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
-        return ApiResponse.ok(service.getAttendancePercentageByStudent(studentId, startDate, endDate));
-    }
-
-    /**
-     * 14. Search attendance records
-     * This endpoint allows searching attendance records based on various criteria.
-     * It supports pagination and sorting by date in descending order.
-     */
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
-    @GetMapping("/search")
-    public ApiResponse<List<AttendanceResponseDto>> search(
-            @RequestParam(required = false) Long studentId,
-            @RequestParam(required = false) Long sectionId,
-            @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) AttendanceStatus status, // PRESENT, ABSENT, LATE
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size){
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
-        Page<AttendanceResponseDto> pagedResult = service.search(studentId, sectionId, classId, status, startDate, endDate, pageable);
-        return ApiResponse.paged(pagedResult);
-    }
 
     /**
      * 15. Get today's attendance by section ID
@@ -246,57 +170,4 @@ public class AttendanceController {
         Page<AttendanceResponseDto> pagedResult = service.bySectionId(sectionId, pageable);
         return ApiResponse.paged(pagedResult);
     }
-
-    // 16. Get monthly attendance report
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
-    @GetMapping("/reports/monthly")
-    public ApiResponse<MonthlyAttendanceReportDto> monthlyReport(
-            @RequestParam int year,
-            @RequestParam int month,
-            @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) Long studentId){
-        return ApiResponse.ok(service.getMonthlyReport(year, month, classId, studentId));
-    }
-
-    // 17. Get weekly attendance report
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
-    @GetMapping("/reports/weekly")
-    public ApiResponse<WeeklyAttendanceReportDto> weeklyReport(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStartDate,
-            @RequestParam(required = false) Long classId,
-            @RequestParam(required = false) Long studentId){
-        return ApiResponse.ok(service.getWeeklyReport(weekStartDate, classId, studentId));
-    }
-
-    // 18. Mark all present for a class
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
-    @PostMapping("/classes/{classId}/mark-all-present")
-    public ApiResponse<List<AttendanceResponseDto>> markAllPresent(
-            @PathVariable Long classId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam @Valid Long teacherId, HttpServletRequest request){
-        List<AttendanceResponseDto> result = service.markAllPresent(classId, date, teacherId);
-        return ApiResponse.ok(result);
-    }
-
-    // 19. Import attendance from file
-//    @PostMapping("/import")
-//    public ApiResponse<ImportResultDto> importAttendance(
-//            @RequestParam("file") MultipartFile file){
-//        ImportResultDto result = service.importAttendance(file);
-//        return ApiResponse.ok(result);
-//    }
-//
-//    // 20. Export attendance to Excel
-//    @GetMapping("/export")
-//    public ResponseEntity<byte[]> exportAttendance(
-//            @RequestParam(required = false) Long classId,
-//            @RequestParam(required = false) Long studentId,
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
-//        byte[] excelData = service.exportAttendanceToExcel(classId, studentId, startDate, endDate);
-//        return ResponseEntity.ok()
-//                .header("Content-Disposition", "attachment; filename=attendance_report.xlsx")
-//                .body(excelData);
-//    }
 }

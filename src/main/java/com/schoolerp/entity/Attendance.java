@@ -11,47 +11,22 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(
-        name = "attendance",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "section_id", "date"}),
-        indexes = {
-                @Index(name = "idx_attendance_date_student", columnList = "date, student_id"),
-                @Index(name = "idx_attendance_section", columnList = "section_id"),
-                @Index(name = "idx_attendance_status", columnList = "status")
-        }
+        name = "attendance"
 )
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Attendance extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Section section;
-
+    @JoinColumn(name = "student_enrollment_id", nullable = false)
+    private StudentEnrollment studentEnrollment;
     @NotNull(message = "Date is required")
     private LocalDate date;
-
     @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     private AttendanceStatus status;
     private String remarks;
     @ManyToOne(fetch = FetchType.LAZY)
     private Teacher recordedBy;
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
-    public Section getSection() {
-        return section;
-    }
-
-    public void setSection(Section section) {
-        this.section = section;
-    }
 
     public LocalDate getDate() {
         return date;

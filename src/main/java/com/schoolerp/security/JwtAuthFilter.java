@@ -40,7 +40,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-
+            String academicSession = request.getHeader(jwtUtil.ACADEMIC_SESSION_ID);
             if (header != null && header.startsWith("Bearer ") && header.length() > 7) {
                 String token = header.substring(7);
                 request.setAttribute(jwtUtil.JWT_TOKEN_ATTRIBUTE, token);    // <<< ADD THIS

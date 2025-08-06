@@ -15,7 +15,6 @@ import java.util.Set;
 public class Student extends BaseEntity {
     @Column(unique = true)
     private String admissionNumber;
-
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -26,28 +25,10 @@ public class Student extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private LocalDate dob;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private SchoolClass schoolClass;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Section section;
-
-    // Student entity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")  // FK in Student table
     private Parent parent;
-
-    @OneToMany(mappedBy = "student")
-    private Set<Attendance> attendances = new HashSet<>();
-
-    @OneToMany(mappedBy = "student")
-    private Set<ExamResult> examResults = new HashSet<>();
-
-    @OneToMany(mappedBy = "student")
-    private Set<StudentFeeAssignment> feeAssignments = new HashSet<>();
-
-    @OneToMany(mappedBy = "student")
-    private Set<Document> documents = new HashSet<>();
 
     public String getAdmissionNumber() {
         return admissionNumber;
@@ -92,25 +73,8 @@ public class Student extends BaseEntity {
     public LocalDate getDob() {
         return dob;
     }
-
     public void setDob(LocalDate dob) {
         this.dob = dob;
-    }
-
-    public SchoolClass getSchoolClass() {
-        return schoolClass;
-    }
-
-    public void setSchoolClass(SchoolClass schoolClass) {
-        this.schoolClass = schoolClass;
-    }
-
-    public Section getSection() {
-        return section;
-    }
-
-    public void setSection(Section section) {
-        this.section = section;
     }
 
     public Parent getParent() {
@@ -118,30 +82,6 @@ public class Student extends BaseEntity {
     }
     public void setParent(Parent parent) {
         this.parent = parent;
-    }
-
-    public Set<Attendance> getAttendances() {
-        return attendances;
-    }
-
-    public void setAttendances(Set<Attendance> attendances) {
-        this.attendances = attendances;
-    }
-
-    public Set<ExamResult> getExamResults() {
-        return examResults;
-    }
-
-    public void setExamResults(Set<ExamResult> examResults) {
-        this.examResults = examResults;
-    }
-
-    public Set<Document> getDocuments() {
-        return documents;
-    }
-
-    public void setDocuments(Set<Document> documents) {
-        this.documents = documents;
     }
 
     public String getEmail() {
@@ -158,13 +98,5 @@ public class Student extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public Set<StudentFeeAssignment> getFeeAssignments() {
-        return feeAssignments;
-    }
-
-    public void setFeeAssignments(Set<StudentFeeAssignment> feeAssignments) {
-        this.feeAssignments = feeAssignments;
     }
 }

@@ -34,46 +34,10 @@ public interface AttendanceService {
     @Transactional(readOnly = true)
     Page<AttendanceResponseDto> byDateRange(LocalDate startDate, LocalDate endDate, Pageable pageable);
 
-    @Transactional(readOnly = true)
-    AttendanceSummaryDto getStudentSummary(Long studentId, LocalDate startDate, LocalDate endDate);
-
-    @Transactional(readOnly = true)
-    AttendanceSummaryDto getSectionSummary(Long sectionId, LocalDate startDate, LocalDate endDate);
-
-    @Transactional(readOnly = true)
-    AttendancePercentageDto getStudentPercentage(Long studentId, LocalDate startDate, LocalDate endDate);
-
     AttendanceResponseDto update(Long id, AttendanceUpdateDto dto, Long entityId, Long userId);
 
     void delete(Long attendanceId, Long entityId, Long userId, String role);
 
-    List<AttendanceResponseDto> markAllPresent(Long classId, LocalDate date, Long teacherId);
-
-    Page<AttendanceResponseDto> byClassId(Long classId, Pageable pageable);
-
-    List<AttendanceResponseDto> byClassAndDate(Long classId, LocalDate date);
-
-    AttendancePercentageDto getAttendancePercentageByStudent(Long studentId,
-                                                             LocalDate startDate,
-                                                             LocalDate endDate);
-
-    Page<AttendanceResponseDto> search(Long studentId,
-                                       Long sectionId,
-                                       Long classId,
-                                       AttendanceStatus status,
-                                       LocalDate startDate,
-                                       LocalDate endDate,
-                                       Pageable pageable);
-
-    Page<AttendanceResponseDto> getTodayAttendance(Long classId, Pageable pageable);
-
-    MonthlyAttendanceReportDto getMonthlyReport(int year, int month,
-                                                Long classId,
-                                                Long studentId);
-
-    WeeklyAttendanceReportDto getWeeklyReport(LocalDate weekStartDate,
-                                              Long classId,
-                                              Long studentId);
 
     AttendanceResponseDto markDateAttendance(Long studentId, AttendanceStatus attendanceStatus,
                                              String remarks, Long teacherId, LocalDate date, Long userId);

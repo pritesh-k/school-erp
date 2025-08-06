@@ -59,6 +59,11 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     /* utility to add request-id header */
     private static ResponseEntity<ApiResponse<Void>> respond(HttpStatus status, String msg) {
         return ResponseEntity.status(status)

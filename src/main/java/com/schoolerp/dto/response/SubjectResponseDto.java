@@ -20,6 +20,8 @@ public class SubjectResponseDto extends BaseDTO{
     private SubjectCode code;
     private SubjectCategory category;
 
+    private String name;
+
     public SubjectCategory getCategory() {
         return category;
     }
@@ -34,6 +36,15 @@ public class SubjectResponseDto extends BaseDTO{
 
     public void setCode(SubjectCode code) {
         this.code = code;
+        setName();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName() {
+        this.name = getCode().getSubjectName();
     }
 }
 

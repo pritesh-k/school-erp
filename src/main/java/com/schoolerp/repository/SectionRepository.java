@@ -15,7 +15,5 @@ import java.util.List;
 public interface SectionRepository extends JpaRepository<Section, Long> {
     Page<Section> findBySchoolClassId(Long classId, Pageable pageable);
 
-    boolean existsByNameAndSchoolClassId(SectionName name, Long classId);
-
     boolean existsBySchoolClassIdAndName(Long classId, SectionName name);
 }

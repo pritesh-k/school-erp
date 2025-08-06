@@ -1,19 +1,12 @@
 package com.schoolerp.dto.response;
 import com.schoolerp.dto.BaseDTO;
-import com.schoolerp.entity.FeeType;
 import com.schoolerp.entity.Student;
 import com.schoolerp.enums.FeeStatus;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 public class FeeRecordResponseDto extends BaseDTO {
     private Student student;
-    private FeeType feeType;
-
     private BigDecimal amount;
     private LocalDate dueDate;
     private LocalDate paidDate;
@@ -29,14 +22,6 @@ public class FeeRecordResponseDto extends BaseDTO {
 
     public void setStudent(Student student) {
         this.student = student;
-    }
-
-    public FeeType getFeeType() {
-        return feeType;
-    }
-
-    public void setFeeType(FeeType feeType) {
-        this.feeType = feeType;
     }
 
     public BigDecimal getAmount() {

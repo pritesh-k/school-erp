@@ -13,6 +13,8 @@ public class UserTypeInfo {
 
     private String username;
 
+    private String academicSession;
+
     public String getUsername() {
         return username;
     }
@@ -58,5 +60,13 @@ public class UserTypeInfo {
     }
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getAcademicSession() {
+        return academicSession;
+    }
+
+    public void setAcademicSession(String academicSession) {
+        this.academicSession = academicSession;
     }
 }

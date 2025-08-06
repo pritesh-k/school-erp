@@ -25,6 +25,7 @@ public class JwtUtil {
     private Long expiration;
 
     public final String JWT_TOKEN_ATTRIBUTE = "JWT_TOKEN";
+    public final String ACADEMIC_SESSION_ID = "X-Academic-Session";
 
     private SecretKey key() { return Keys.hmacShaKeyFor(secret.getBytes()); }
 
@@ -115,5 +116,7 @@ public class JwtUtil {
     public String getTokenFromRequest(HttpServletRequest request) {
         return (String) request.getAttribute(JWT_TOKEN_ATTRIBUTE);
     }
-
+    public String getAcademicSession(HttpServletRequest request) {
+        return (String) request.getAttribute(ACADEMIC_SESSION_ID);
+    }
 }

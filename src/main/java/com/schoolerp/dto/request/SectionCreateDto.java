@@ -5,8 +5,6 @@ public class SectionCreateDto{
     @NotBlank SectionName name;
     String roomNo;
     Integer  capacity;
-    Long classTeacherId;
-
 
     public SectionName getName() {
         return name;
@@ -30,14 +28,5 @@ public class SectionCreateDto{
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
-    }
-
-
-    public Long getClassTeacherId() {
-        return classTeacherId;
-    }
-
-    public void setClassTeacherId(Long classTeacherId) {
-        this.classTeacherId = classTeacherId;
     }
 }

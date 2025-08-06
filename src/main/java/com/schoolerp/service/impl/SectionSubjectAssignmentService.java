@@ -2,12 +2,14 @@ package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.SectionSubjectAssignmentCreateDto;
 import com.schoolerp.dto.response.SectionSubjectAssignmentResponseDto;
+import com.schoolerp.entity.AcademicSession;
 import com.schoolerp.entity.Section;
 import com.schoolerp.entity.SectionSubjectAssignment;
 import com.schoolerp.entity.Subject;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.exception.ValidationException;
 import com.schoolerp.mapper.AssignmentMapper;
+import com.schoolerp.repository.AcademicSessionRepository;
 import com.schoolerp.repository.SectionRepository;
 import com.schoolerp.repository.SectionSubjectAssignmentRepository;
 import com.schoolerp.repository.SubjectRepository;
@@ -30,28 +32,38 @@ public class SectionSubjectAssignmentService {
     private SectionSubjectAssignmentRepository repo;
     @Autowired
     private AssignmentMapper mapper;
+    @Autowired
+    AcademicSessionRepository academicSessionRepository;
 
     @Transactional
-    public void create(SectionSubjectAssignmentCreateDto dto, Long sectionId) {
+    public void create(SectionSubjectAssignmentCreateDto dto, Long sectionId, String academicSessionName) {
+
+        Optional<AcademicSession> academicSession = academicSessionRepository.findByName(academicSessionName);
+        if (academicSession.isEmpty()){
+            throw new ResourceNotFoundException("Academic Session is not present");
+        }
+
         if (repo.findBySection_IdAndSubject_Id(sectionId, dto.getSubjectId()).isPresent()) {
             throw new ValidationException("This subject is already assigned to the section");
         }
 
         Section section = sectionRepo.findById(sectionId).orElseThrow(() -> new ResourceNotFoundException("Section not found"));
         Subject subject = subjectRepo.findById(dto.getSubjectId()).orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
-
+        boolean mandatory = Boolean.TRUE.equals(dto.getMandatory());
         SectionSubjectAssignment assignment = SectionSubjectAssignment.builder()
                 .section(section)
                 .subject(subject)
-                .isMandatory(dto.getMandatory())
+                .isMandatory(mandatory)
                 .weeklyHours(dto.getWeeklyHours())
+                .academicSession(academicSession.get())
                 .build();
 
         repo.save(assignment);
     }
 
     public Page<SectionSubjectAssignmentResponseDto> listBySectionId(Long sectionId, Pageable pageable) {
-        return repo.findBySection_Id(sectionId, pageable).map(mapper::toDto);
+        Page<SectionSubjectAssignment> paged =  repo.findBySectionId(sectionId, pageable);
+        return paged.map(mapper::toDto);
     }
 
     @Transactional

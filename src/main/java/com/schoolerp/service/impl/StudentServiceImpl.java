@@ -45,14 +45,8 @@ public class StudentServiceImpl implements StudentService {
     UserRepository userRepository;
     @Autowired
     private final ExamResultRepository examResultRepo;
-    @Autowired
-    private final FeeRecordRepository feeRecordRepo;
-    private final ExcelUtil excelUtil;
-
     private final AuthServiceImpl authService;
-
     private final UserRepository userRepo;
-
     private final ParentService parentService;
     @Override
     @Transactional
@@ -99,13 +93,6 @@ public class StudentServiceImpl implements StudentService {
         student.setCreatedAt(java.time.Instant.now());
         student.setCreatedBy(userId);
 
-        if (dto.getSchoolClassId() != null) {
-            student.setSchoolClass(classRepo.getReferenceById(dto.getSchoolClassId()));
-        }
-        if (dto.getSectionId() != null) {
-            student.setSection(sectionRepo.getReferenceById(dto.getSectionId()));
-        }
-
         Student savedStudent = repo.save(student);
 
         // 4. Update User with Student's ID
@@ -119,8 +106,6 @@ public class StudentServiceImpl implements StudentService {
 
         return mapper.toDto(savedStudent);
     }
-
-
 
     @Override
     public Page<StudentResponseDto> list(Pageable pageable) {
@@ -164,16 +149,6 @@ public class StudentServiceImpl implements StudentService {
             s.setGender(dto.getGender());
         }
 
-        // Update school class only if not null
-        if (dto.getSchoolClassId() != null) {
-            s.setSchoolClass(classRepo.getReferenceById(dto.getSchoolClassId()));
-        }
-
-        // Update section only if not null
-        if (dto.getSectionId() != null) {
-            s.setSection(sectionRepo.getReferenceById(dto.getSectionId()));
-        }
-
         if (dto.getEmail() != null){
             s.setEmail(dto.getEmail().trim());
             user.setEmail(s.getEmail());
@@ -205,9 +180,9 @@ public class StudentServiceImpl implements StudentService {
         }
 
         // Check for critical dependencies
-        if (hasActiveRecords(id)) {
-            throw new IllegalStateException("Cannot delete student with active records");
-        }
+//        if (hasActiveRecords(id)) {
+//            throw new IllegalStateException("Cannot delete student with active records");
+//        }
 
         // Soft delete student
         student.setDeleted(true);
@@ -224,11 +199,11 @@ public class StudentServiceImpl implements StudentService {
         log.info("Student deleted successfully: {}", id);
     }
 
-    private boolean hasActiveRecords(Long studentId) {
-        return attendanceRepo.existsByStudentId(studentId) ||
-                examResultRepo.existsByStudentId(studentId) ||
-                feeRecordRepo.existsByStudentFeeAssignment_Student_Id(studentId);
-    }
+//    private boolean hasActiveRecords(Long studentId) {
+//        return attendanceRepo.existsByStudentId(studentId) ||
+//                examResultRepo.existsByStudentId(studentId) ||
+//                feeRecordRepo.existsByStudentFeeAssignment_Student_Id(studentId);
+//    }
 
 
     @Override

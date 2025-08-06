@@ -130,12 +130,6 @@ public class ClassServiceImpl implements ClassService {
             throw new DuplicateEntry("Section with name " + dto.getName() + " already exists for class " + schoolClass.getName());
         }
 
-        // Optional class teacher
-        Teacher teacher = null;
-        if (dto.getClassTeacherId() != null && dto.getClassTeacherId() > 0) {
-            teacher = teacherRepo.findById(dto.getClassTeacherId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Teacher with id " + dto.getClassTeacherId() + " not found"));
-        }
         // Build Section only with valid fields
         Section.SectionBuilder sectionBuilder = Section.builder()
                 .schoolClass(schoolClass);
@@ -189,7 +183,7 @@ public class ClassServiceImpl implements ClassService {
 
         // 3. Update supplied fields
         if (dto.getName() != null && !dto.getName().equals(section.getName())) {
-            if (sectionRepo.existsByNameAndSchoolClassId(dto.getName(), classId)) {
+            if (sectionRepo.existsBySchoolClassIdAndName(classId, dto.getName())) {
                 throw new DuplicateEntry("Section name '" + dto.getName() + "' already exists in class with ID: " + classId);
             }
             section.setName(dto.getName());

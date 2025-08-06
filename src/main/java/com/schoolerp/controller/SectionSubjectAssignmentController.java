@@ -31,10 +31,9 @@ public class SectionSubjectAssignmentController {
             @PathVariable Long sectionId,
             @RequestBody SectionSubjectAssignmentCreateDto dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        service.create(dto, sectionId);
+        service.create(dto, sectionId, userTypeInfo.getAcademicSession());
         return ApiResponse.ok(null);
     }
-
     @GetMapping("/{sectionId}/subjects")
     public ApiResponse<List<SectionSubjectAssignmentResponseDto>> listAllBySectionId(
             @PathVariable Long sectionId,

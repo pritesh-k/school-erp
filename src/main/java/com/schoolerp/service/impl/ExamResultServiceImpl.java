@@ -27,7 +27,6 @@ public class ExamResultServiceImpl implements ExamResultService {
     @Transactional
     public ExamResultResponseDto create(ExamResultCreateDto dto) {
         ExamResult er = ExamResult.builder()
-                .student(studentRepo.getReferenceById(dto.studentId()))
                 .exam(examRepo.getReferenceById(dto.examId()))
                 .subject(subjectRepo.getReferenceById(dto.subjectId()))
                 .score(dto.score())
@@ -49,7 +48,6 @@ public class ExamResultServiceImpl implements ExamResultService {
     @Transactional
     public ExamResultResponseDto update(Long id, ExamResultCreateDto dto) {
         ExamResult er = repo.findById(id).orElseThrow();
-        er.setStudent(studentRepo.getReferenceById(dto.studentId()));
         er.setExam(examRepo.getReferenceById(dto.examId()));
         er.setSubject(subjectRepo.getReferenceById(dto.subjectId()));
         er.setScore(dto.score());

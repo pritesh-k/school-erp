@@ -35,8 +35,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ApiResponse<String> register(@RequestBody RegisterRequest req) {
+        Role role = req.getRole();
+        if (role != Role.ADMIN && role != Role.PRINCIPAL) {
+            throw new IllegalArgumentException("Role must be either ADMIN or PRINCIPAL");
+        }
         UserDTO user = service.register(req);
-        return ApiResponse.ok("User registered successfully");
+        return ApiResponse.ok("Successfully Registered");
     }
 
     @PostMapping("/login")

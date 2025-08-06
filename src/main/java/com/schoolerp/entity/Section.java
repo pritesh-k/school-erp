@@ -19,30 +19,13 @@ public class Section extends BaseEntity {
     private String roomNo;
 
     private Integer capacity;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_class_id")
     private SchoolClass schoolClass;
 
     // This maps subjects assigned to the section
-    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<SectionSubjectAssignment> sectionSubjectAssignments = new HashSet<>();
-
-    // This maps teacher assignments (with section & subject)
-    @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<TeacherSubjectAssignment> teacherSubjectAssignments = new HashSet<>();
-
-    @OneToMany(mappedBy = "section")
-    private Set<Student> students = new HashSet<>();
-
-
-    public Set<TeacherSubjectAssignment> getTeacherSubjectAssignments() {
-        return teacherSubjectAssignments;
-    }
-
-    public void setTeacherSubjectAssignments(Set<TeacherSubjectAssignment> teacherSubjectAssignments) {
-        this.teacherSubjectAssignments = teacherSubjectAssignments;
-    }
 
     public Set<SectionSubjectAssignment> getSectionSubjectAssignments() {
         return sectionSubjectAssignments;
@@ -83,15 +66,6 @@ public class Section extends BaseEntity {
     public void setSchoolClass(SchoolClass schoolClass) {
         this.schoolClass = schoolClass;
     }
-
-    public Set<Student> getStudents() {
-        return students;
-    }
-
-    public void setStudents(Set<Student> students) {
-        this.students = students;
-    }
-
 
     @Override
     public boolean equals(Object o) {

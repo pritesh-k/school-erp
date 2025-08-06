@@ -57,7 +57,6 @@ public class TeacherServiceImpl implements TeacherService {
         authService.register(req);
         User savedUser = authService.getUserByUsername(dto.username());
 
-
         // 1. Create Teacher with saved User
         Teacher teacher = Teacher.builder()
                 .user(savedUser) //User with proper ID

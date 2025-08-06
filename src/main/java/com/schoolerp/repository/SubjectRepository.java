@@ -15,8 +15,6 @@ import java.util.Optional;
 
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
-
-
     boolean existsByCode(SubjectCode code);
 
 }

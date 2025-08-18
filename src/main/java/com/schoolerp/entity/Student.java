@@ -19,6 +19,7 @@ public class Student extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
     private String email;
+    @Column(unique = true)
     private String rollNumber;
     private String firstName;
     private String lastName;

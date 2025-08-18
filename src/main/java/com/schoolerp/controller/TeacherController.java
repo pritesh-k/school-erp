@@ -3,6 +3,7 @@ package com.schoolerp.controller;
 import com.schoolerp.dto.request.TeacherCreateDto;
 import com.schoolerp.dto.request.TeacherUpdateDto;
 import com.schoolerp.dto.response.ApiResponse;
+import com.schoolerp.dto.response.TeacherDetailsResponseDto;
 import com.schoolerp.dto.response.TeacherResponseDto;
 import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.service.RequestContextService;
@@ -10,8 +11,10 @@ import com.schoolerp.service.TeacherService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +53,6 @@ public class TeacherController {
         Long userId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.update(teacherId, dto, userId));
     }
-
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('PRINCIPAL')")
     @GetMapping
     public ApiResponse<List<TeacherResponseDto>> list(
@@ -72,8 +74,19 @@ public class TeacherController {
     @GetMapping("/{id}")
     public ApiResponse<TeacherResponseDto> getById(@PathVariable Long id) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
         return ApiResponse.ok(service.getByTeacherId(id));
+    }
+
+    @GetMapping("/without-assignment/{sectionSubjectAssignmentId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ApiResponse<List<TeacherResponseDto>> getTeachersWithoutAssignment(
+            @PathVariable Long sectionSubjectAssignmentId,
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<TeacherResponseDto> teachers = service.getTeachersWithoutAssignment(sectionSubjectAssignmentId, pageable);
+        return ApiResponse.paged(teachers);
     }
 
     @GetMapping("/total")
@@ -81,6 +94,4 @@ public class TeacherController {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         return ApiResponse.ok(service.getTotalCount());
     }
-
-
 }

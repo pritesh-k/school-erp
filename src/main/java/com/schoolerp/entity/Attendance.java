@@ -3,16 +3,14 @@ package com.schoolerp.entity;
 import com.schoolerp.enums.AttendanceStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "attendance"
-)
+@Table(name = "attendance")
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Attendance extends BaseEntity {
 
@@ -42,6 +40,14 @@ public class Attendance extends BaseEntity {
 
     public void setStatus(AttendanceStatus status) {
         this.status = status;
+    }
+
+    public StudentEnrollment getStudentEnrollment() {
+        return studentEnrollment;
+    }
+
+    public void setStudentEnrollment(StudentEnrollment studentEnrollment) {
+        this.studentEnrollment = studentEnrollment;
     }
 
     public String getRemarks() {

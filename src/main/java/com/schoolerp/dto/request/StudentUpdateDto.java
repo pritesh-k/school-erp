@@ -2,46 +2,19 @@ package com.schoolerp.dto.request;
 
 import com.schoolerp.enums.Gender;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class StudentCreateDto {
-    @NotBlank private String admissionNumber;
-    @NotBlank private String rollNumber;
-    @NotBlank private String firstName;
+public class StudentUpdateDto {
+    private String admissionNumber;
+    private String rollNumber;
+    private String firstName;
     private String lastName;
-    @NotBlank private LocalDate dob;
-    @NotBlank
+    private LocalDate dob;
     private Gender gender;
-
     @Email
     private String email;
-
-    private ParentCreateDto parentCreateDto;
-
-    public ParentCreateDto getParentCreateDto() {
-        return parentCreateDto;
-    }
-
-    public void setParentCreateDto(ParentCreateDto parentCreateDto) {
-        this.parentCreateDto = parentCreateDto;
-    }
-
-    public Gender getGender() {
-        return gender;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
+    private ParentUpdateDto parent;
 
     public String getAdmissionNumber() {
         return admissionNumber;
@@ -83,11 +56,27 @@ public class StudentCreateDto {
         this.dob = dob;
     }
 
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public ParentUpdateDto getParent() {
+        return parent;
+    }
+
+    public void setParent(ParentUpdateDto parent) {
+        this.parent = parent;
     }
 }

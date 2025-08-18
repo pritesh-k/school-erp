@@ -1,12 +1,14 @@
 package com.schoolerp.dto.response;
 
 import com.schoolerp.dto.BaseDTO;
+import com.schoolerp.dto.request.SectionSummaryDto;
 import com.schoolerp.entity.Section;
 import com.schoolerp.entity.Subject;
 
 public class SectionSubjectAssignmentResponseDto extends BaseDTO {
 
     private SubjectResponseDto subject;
+    private SectionSummaryDto section;
     private Boolean isMandatory;
     private Integer weeklyHours;
 
@@ -32,5 +34,13 @@ public class SectionSubjectAssignmentResponseDto extends BaseDTO {
 
     public void setWeeklyHours(Integer weeklyHours) {
         this.weeklyHours = weeklyHours;
+    }
+
+    public SectionSummaryDto getSection() {
+        return section;
+    }
+
+    public void setSection(SectionSummaryDto section) {
+        this.section = section;
     }
 }

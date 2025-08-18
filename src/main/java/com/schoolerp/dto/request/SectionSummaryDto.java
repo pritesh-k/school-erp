@@ -16,7 +16,15 @@ public class SectionSummaryDto {
     private Integer capacity;
     private String className;
     private Integer studentCount;
+    private Long classId;
 
+    public Long getClassId() {
+        return classId;
+    }
+
+    public void setClassId(Long classId) {
+        this.classId = classId;
+    }
 
     public Long getId() {
         return id;

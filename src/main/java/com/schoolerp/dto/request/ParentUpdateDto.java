@@ -1,23 +1,13 @@
-package com.schoolerp.dto.response;
+package com.schoolerp.dto.request;
 
-import com.schoolerp.dto.BaseDTO;
-import com.schoolerp.entity.Student;
-import com.schoolerp.entity.User;
 import com.schoolerp.enums.Relation;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToMany;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-public class ParentResponseDto extends BaseDTO {
+public class ParentUpdateDto {
     private String firstName;
     private String lastName;
     private String phone;
-    private String email;
     private String occupation;
+    private String email;
     private Relation relation;
 
     public String getFirstName() {
@@ -44,20 +34,20 @@ public class ParentResponseDto extends BaseDTO {
         this.phone = phone;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getOccupation() {
         return occupation;
     }
 
     public void setOccupation(String occupation) {
         this.occupation = occupation;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Relation getRelation() {

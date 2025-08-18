@@ -20,5 +20,19 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     @Query("SELECT t FROM Teacher t WHERE LOWER(t.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Teacher> searchByName(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("""
+        SELECT t
+        FROM Teacher t
+        WHERE NOT EXISTS (
+            SELECT tsa.id
+            FROM TeacherSubjectAssignment tsa
+            WHERE tsa.teacher = t
+              AND tsa.sectionSubjectAssignment.id = :sectionSubjectAssignmentId
+        )
+    """)
+    Page<Teacher> findTeachersWithoutAssignment(@Param("sectionSubjectAssignmentId") Long sectionSubjectAssignmentId, Pageable pageable);
+
     boolean existsByIdAndUser_Id(Long id, Long userId);
+
+    Optional<Teacher> findByUserId(Long recordedByUserId);
 }

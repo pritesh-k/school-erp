@@ -16,16 +16,6 @@ public class StudentResponseDto extends BaseDTO {
     private String lastName;
     private Gender gender;
     private LocalDate dob;
-    private Parent parents;
-
-    public Parent getParents() {
-        return parents;
-    }
-
-    public void setParents(Parent parents) {
-        this.parents = parents;
-    }
-
     public String getAdmissionNumber() {
         return admissionNumber;
     }

@@ -101,6 +101,9 @@ public class AuthServiceImpl implements AuthService {
             userTypeInfo.setUserType(user.getRole());
             userTypeInfo.setEntityId(user.getEntityId());
             userTypeInfo.setDisplayName(user.getDisplayName());
+            Optional<AcademicSession> academicSession = academicSessionRepository.findByIsCurrentTrue();
+
+            academicSession.ifPresent(session -> userTypeInfo.setAcademicSession(session.getName()));
 
 //            Optional<AcademicSession> academicSession = academicSessionRepository.findByIsCurrentTrue();
 //            if (academicSession.isPresent()){

@@ -1,5 +1,6 @@
 package com.schoolerp.dto.request;
 
+import com.schoolerp.dto.BaseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -7,22 +8,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentEnrollmentDTO {
-    private Long id;
+public class StudentEnrollmentDTO extends BaseDTO {
     private Long studentId;
     private Long schoolClassId;
     private Long sectionId;
     private Long academicSessionId;
-    private String rollNumber;
-    private boolean active;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Long getStudentId() {
         return studentId;
@@ -54,22 +44,6 @@ public class StudentEnrollmentDTO {
 
     public void setAcademicSessionId(Long academicSessionId) {
         this.academicSessionId = academicSessionId;
-    }
-
-    public String getRollNumber() {
-        return rollNumber;
-    }
-
-    public void setRollNumber(String rollNumber) {
-        this.rollNumber = rollNumber;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 }
 

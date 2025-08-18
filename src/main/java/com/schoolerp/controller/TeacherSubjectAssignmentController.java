@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,8 +42,11 @@ public class TeacherSubjectAssignmentController {
             @PathVariable Long teacherId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(10) int size) {
-        requestContextService.getCurrentUserContext();
-        return ApiResponse.paged(service.listByTeacher(teacherId, PageRequest.of(page, size)));
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        String academicSession = userTypeInfo.getAcademicSession();
+        Page<TeacherSubjectAssignmentResponseDto> result =
+                service.listByTeacher(teacherId, PageRequest.of(page, size), academicSession);
+        return ApiResponse.paged(result);
     }
 
     @GetMapping("/{sectionSubjectAssignmentId}")

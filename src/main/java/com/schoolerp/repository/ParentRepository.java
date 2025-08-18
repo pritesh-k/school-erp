@@ -7,7 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface ParentRepository extends JpaRepository<Parent, Long> {
     Page<Parent> findByFirstNameContainingIgnoreCase(String keyword, Pageable pageable);
+
+    boolean existsByPhone(String phone);
+
+    Optional<Parent> findByPhone(String phone);
+
+    Optional<Parent> findByPhoneOrEmail(String phone, String email);
 }

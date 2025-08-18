@@ -29,6 +29,4 @@ public interface SectionMapper {
     static String mapSchoolClassName(SchoolClass schoolClass) {
         return (schoolClass == null || schoolClass.getName() == null) ? null : schoolClass.getName().name();
     }
-    List<SectionSummaryDto> toSectionSummaryDtos(List<Section> sections);
-
 }

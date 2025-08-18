@@ -31,6 +31,12 @@ public class Parent extends BaseEntity {
     @OneToMany(mappedBy = "parent")
     private Set<Student> students = new HashSet<>();
 
+    public void addStudent(Student student) {
+        this.students.add(student);
+        student.setParent(this);
+    }
+
+
     public User getUser() {
         return user;
     }

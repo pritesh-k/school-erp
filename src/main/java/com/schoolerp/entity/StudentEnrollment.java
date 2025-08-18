@@ -22,8 +22,6 @@ public class StudentEnrollment extends BaseEntity {
     @JoinColumn(name = "academic_session_id", nullable = false)
     private AcademicSession academicSession;
 
-    private String rollNumber;
-
     private boolean active; // To indicate current enrollment status
 
     public Student getStudent() {
@@ -56,14 +54,6 @@ public class StudentEnrollment extends BaseEntity {
 
     public void setAcademicSession(AcademicSession academicSession) {
         this.academicSession = academicSession;
-    }
-
-    public String getRollNumber() {
-        return rollNumber;
-    }
-
-    public void setRollNumber(String rollNumber) {
-        this.rollNumber = rollNumber;
     }
 
     @Override

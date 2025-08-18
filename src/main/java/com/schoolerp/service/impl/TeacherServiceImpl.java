@@ -3,27 +3,21 @@ package com.schoolerp.service.impl;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.request.TeacherCreateDto;
 import com.schoolerp.dto.request.TeacherUpdateDto;
+import com.schoolerp.dto.response.TeacherDetailsResponseDto;
 import com.schoolerp.dto.response.TeacherResponseDto;
-import com.schoolerp.dto.response.TeachersAssignedDto;
-import com.schoolerp.entity.Section;
 import com.schoolerp.entity.Teacher;
 import com.schoolerp.entity.User;
 import com.schoolerp.enums.Role;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.TeacherMapper;
-import com.schoolerp.repository.SectionRepository;
-import com.schoolerp.repository.SubjectRepository;
 import com.schoolerp.repository.TeacherRepository;
 import com.schoolerp.repository.UserRepository;
 import com.schoolerp.service.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +26,8 @@ public class TeacherServiceImpl implements TeacherService {
     private final TeacherRepository teacherRepo;
     private final UserRepository userRepo;
     private final TeacherMapper mapper;
-    private final SectionRepository sectionRepo;
 
     private final AuthServiceImpl authService;
-    private final SubjectRepository subjectRepository;
 
 
     @Override
@@ -86,12 +78,17 @@ public class TeacherServiceImpl implements TeacherService {
     public TeacherResponseDto getByTeacherId(Long id) {
         return mapper.toDto(teacherRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Teacher not found")));
     }
-
     @Override
     public Page<TeacherResponseDto> list(Pageable pageable) {
         return teacherRepo.findAll(pageable).map(mapper::toDto);
     }
-
+    public Page<TeacherResponseDto> getTeachersWithoutAssignment(Long sectionSubjectAssignmentId, Pageable pageable) {
+        if (sectionSubjectAssignmentId == null) {
+            throw new IllegalArgumentException("Assignment ID cannot be null");
+        }
+        Page<Teacher> teachers = teacherRepo.findTeachersWithoutAssignment(sectionSubjectAssignmentId, pageable);
+        return teachers.map(mapper::toDto);
+    }
     @Override
     @Transactional
     public TeacherResponseDto update(Long teacherId, TeacherUpdateDto dto, Long userId) {

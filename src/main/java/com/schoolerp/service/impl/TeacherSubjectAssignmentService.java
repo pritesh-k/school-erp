@@ -61,8 +61,9 @@ public class TeacherSubjectAssignmentService {
         repo.save(assignment);
     }
 
-    public Page<TeacherSubjectAssignmentResponseDto> listByTeacher(Long teacherId, Pageable pageable) {
-        return repo.findByTeacher_Id(teacherId, pageable).map(mapper::toDto);
+    public Page<TeacherSubjectAssignmentResponseDto> listByTeacher(Long teacherId, Pageable pageable, String academicSession) {
+        Page<TeacherSubjectAssignment> page =  repo.findByTeacher_Id(teacherId, pageable);
+        return page.map(mapper::toDto);
     }
     public Page<TeacherSubjectAssignmentResponseDto> listBySectionSubjectAssignmentId
             (Long sectionSubjectAssignmentId, Pageable pageable) {

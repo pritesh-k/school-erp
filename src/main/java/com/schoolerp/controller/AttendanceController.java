@@ -57,7 +57,7 @@ public class AttendanceController {
     }
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{attendanceId}")
-    public ApiResponse<Void> delete(@PathVariable Long attendanceId, HttpServletRequest request) {
+    public ApiResponse<Void> delete(@PathVariable Long attendanceId) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
 
         Long userId = userTypeInfo.getUserId();

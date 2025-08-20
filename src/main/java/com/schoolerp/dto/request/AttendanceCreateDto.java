@@ -16,12 +16,8 @@ public class AttendanceCreateDto {
     private Long sectionId;
     @NotNull(message = "Date is required")
     private LocalDate date;
-
     @NotNull(message = "Status is required")
     private AttendanceStatus status;
-
-    @Size(max = 200, message = "Remarks cannot exceed 200 characters")
-    private String remarks;
 
     public Long getClassId() {
         return classId;
@@ -62,13 +58,4 @@ public class AttendanceCreateDto {
     public void setStatus(AttendanceStatus status) {
         this.status = status;
     }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
-    }
-
 }

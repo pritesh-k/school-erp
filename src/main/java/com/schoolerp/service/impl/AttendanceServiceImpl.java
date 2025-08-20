@@ -76,7 +76,6 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .studentEnrollment(studentEnrollment)
                     .date(dto.getDate())
                     .status(dto.getStatus())
-                    .remarks(dto.getRemarks() != null ? dto.getRemarks() : "Marked for " + dto.getDate())
                     .recordedBy(teacher)
                     .build();
 
@@ -120,10 +119,6 @@ public class AttendanceServiceImpl implements AttendanceService {
             hasChanges = true;
         }
 
-        if (dto.getRemarks() != null && !dto.getRemarks().isEmpty()) {
-            attendance.setRemarks(dto.getRemarks());
-            hasChanges = true;
-        }
         if (hasChanges){
             attendance.setUpdatedAt(java.time.Instant.now());
             attendance.setUpdatedBy(userId);
@@ -238,7 +233,6 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .studentEnrollment(se)
                     .date(date)
                     .status(req.getStatus())
-                    .remarks(req.getRemarks())
                     .recordedBy(maybeTeacher.orElse(null))
                     .build();
 
@@ -265,7 +259,6 @@ public class AttendanceServiceImpl implements AttendanceService {
                         .studentEnrollment(se)
                         .date(date)
                         .status(req.getStatus())
-                        .remarks(req.getRemarks())
                         .recordedBy(maybeTeacher.orElse(null))
                         .build();
                 toSave.add(a);

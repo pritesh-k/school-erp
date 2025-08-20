@@ -14,7 +14,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface SectionMapper {
 
-    SectionResponseDto toDto(Section entity);
+    @Mapping(target = "className", source = "schoolClass", qualifiedByName = "schoolClassNameToString")
+    SectionResponseDto toDto(Section section);
 
     @Mapping(target = "sectionName", source = "name", qualifiedByName = "sectionNameToString")
     @Mapping(target = "className", source = "schoolClass", qualifiedByName = "schoolClassNameToString")

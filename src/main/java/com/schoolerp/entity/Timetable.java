@@ -22,21 +22,9 @@ public class Timetable extends BaseEntity {
     @Column(nullable = false)
     private TimetableType type;
 
-    // Which class is this scheduled for?
+    // Which class,section,subject is this scheduled for?
     @ManyToOne(fetch = FetchType.LAZY)
-    private SchoolClass schoolClass;
-
-    // Specific section, if relevant
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Section section;
-
-    // Which subject is being scheduled
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Subject subject;
-
-    // If this is a regular teaching period, assign a teacher
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Teacher teacher;
+    private SectionSubjectAssignment sectionSubjectAssignment;
 
     // If this event is an exam slot, link to the exam
     @ManyToOne(fetch = FetchType.LAZY)
@@ -64,38 +52,6 @@ public class Timetable extends BaseEntity {
 
     public void setType(TimetableType type) {
         this.type = type;
-    }
-
-    public SchoolClass getSchoolClass() {
-        return schoolClass;
-    }
-
-    public void setSchoolClass(SchoolClass schoolClass) {
-        this.schoolClass = schoolClass;
-    }
-
-    public Section getSection() {
-        return section;
-    }
-
-    public void setSection(Section section) {
-        this.section = section;
-    }
-
-    public Subject getSubject() {
-        return subject;
-    }
-
-    public void setSubject(Subject subject) {
-        this.subject = subject;
-    }
-
-    public Teacher getTeacher() {
-        return teacher;
-    }
-
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
     }
 
     public Exam getExam() {

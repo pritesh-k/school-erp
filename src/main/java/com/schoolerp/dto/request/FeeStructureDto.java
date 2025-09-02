@@ -6,9 +6,16 @@ import java.util.List;
 
 @Data
 public class FeeStructureDto {
+    private String name;
     public Long sessionId;
     public Long schoolClassId;
     public List<FeeItem> items; // headId, amount
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Long getSessionId() {
         return sessionId;

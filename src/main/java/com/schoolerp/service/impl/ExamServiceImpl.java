@@ -1,12 +1,16 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.ExamCreateDto;
+import com.schoolerp.dto.request.ExamUpdateDto;
 import com.schoolerp.dto.response.ExamResponseDto;
+import com.schoolerp.entity.AcademicSession;
 import com.schoolerp.entity.Exam;
 import com.schoolerp.entity.SchoolClass;
 import com.schoolerp.entity.Subject;
+import com.schoolerp.enums.ExamStatus;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.ExamMapper;
+import com.schoolerp.repository.AcademicSessionRepository;
 import com.schoolerp.repository.ExamRepository;
 import com.schoolerp.repository.SchoolClassRepository;
 import com.schoolerp.repository.SubjectRepository;
@@ -32,32 +36,32 @@ public class ExamServiceImpl implements ExamService {
 
     private final ExamRepository repo;
     private final ExamMapper mapper;
-    private final SchoolClassRepository classRepo;
     private final SubjectRepository subjectRepo;
+
+    private final AcademicSessionRepository academicSessionRepository;
 
     @Override
     @Transactional
-    public ExamResponseDto create(ExamCreateDto dto, Long userId, Long entityId, String role) {
-        log.info("Creating exam: {} for class ID: {}", dto.getName(), dto.getSchoolClassId());
-
-        // Validate input
+    public ExamResponseDto create(ExamCreateDto dto, Long userId, Long entityId, String role, String academicSession) {
         validateExamInput(dto);
 
-        // Validate and fetch school class
-        SchoolClass schoolClass = validateAndGetSchoolClass(dto.getSchoolClassId());
+        AcademicSession academicSession1 = academicSessionRepository.findByName(academicSession)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic session not found: " + academicSession));
 
-        // Validate and fetch subjects
-        Set<Subject> subjects = validateAndGetSubjects(dto.getSubjectIds(), schoolClass);
-
-        // Check for existing exam conflicts
-        validateExamConflicts(dto, schoolClass.getId());
-
-        // Create exam
-        Exam exam = createExam(dto, schoolClass, subjects, userId, entityId, role);
+        Exam exam = Exam.builder()
+                .name(dto.getName())
+                .term(dto.getTerm())
+                .startDate(dto.getStartDate())
+                .endDate(dto.getEndDate())
+                .academicSession(academicSession1)
+                .status(ExamStatus.DRAFT)
+                .build();
+        exam.setActive(true);
+        exam.setDeleted(false);
+        exam.setCreatedAt(java.time.Instant.now());
+        exam.setCreatedBy(userId);
 
         Exam savedExam = repo.save(exam);
-        log.info("Exam created successfully with ID: {} for class: {}",
-                savedExam.getId(), schoolClass.getName());
 
         return mapper.toDto(savedExam);
     }
@@ -65,26 +69,80 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public ExamResponseDto get(Long id, Long userId, Long entityId, String role) {
-        return mapper.toDto(repo.findById(id).orElseThrow());
+        Exam exam = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Exam not found with id: " + id));
+        return mapper.toDto(exam);
     }
 
     @Override
-    public Page<ExamResponseDto> list(Pageable pageable, Long userId, Long entityId, String role) {
-        return repo.findAll(pageable).map(mapper::toDto);
+    public Page<ExamResponseDto> list(Pageable pageable, Long userId, Long entityId, String academicSession) {
+        AcademicSession academicSession1 = academicSessionRepository.findByName(academicSession)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic session not found: " + academicSession));
+
+        Page<Exam> examsPage = repo.findByAcademicSession_Id(academicSession1.getId(), pageable);
+        return examsPage.map(mapper::toDto);
     }
 
     @Override
     @Transactional
-    public ExamResponseDto update(Long id, ExamCreateDto dto, Long userId, Long entityId, String role) {
-        Exam e = repo.findById(id).orElseThrow();
-        e.setName(dto.getName());
-        e.setTerm(dto.getTerm());
-        e.setStartDate(dto.getStartDate());
-        e.setEndDate(dto.getEndDate());
-        e.setSchoolClass(classRepo.getReferenceById(dto.getSchoolClassId()));
+    public ExamResponseDto update(Long id, ExamUpdateDto dto, Long userId, Long entityId, String role) {
+        Exam e = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exam with id " + id + " not found"));
+        boolean hasChanges = false;
+        // Update name
+        if (dto.getName() != null && !dto.getName().isBlank() && !dto.getName().equals(e.getName())) {
+            e.setName(dto.getName().trim());
+            hasChanges = true;
+        }
+
+        // Update term
+        if (dto.getTerm() != null && !dto.getTerm().equals(e.getTerm())) {
+            e.setTerm(dto.getTerm());
+            hasChanges = true;
+        }
+
+        // Update dates with validation
+        if (dto.getStartDate() != null) {
+            if (dto.getEndDate() != null && dto.getStartDate().isAfter(dto.getEndDate())) {
+                throw new IllegalArgumentException("Start date cannot be after end date");
+            }
+            if (dto.getStartDate().isBefore(LocalDate.now())) {
+                throw new IllegalArgumentException("Start date cannot be in the past");
+            }
+            e.setStartDate(dto.getStartDate());
+            hasChanges = true;
+        }
+
+        if (dto.getEndDate() != null) {
+            if (e.getStartDate() != null && dto.getEndDate().isBefore(e.getStartDate())) {
+                throw new IllegalArgumentException("End date cannot be before start date");
+            }
+            e.setEndDate(dto.getEndDate());
+            hasChanges = true;
+        }
+
+        if (hasChanges){
+            e.setUpdatedAt(java.time.Instant.now());
+            e.setUpdatedBy(userId);
+        } else {
+            // No changes to save
+            return mapper.toDto(e);
+        }
         return mapper.toDto(repo.save(e));
     }
 
+    @Override
+    @Transactional
+    public ExamResponseDto publishExam(Long id, Long publishedById){
+        Exam e = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exam with id " + id + " not found"));
+        if (e.getStatus() == ExamStatus.PUBLISHED) {
+            throw new IllegalArgumentException("Exam with id " + id + " is already published");
+        }
+        e.setStatus(ExamStatus.PUBLISHED);
+        e.setPublishedBy(publishedById);
+        Exam saved = repo.save(e);
+        return mapper.toDto(saved);
+    }
     @Override
     @Transactional
     public void delete(Long id, Long userId, Long entityId, String role) {
@@ -113,84 +171,5 @@ public class ExamServiceImpl implements ExamService {
         if (daysBetween > 30) {
             throw new IllegalArgumentException("Exam duration cannot exceed 30 days");
         }
-
-        // Validate subject count
-        if (dto.getSubjectIds().size() > 20) {
-            throw new IllegalArgumentException("Cannot have more than 20 subjects in an exam");
-        }
     }
-
-    private SchoolClass validateAndGetSchoolClass(Long schoolClassId) {
-        return classRepo.findById(schoolClassId)
-                .orElseThrow(() -> new ResourceNotFoundException("School class not found with ID: " + schoolClassId));
-    }
-
-    private Set<Subject> validateAndGetSubjects(Set<Long> subjectIds, SchoolClass schoolClass) {
-        // Fetch all subjects at once
-        List<Subject> subjects = subjectRepo.findAllById(subjectIds);
-
-        // Check if all subjects exist
-        if (subjects.size() != subjectIds.size()) {
-            Set<Long> foundIds = subjects.stream().map(Subject::getId).collect(Collectors.toSet());
-            Set<Long> missingIds = subjectIds.stream()
-                    .filter(id -> !foundIds.contains(id))
-                    .collect(Collectors.toSet());
-
-            throw new ResourceNotFoundException("Subjects not found with IDs: " + missingIds);
-        }
-
-        // Validate subjects belong to the same class (if needed)
-        // Uncomment if subjects are class-specific
-    /*
-    List<Subject> invalidSubjects = subjects.stream()
-        .filter(subject -> !subject.getSchoolClasses().contains(schoolClass))
-        .collect(Collectors.toList());
-
-    if (!invalidSubjects.isEmpty()) {
-        throw new IllegalArgumentException("Some subjects don't belong to the specified class: " +
-            invalidSubjects.stream().map(Subject::getName).collect(Collectors.joining(", ")));
-    }
-    */
-
-        return new HashSet<>(subjects);
-    }
-
-    private void validateExamConflicts(ExamCreateDto dto, Long schoolClassId) {
-        // Check for overlapping exams in the same class
-        List<Exam> conflictingExams = repo.findBySchoolClassIdAndDateRange(
-                schoolClassId, dto.getStartDate(), dto.getEndDate());
-
-        if (!conflictingExams.isEmpty()) {
-            String conflictNames = conflictingExams.stream()
-                    .map(Exam::getName)
-                    .collect(Collectors.joining(", "));
-
-            throw new IllegalArgumentException(
-                    "Exam dates conflict with existing exams: " + conflictNames);
-        }
-
-        // Check for same term exam in the class
-        if (repo.existsBySchoolClassIdAndTermAndNameNot(schoolClassId, dto.getTerm(), dto.getName())) {
-            throw new IllegalArgumentException(
-                    "An exam for term " + dto.getTerm() + " already exists in this class");
-        }
-    }
-
-    private Exam createExam(ExamCreateDto dto, SchoolClass schoolClass, Set<Subject> subjects, Long userId, Long entityId, String role) {
-        Exam exam = Exam.builder()
-                .name(dto.getName())
-                .term(dto.getTerm())
-                .startDate(dto.getStartDate())
-                .endDate(dto.getEndDate())
-                .schoolClass(schoolClass)
-                .subjects(subjects)
-                .examResults(new HashSet<>())
-                .build();
-        exam.setActive(true);  // Set via setter
-        exam.setDeleted(false);
-        exam.setCreatedAt(java.time.Instant.now());
-        exam.setCreatedBy(userId);
-        return exam;
-    }
-
 }

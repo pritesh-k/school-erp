@@ -1,7 +1,7 @@
 package com.schoolerp.dto.response;
 import com.schoolerp.dto.BaseDTO;
 import com.schoolerp.entity.Student;
-import com.schoolerp.enums.FeeStatus;
+import com.schoolerp.enums.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,7 +11,7 @@ public class FeeRecordResponseDto extends BaseDTO {
     private LocalDate dueDate;
     private LocalDate paidDate;
 
-    private FeeStatus status;
+    private PaymentStatus status;
 
     private String receiptNo;
     private String receiptUrl;
@@ -48,11 +48,11 @@ public class FeeRecordResponseDto extends BaseDTO {
         this.paidDate = paidDate;
     }
 
-    public FeeStatus getStatus() {
+    public PaymentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(FeeStatus status) {
+    public void setStatus(PaymentStatus status) {
         this.status = status;
     }
 

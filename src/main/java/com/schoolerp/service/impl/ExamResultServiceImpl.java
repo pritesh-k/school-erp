@@ -26,12 +26,8 @@ public class ExamResultServiceImpl implements ExamResultService {
     @Override
     @Transactional
     public ExamResultResponseDto create(ExamResultCreateDto dto) {
-        ExamResult er = ExamResult.builder()
-                .exam(examRepo.getReferenceById(dto.examId()))
-                .subject(subjectRepo.getReferenceById(dto.subjectId()))
-                .score(dto.score())
-                .build();
-        return mapper.toDto(repo.save(er));
+        ExamResult result = mapper.toEntity(dto);
+        return mapper.toDto(repo.save(result));
     }
 
     @Override
@@ -47,11 +43,10 @@ public class ExamResultServiceImpl implements ExamResultService {
     @Override
     @Transactional
     public ExamResultResponseDto update(Long id, ExamResultCreateDto dto) {
-        ExamResult er = repo.findById(id).orElseThrow();
-        er.setExam(examRepo.getReferenceById(dto.examId()));
-        er.setSubject(subjectRepo.getReferenceById(dto.subjectId()));
-        er.setScore(dto.score());
-        return mapper.toDto(repo.save(er));
+        ExamResult result = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ExamResult not found"));
+        result.setScore(dto.getScore());
+        return mapper.toDto(repo.save(result));
     }
 
     @Override

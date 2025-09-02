@@ -15,7 +15,4 @@ import java.util.Optional;
 
 @Repository
 public interface ExamResultRepository extends JpaRepository<ExamResult, Long> {
-
-    // Get results by student
-
 }

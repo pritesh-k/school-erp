@@ -1,5 +1,5 @@
 package com.schoolerp.enums;
-public enum FeeStatus {
+public enum PaymentStatus {
     DUE,
     PAID,
     OVERDUE,

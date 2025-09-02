@@ -1,12 +1,12 @@
 package com.schoolerp.controller;
 
 import com.schoolerp.dto.request.ExamCreateDto;
+import com.schoolerp.dto.request.ExamUpdateDto;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.ExamResponseDto;
 import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.service.ExamService;
 import com.schoolerp.service.RequestContextService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,47 +30,52 @@ public class ExamController {
 
     @PostMapping
     public ApiResponse<ExamResponseDto> create(@RequestBody ExamCreateDto dto) {
-
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
+        String academicSession = userTypeInfo.getAcademicSession();
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
         String role = userTypeInfo.getUserType().name();
-        return ApiResponse.ok(service.create(dto, userId, entityId, role));
+        ExamResponseDto result = service.create(dto, userId, entityId, role, academicSession);
+        return ApiResponse.ok(result);
     }
 
     @GetMapping
     public ApiResponse<List<ExamResponseDto>> list(
             @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
-            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size, HttpServletRequest request) {
-
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) int size) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
-
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
-        String role = userTypeInfo.getUserType().name();
-        return ApiResponse.paged(service.list(pageable, userId, entityId, role));
+        String academicSession = userTypeInfo.getAcademicSession();
+        Page<ExamResponseDto> exams = service.list(pageable, userId, entityId, academicSession);
+        return ApiResponse.paged(exams);
     }
 
     @PutMapping("/{examId}")
     public ApiResponse<ExamResponseDto> update(
             @PathVariable Long examId,
-            @RequestBody ExamCreateDto dto) {
-
+            @RequestBody ExamUpdateDto dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
         String role = userTypeInfo.getUserType().name();
-        return ApiResponse.ok(service.update(examId, dto, userId, entityId, role));
+        ExamResponseDto updatedExam = service.update(examId, dto, userId, entityId, role);
+        return ApiResponse.ok(updatedExam);
+    }
+
+    @PutMapping("/{examId}/publish")
+    public ApiResponse<ExamResponseDto> publishExam(
+            @PathVariable Long examId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Long userId = userTypeInfo.getUserId();
+        ExamResponseDto updatedExam = service.publishExam(examId, userId);
+        return ApiResponse.ok(updatedExam);
     }
 
     @GetMapping("/{examId}")
     public ApiResponse<ExamResponseDto> get(@PathVariable Long examId) {
-
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
         String role = userTypeInfo.getUserType().name();
@@ -80,9 +84,7 @@ public class ExamController {
 
     @DeleteMapping("/{examId}")
     public ApiResponse<String> delete(@PathVariable Long examId) {
-
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-
         Long userId = userTypeInfo.getUserId();
         Long entityId = userTypeInfo.getEntityId();
         String role = userTypeInfo.getUserType().name();

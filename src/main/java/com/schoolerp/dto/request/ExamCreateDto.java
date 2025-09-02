@@ -10,13 +10,14 @@ import java.util.Set;
 
 
 public class ExamCreateDto{
-    @NotBlank @NotNull String name;
-    @NotNull @NotBlank Term term;
-    @NotNull @NotBlank LocalDate startDate;
-    @NotNull @NotBlank LocalDate endDate;
-    @NotNull @NotBlank Long schoolClassId;
-    @NotEmpty Set<@NotNull Long> subjectIds;
-
+    @NotBlank private String name;
+    @NotNull private Term term;
+    @NotNull private LocalDate startDate;
+    @NotNull private LocalDate endDate;
+    @AssertTrue(message = "End date must not be before start date")
+    public boolean isValidDates() {
+        return startDate != null && endDate != null && !endDate.isBefore(startDate);
+    }
     public String getName() {
         return name;
     }
@@ -47,21 +48,5 @@ public class ExamCreateDto{
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-
-    public Long getSchoolClassId() {
-        return schoolClassId;
-    }
-
-    public void setSchoolClassId(Long schoolClassId) {
-        this.schoolClassId = schoolClassId;
-    }
-
-    public Set<Long> getSubjectIds() {
-        return subjectIds;
-    }
-
-    public void setSubjectIds(Set<Long> subjectIds) {
-        this.subjectIds = subjectIds;
     }
 }

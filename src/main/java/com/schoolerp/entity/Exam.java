@@ -1,37 +1,50 @@
 package com.schoolerp.entity;
 
+import com.schoolerp.enums.ExamStatus;
 import com.schoolerp.enums.Term;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Table(name = "exams")
 @NoArgsConstructor @AllArgsConstructor @Builder
+@Entity
+@Table(name = "exams",
+        indexes = {
+                @Index(name = "idx_exam_session", columnList = "academic_session_id"),
+                @Index(name = "idx_exam_status", columnList = "status")
+        })
 public class Exam extends BaseEntity {
+
+    @Column(nullable = false, length = 120)
     private String name;
-    @Enumerated(EnumType.STRING)
+
+    @Enumerated(EnumType.STRING) @Column(nullable = false)
     private Term term;
-    private LocalDate startDate;
-    private LocalDate endDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private SchoolClass schoolClass;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "academic_session_id", nullable = false)
     private AcademicSession academicSession;
 
-    @ManyToMany
-    @JoinTable(name = "exam_subject",
-            joinColumns = @JoinColumn(name = "exam_id"),
-            inverseJoinColumns = @JoinColumn(name = "subject_id"))
-    private Set<Subject> subjects = new HashSet<>();
+    @Column(nullable = false)
+    private LocalDate startDate;
 
-    @OneToMany(mappedBy = "exam")
-    private Set<ExamResult> examResults = new HashSet<>();
+    @Column(nullable = false)
+    private LocalDate endDate;
+
+    @Enumerated(EnumType.STRING) @Column(nullable = false)
+    private ExamStatus status; // DRAFT, PUBLISHED, ARCHIVED
+
+    private Long publishedBy;
+
+    @PrePersist @PreUpdate
+    private void validateWindow() {
+        if (endDate.isBefore(startDate)) throw new IllegalArgumentException("End date before start date");
+    }
 
     public String getName() {
         return name;
@@ -47,6 +60,14 @@ public class Exam extends BaseEntity {
 
     public void setTerm(Term term) {
         this.term = term;
+    }
+
+    public AcademicSession getAcademicSession() {
+        return academicSession;
+    }
+
+    public void setAcademicSession(AcademicSession academicSession) {
+        this.academicSession = academicSession;
     }
 
     public LocalDate getStartDate() {
@@ -65,27 +86,19 @@ public class Exam extends BaseEntity {
         this.endDate = endDate;
     }
 
-    public SchoolClass getSchoolClass() {
-        return schoolClass;
+    public ExamStatus getStatus() {
+        return status;
     }
 
-    public void setSchoolClass(SchoolClass schoolClass) {
-        this.schoolClass = schoolClass;
+    public void setStatus(ExamStatus status) {
+        this.status = status;
     }
 
-    public Set<Subject> getSubjects() {
-        return subjects;
+    public Long getPublishedBy() {
+        return publishedBy;
     }
 
-    public void setSubjects(Set<Subject> subjects) {
-        this.subjects = subjects;
-    }
-
-    public Set<ExamResult> getExamResults() {
-        return examResults;
-    }
-
-    public void setExamResults(Set<ExamResult> examResults) {
-        this.examResults = examResults;
+    public void setPublishedBy(Long publishedBy) {
+        this.publishedBy = publishedBy;
     }
 }

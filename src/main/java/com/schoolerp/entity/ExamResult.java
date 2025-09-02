@@ -7,29 +7,28 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "exam_results")
+@Table(name = "exam_results",
+        uniqueConstraints = @UniqueConstraint(name="uk_result_student_slot",
+                columnNames={"student_enrollment_id","exam_slot_id"}))
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class ExamResult extends BaseEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_enrollment_id", nullable = false)
     private StudentEnrollment studentEnrollment;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Exam exam;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private AcademicSession academicSession;
+    @JoinColumn(name = "exam_slot_id", nullable = false)
+    private ExamSlot examSlot;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Subject subject;
-
+    @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal score; // marks obtained
-
-    private BigDecimal totalMarks; // total possible marks for this subject
 
     private String grade;
 
     @Enumerated(EnumType.STRING)
-    private ResultStatus status;
+    @Column(nullable = false)
+    private ResultStatus status; // e.g., PASSED, FAILED, ABSENT
 
     public StudentEnrollment getStudentEnrollment() {
         return studentEnrollment;
@@ -39,28 +38,12 @@ public class ExamResult extends BaseEntity {
         this.studentEnrollment = studentEnrollment;
     }
 
-    public AcademicSession getAcademicSession() {
-        return academicSession;
+    public ExamSlot getExamSlot() {
+        return examSlot;
     }
 
-    public void setAcademicSession(AcademicSession academicSession) {
-        this.academicSession = academicSession;
-    }
-
-    public Exam getExam() {
-        return exam;
-    }
-
-    public void setExam(Exam exam) {
-        this.exam = exam;
-    }
-
-    public Subject getSubject() {
-        return subject;
-    }
-
-    public void setSubject(Subject subject) {
-        this.subject = subject;
+    public void setExamSlot(ExamSlot examSlot) {
+        this.examSlot = examSlot;
     }
 
     public BigDecimal getScore() {
@@ -69,14 +52,6 @@ public class ExamResult extends BaseEntity {
 
     public void setScore(BigDecimal score) {
         this.score = score;
-    }
-
-    public BigDecimal getTotalMarks() {
-        return totalMarks;
-    }
-
-    public void setTotalMarks(BigDecimal totalMarks) {
-        this.totalMarks = totalMarks;
     }
 
     public String getGrade() {

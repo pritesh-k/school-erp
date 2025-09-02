@@ -3,6 +3,7 @@ import com.schoolerp.dto.BaseDTO;
 import com.schoolerp.entity.SchoolClass;
 import com.schoolerp.entity.ExamResult;
 import com.schoolerp.entity.Subject;
+import com.schoolerp.enums.ExamStatus;
 import com.schoolerp.enums.Term;
 
 import java.time.LocalDate;
@@ -14,9 +15,16 @@ public class ExamResponseDto extends BaseDTO {
     private Term term;
     private LocalDate startDate;
     private LocalDate endDate;
-    private SchoolClass schoolClass;
-    private Set<Subject> subjects = new HashSet<>();
-    private Set<ExamResult> examResults = new HashSet<>();
+
+    private ExamStatus status;
+
+    public ExamStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ExamStatus status) {
+        this.status = status;
+    }
 
     public String getName() {
         return name;
@@ -48,29 +56,5 @@ public class ExamResponseDto extends BaseDTO {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-
-    public SchoolClass getSchoolClass() {
-        return schoolClass;
-    }
-
-    public void setSchoolClass(SchoolClass schoolClass) {
-        this.schoolClass = schoolClass;
-    }
-
-    public Set<Subject> getSubjects() {
-        return subjects;
-    }
-
-    public void setSubjects(Set<Subject> subjects) {
-        this.subjects = subjects;
-    }
-
-    public Set<ExamResult> getExamResults() {
-        return examResults;
-    }
-
-    public void setExamResults(Set<ExamResult> examResults) {
-        this.examResults = examResults;
     }
 }

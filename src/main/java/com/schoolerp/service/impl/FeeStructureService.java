@@ -1,56 +1,77 @@
-package com.schoolerp.service.impl;
-
-import com.schoolerp.dto.request.FeeItem;
-import com.schoolerp.dto.request.FeeStructureDto;
-import com.schoolerp.entity.*;
-import com.schoolerp.repository.AcademicSessionRepository;
-import com.schoolerp.repository.FeeHeadRepository;
-import com.schoolerp.repository.FeeStructureRepository;
-import com.schoolerp.repository.SchoolClassRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-@Service
-public class FeeStructureService {
-    @Autowired private FeeStructureRepository repo;
-    @Autowired private SchoolClassRepository classRepo;
-    @Autowired private AcademicSessionRepository sessionRepo;
-    @Autowired private FeeHeadRepository headRepo;
-
-    public FeeStructure create(FeeStructureDto dto) {
-        AcademicSession session = sessionRepo.findById(dto.getSessionId()).orElseThrow();
-        SchoolClass schoolClass = classRepo.findById(dto.getSchoolClassId()).orElseThrow();
-
-        FeeStructure structure = new FeeStructure();
-        structure.setSession(session);
-        structure.setSchoolClass(schoolClass);
-
-        Set<FeeStructureItem> items = new HashSet<>();
-        dto.getItems().forEach(itemDto -> {
-            FeeHead head = headRepo.findById(itemDto.getHeadId()).orElseThrow();
-            FeeStructureItem item = new FeeStructureItem();
-            item.setFeeStructure(structure);
-            item.setFeeHead(head);
-            items.add(item);
-        });
-        structure.setItems(items);
-        return repo.save(structure);
-    }
-    public FeeStructure get(Long id) { return repo.findById(id).orElseThrow(); }
-    public List<FeeStructure> listByClassAndSession(Long classId, Long sessionId) {
-        return repo.findAll((root, query, cb) -> cb.and(
-                cb.equal(root.get("schoolClass").get("id"), classId),
-                cb.equal(root.get("session").get("id"), sessionId)
-        ));
-    }
-    public FeeStructure update(Long id, FeeStructureDto dto) {
-        FeeStructure fs = get(id);
-        // update logic as needed, similar to create
-        return repo.save(fs);
-    }
-    public void delete(Long id) { repo.deleteById(id); }
-}
+//package com.schoolerp.service.impl;
+//
+//import com.schoolerp.dto.request.FeeItem;
+//import com.schoolerp.dto.request.FeeStructureDto;
+//import com.schoolerp.dto.request.FeeStructureItemRequest;
+//import com.schoolerp.dto.request.FeeStructureRequest;
+//import com.schoolerp.dto.response.FeeStructureItemResponse;
+//import com.schoolerp.dto.response.FeeStructureResponse;
+//import com.schoolerp.entity.*;
+//import com.schoolerp.mapper.FeeStructureMapper;
+//import com.schoolerp.repository.AcademicSessionRepository;
+//import com.schoolerp.repository.FeeHeadRepository;
+//import com.schoolerp.repository.FeeStructureRepository;
+//import com.schoolerp.repository.SchoolClassRepository;
+//import jakarta.persistence.EntityNotFoundException;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.data.domain.Page;
+//import org.springframework.data.domain.Pageable;
+//import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//import java.time.Instant;
+//import java.util.HashSet;
+//import java.util.List;
+//import java.util.Set;
+//import java.util.stream.Collectors;
+//
+//@Service
+//@Transactional
+//public class FeeStructureService {
+//
+//    @Autowired
+//    private FeeStructureRepository feeStructureRepository;
+//    @Autowired
+//    private FeeHeadRepository feeHeadRepository;
+//    @Autowired
+//    private AcademicSessionRepository sessionRepository;
+//    @Autowired
+//    private SchoolClassRepository classRepository;
+//    @Autowired
+//    FeeStructureMapper feeStructureMapper;
+//
+//    public FeeStructureResponse create(FeeStructureRequest request, Long createdBy, String academicSessionName) {
+//        AcademicSession academicSession = sessionRepository.findByName(academicSessionName)
+//                .orElseThrow(() -> new EntityNotFoundException("Academic session not found"));
+//        SchoolClass schoolClass = classRepository.findById(request.getClassId())
+//                .orElseThrow(() -> new EntityNotFoundException("Class not found"));
+//
+//        FeeStructure feeStructure = FeeStructure.builder()
+//                .schoolClass(schoolClass)
+//                .name(request.getName())
+//                .build();
+//
+//        feeStructure.setActive(true);
+//        feeStructure.setCreatedAt(Instant.now());
+//        feeStructure.setCreatedBy(createdBy);
+//        feeStructure.setSession(academicSession);
+//
+//        feeStructure = feeStructureRepository.save(feeStructure);
+//
+//        return feeStructureMapper.toResponse(feeStructure);
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public Page<FeeStructureResponse> list(Pageable pageable, Long sessionId, Long classId) {
+//        Page<FeeStructure> structures = feeStructureRepository
+//                .findByIsActiveTrueAndSessionIdAndSchoolClassIdOrderByNameAsc(pageable, sessionId, classId);
+//        return structures.map(feeStructureMapper::toResponse);
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public FeeStructureResponse getById(Long id) {
+//        FeeStructure structure = feeStructureRepository.findById(id)
+//                .orElseThrow(() -> new EntityNotFoundException("FeeStructure not found with id: " + id));
+//        return feeStructureMapper.toResponse(structure);
+//    }
+//}

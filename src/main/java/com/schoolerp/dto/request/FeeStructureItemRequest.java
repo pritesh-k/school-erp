@@ -16,5 +16,28 @@ public class FeeStructureItemRequest {
     private Long feeHeadId;
     private BigDecimal amount;
     private LocalDate dueDate;
-    private Boolean isActive;
+
+    public Long getFeeHeadId() {
+        return feeHeadId;
+    }
+
+    public void setFeeHeadId(Long feeHeadId) {
+        this.feeHeadId = feeHeadId;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
 }

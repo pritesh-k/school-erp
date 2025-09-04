@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +15,10 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Builder
 public class Timetable extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "academic_session_id", nullable = false)
+    private AcademicSession academicSession;
 
     // Type of schedule: PERIOD, EXAM, ACTIVITY, HOLIDAY etc.
     @Enumerated(EnumType.STRING)
@@ -39,6 +42,10 @@ public class Timetable extends BaseEntity {
 
     @Column(nullable = false)
     private LocalTime endTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TimeTableStatus status; // DRAFT, ACTIVE, CANCELLED
 
     // Location, e.g., Room No/Lab (optional)
     private String location;
@@ -100,5 +107,33 @@ public class Timetable extends BaseEntity {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public SectionSubjectAssignment getSectionSubjectAssignment() {
+        return sectionSubjectAssignment;
+    }
+
+    public void setSectionSubjectAssignment(SectionSubjectAssignment sectionSubjectAssignment) {
+        this.sectionSubjectAssignment = sectionSubjectAssignment;
+    }
+
+    public AcademicSession getAcademicSession() {
+        return academicSession;
+    }
+
+    public void setAcademicSession(AcademicSession academicSession) {
+        this.academicSession = academicSession;
+    }
+
+    public TimeTableStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TimeTableStatus status) {
+        this.status = status;
+    }
+
+    public enum TimeTableStatus {
+        DRAFT, ACTIVE, CANCELLED
     }
 }

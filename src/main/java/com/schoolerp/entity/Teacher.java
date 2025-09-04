@@ -15,8 +15,12 @@ import java.util.Set;
         indexes = {
                 @Index(name = "idx_teacher_user_id", columnList = "user_id"),
                 @Index(name = "idx_teacher_email", columnList = "email"),
-})
-@NoArgsConstructor @AllArgsConstructor @Builder
+                @Index(name = "idx_teacher_first_name", columnList = "firstName"),
+                @Index(name = "idx_teacher_last_name", columnList = "lastName")
+        })
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Teacher extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id")

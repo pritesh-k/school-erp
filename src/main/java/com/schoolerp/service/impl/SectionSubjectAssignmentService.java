@@ -6,6 +6,7 @@ import com.schoolerp.entity.AcademicSession;
 import com.schoolerp.entity.Section;
 import com.schoolerp.entity.SectionSubjectAssignment;
 import com.schoolerp.entity.Subject;
+import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.exception.ValidationException;
 import com.schoolerp.mapper.AssignmentMapper;
@@ -13,6 +14,7 @@ import com.schoolerp.repository.AcademicSessionRepository;
 import com.schoolerp.repository.SectionRepository;
 import com.schoolerp.repository.SectionSubjectAssignmentRepository;
 import com.schoolerp.repository.SubjectRepository;
+import com.schoolerp.service.TimetableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,8 +37,11 @@ public class SectionSubjectAssignmentService {
     @Autowired
     AcademicSessionRepository academicSessionRepository;
 
+    @Autowired
+    TimetableService timetableService;
+
     @Transactional
-    public void create(SectionSubjectAssignmentCreateDto dto, Long sectionId, String academicSessionName) {
+    public void create(SectionSubjectAssignmentCreateDto dto, Long sectionId, String academicSessionName, Long userId) {
 
         Optional<AcademicSession> academicSession = academicSessionRepository.findByName(academicSessionName);
         if (academicSession.isEmpty()){
@@ -44,7 +49,7 @@ public class SectionSubjectAssignmentService {
         }
 
         if (repo.findBySection_IdAndSubject_Id(sectionId, dto.getSubjectId()).isPresent()) {
-            throw new ValidationException("This subject is already assigned to the section");
+            throw new DuplicateEntry("This subject is already assigned to the section");
         }
 
         Section section = sectionRepo.findById(sectionId).orElseThrow(() -> new ResourceNotFoundException("Section not found"));
@@ -57,7 +62,11 @@ public class SectionSubjectAssignmentService {
                 .weeklyHours(dto.getWeeklyHours())
                 .academicSession(academicSession.get())
                 .build();
+        assignment.setActive(true);
+        assignment.setDeleted(false);
+        assignment.setCreatedBy(userId);
 
+        timetableService.createTimetableForSubject(userId, assignment.getId());
         repo.save(assignment);
     }
 

@@ -1,10 +1,14 @@
 package com.schoolerp.controller;
 
+import com.schoolerp.dto.request.FeeStructureItemRequest;
 import com.schoolerp.dto.request.FeeStructureRequest;
 import com.schoolerp.dto.response.ApiResponse;
+import com.schoolerp.dto.response.FeeStructureItemResponse;
 import com.schoolerp.dto.response.FeeStructureResponse;
+import com.schoolerp.entity.FeeStructureItem;
 import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.service.RequestContextService;
+import com.schoolerp.service.impl.FeeStructureItemServiceImpl;
 import com.schoolerp.service.impl.FeeStructureService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -21,46 +25,40 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/feeStructure")
+@RequestMapping("/api/v1/feesStructureItem")
 @Validated
 @Slf4j
-public class FeeStructureController {
-
-    @Autowired
-    private FeeStructureService feeStructureService;
-
+public class FeeStructureItemController {
     @Autowired
     private RequestContextService requestContextService;
+    @Autowired
+    private FeeStructureItemServiceImpl feeStructureItemService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/structure")
-    public ApiResponse<FeeStructureResponse> createFeeStructure(@Valid @RequestBody FeeStructureRequest request) {
-        log.info("Creating fee structure: {}", request.getName());
+    @PostMapping("/{id}")
+    public ApiResponse<FeeStructureItemResponse> createFeeStructureItem( @PathVariable Long id,
+            @Valid @RequestBody FeeStructureItemRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long createdBy = userTypeInfo.getUserId();
         String academicSession = userTypeInfo.getAcademicSession();
-        return ApiResponse.ok(feeStructureService.create(request, createdBy, academicSession));
+        return ApiResponse.ok(feeStructureItemService.create(id, request, createdBy));
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
-    @GetMapping("/structure")
-    public ApiResponse<List<FeeStructureResponse>> getAllFeeStructures(
+    @GetMapping
+    public ApiResponse<List<FeeStructureItemResponse>> getAllFeeStructuresItem(
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
             @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size,
-            @RequestParam(required = false) Long sessionId,
-            @RequestParam(required = false) Long classId) {
-        log.info("Fetching fee structures - page: {}, size: {}, sessionId: {}, classId: {}",
-                page, size, sessionId, classId);
+            @RequestParam(required = false) Long feeStructureId) {
+
         Pageable pageable = PageRequest.of(page, size);
-        Page<FeeStructureResponse> results = feeStructureService.list(pageable, sessionId, classId);
+        Page<FeeStructureItemResponse> results = feeStructureItemService.list(pageable, feeStructureId);
         return ApiResponse.paged(results);
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
-    @GetMapping("/structure/{id}")
-    public ApiResponse<FeeStructureResponse> getFeeStructure(@PathVariable Long id) {
-        return ApiResponse.ok(feeStructureService.getById(id));
+    @GetMapping("/{id}")
+    public ApiResponse<FeeStructureItemResponse> getFeeStructureItem(@PathVariable Long id) {
+        return ApiResponse.ok(feeStructureItemService.getById(id));
     }
-
 }
-

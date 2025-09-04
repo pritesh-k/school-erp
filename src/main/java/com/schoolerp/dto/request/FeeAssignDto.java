@@ -1,6 +1,7 @@
 package com.schoolerp.dto.request;
 
 import lombok.Data;
+import lombok.extern.java.Log;
 
 import java.math.BigDecimal;
 
@@ -8,7 +9,18 @@ import java.math.BigDecimal;
 public class FeeAssignDto {
     public Long studentId;
     public Long feeStructureId;
-    public BigDecimal discount;
+    public BigDecimal discountAmount;
+    private String discountReason;
+
+    private Long studentEnrollmentId;
+
+    public Long getStudentEnrollmentId() {
+        return studentEnrollmentId;
+    }
+
+    public void setStudentEnrollmentId(Long studentEnrollmentId) {
+        this.studentEnrollmentId = studentEnrollmentId;
+    }
 
     public Long getStudentId() {
         return studentId;
@@ -26,11 +38,19 @@ public class FeeAssignDto {
         this.feeStructureId = feeStructureId;
     }
 
-    public BigDecimal getDiscount() {
-        return discount;
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
     }
 
-    public void setDiscount(BigDecimal discount) {
-        this.discount = discount;
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public String getDiscountReason() {
+        return discountReason;
+    }
+
+    public void setDiscountReason(String discountReason) {
+        this.discountReason = discountReason;
     }
 }

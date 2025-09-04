@@ -8,6 +8,7 @@ import com.schoolerp.entity.Student;
 import com.schoolerp.utils.BulkImportReport;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -16,6 +17,9 @@ public interface StudentService {
     StudentResponseDto create(StudentCreateDto dto, Long userId);
     Page<StudentResponseDto> list(Pageable pageable);
     StudentResponseDto get(Long id);
+
+    Page<StudentResponseDto> searchStudentsByName(String name, Pageable pageable);
+
     StudentResponseDto update(Long id, StudentUpdateDto dto);
     void delete(Long id);
     void bulkUpload(MultipartFile file);

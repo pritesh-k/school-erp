@@ -59,6 +59,17 @@ public class StudentController {
         return ApiResponse.paged(service.list(pageable));
     }
 
+    @GetMapping("/search")
+    public ApiResponse<List<StudentResponseDto>> searchStudents(
+            @RequestParam String name,
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "admissionNumber");
+
+        Page<StudentResponseDto> result = service.searchStudentsByName(name, pageable);
+        return ApiResponse.paged(result);
+    }
     @GetMapping("/total")
     public ApiResponse<Long> totalStudents() {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();

@@ -3,7 +3,6 @@ package com.schoolerp.service.impl;
 import com.schoolerp.dto.request.RegisterRequest;
 import com.schoolerp.dto.request.TeacherCreateDto;
 import com.schoolerp.dto.request.TeacherUpdateDto;
-import com.schoolerp.dto.response.TeacherDetailsResponseDto;
 import com.schoolerp.dto.response.TeacherResponseDto;
 import com.schoolerp.entity.Teacher;
 import com.schoolerp.entity.User;
@@ -140,6 +139,7 @@ public class TeacherServiceImpl implements TeacherService {
 
         // Save only if there are changes
         if (hasChanges) {
+            teacher.createFullName();
             return mapper.toDto(teacherRepo.save(teacher));
         } else {
             return mapper.toDto(teacher);
@@ -206,5 +206,12 @@ public class TeacherServiceImpl implements TeacherService {
 
     public Long getTotalCount() {
         return teacherRepo.count(); // this returns the total number of rows
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TeacherResponseDto> searchTeachersByName(String name, Pageable pageable) {
+        Page<Teacher> page = teacherRepo.searchByName(name, pageable);
+        return page.map(mapper::toDto);
     }
 }

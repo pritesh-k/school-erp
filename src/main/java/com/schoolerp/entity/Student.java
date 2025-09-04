@@ -10,7 +10,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "students")
+@Table(
+        name = "students",
+        indexes = {
+                @Index(name = "idx_student_user_id", columnList = "user_id"),
+                @Index(name = "idx_student_email", columnList = "email"),
+                @Index(name = "idx_student_first_name", columnList = "firstName"),
+                @Index(name = "idx_student_last_name", columnList = "lastName"),
+                @Index(name = "idx_student_roll_number", columnList = "rollNumber"),
+                @Index(name = "idx_student_admission_number", columnList = "admissionNumber")
+        }
+)
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class Student extends BaseEntity {
     @Column(unique = true)

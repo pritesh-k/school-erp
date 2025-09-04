@@ -13,8 +13,12 @@ import java.util.Optional;
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
     // Search students by name
-    @Query("SELECT s FROM Student s WHERE LOWER(s.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Student> searchByName(@Param("keyword") String keyword, Pageable pageable);
+    @Query("""
+       SELECT s FROM Student s
+       WHERE LOWER(s.firstName) LIKE LOWER(CONCAT('%', :name, '%'))
+          OR LOWER(s.lastName) LIKE LOWER(CONCAT('%', :name, '%'))
+    """)
+    Page<Student> searchByName(@Param("name") String name, Pageable pageable);
 
     Optional<Student> findByAdmissionNumber(String admissionNumber);
 

@@ -8,6 +8,7 @@ import com.schoolerp.dto.response.TeacherResponseDto;
 import com.schoolerp.entity.Teacher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface TeacherService {
     TeacherResponseDto create(TeacherCreateDto dto, Long userId);
@@ -21,4 +22,6 @@ public interface TeacherService {
     Long getTotalCount();
 
     Page<TeacherResponseDto> getTeachersWithoutAssignment(Long sectionSubjectAssignmentId, Pageable pageable);
+
+    Page<TeacherResponseDto> searchTeachersByName(String name, Pageable pageable);
 }

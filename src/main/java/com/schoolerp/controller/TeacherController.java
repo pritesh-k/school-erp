@@ -94,4 +94,16 @@ public class TeacherController {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         return ApiResponse.ok(service.getTotalCount());
     }
+
+    @GetMapping("/search")
+    public ApiResponse<List<TeacherResponseDto>> searchTeachers(
+            @RequestParam String name,
+            @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<TeacherResponseDto> result = service.searchTeachersByName(name, pageable);
+        return ApiResponse.paged(result);
+    }
+
 }

@@ -18,7 +18,7 @@ public interface StudentFeeAssignmentRepository extends JpaRepository<StudentFee
             "JOIN FETCH sfa.feeStructure fs " +
             "JOIN FETCH fs.items fsi " +
             "JOIN FETCH fsi.feeHead fh " +
-            "WHERE se.student.id = :studentId AND fs.session.id = :sessionId")
+            "WHERE se.student.id = :studentId AND fs.academicSession.id = :sessionId")
     Optional<StudentFeeAssignment> findByStudentAndSessionWithDetails(
             @Param("studentId") Long studentId, @Param("sessionId") Long sessionId);
 

@@ -1,5 +1,6 @@
 package com.schoolerp.dto.response;
 
+import com.schoolerp.dto.BaseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,36 +13,18 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FeeStructureItemResponse {
-    private Long id;
-    private Long feeHeadId;
-    private String feeHeadName;
+public class FeeStructureItemResponse extends BaseDTO {
     private BigDecimal amount;
     private LocalDate dueDate;
-    private Boolean isActive;
 
-    public Long getId() {
-        return id;
+    private FeeHeadResponse feeHead;
+
+    public FeeHeadResponse getFeeHead() {
+        return feeHead;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getFeeHeadId() {
-        return feeHeadId;
-    }
-
-    public void setFeeHeadId(Long feeHeadId) {
-        this.feeHeadId = feeHeadId;
-    }
-
-    public String getFeeHeadName() {
-        return feeHeadName;
-    }
-
-    public void setFeeHeadName(String feeHeadName) {
-        this.feeHeadName = feeHeadName;
+    public void setFeeHead(FeeHeadResponse feeHead) {
+        this.feeHead = feeHead;
     }
 
     public BigDecimal getAmount() {
@@ -58,13 +41,5 @@ public class FeeStructureItemResponse {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
-    }
-
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
     }
 }

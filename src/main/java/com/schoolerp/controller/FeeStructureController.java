@@ -1,6 +1,7 @@
 package com.schoolerp.controller;
 
 import com.schoolerp.dto.request.FeeStructureRequest;
+import com.schoolerp.dto.request.FeeStructureUpdateRequest;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.FeeStructureResponse;
 import com.schoolerp.entity.UserTypeInfo;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/feeStructure")
+@RequestMapping("/api/v1/fees")
 @Validated
 @Slf4j
 public class FeeStructureController {
@@ -42,24 +43,39 @@ public class FeeStructureController {
         return ApiResponse.ok(feeStructureService.create(request, createdBy, academicSession));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/structure/{id}")
+    public ApiResponse<FeeStructureResponse> updateFeeStructure(
+            @Valid @RequestBody FeeStructureUpdateRequest request, @RequestParam Long id) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Long updatedBy = userTypeInfo.getUserId();
+        return ApiResponse.ok(feeStructureService.update(request, updatedBy, id));
+    }
+
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
     @GetMapping("/structure")
     public ApiResponse<List<FeeStructureResponse>> getAllFeeStructures(
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
-            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size,
-            @RequestParam(required = false) Long sessionId,
-            @RequestParam(required = false) Long classId) {
-        log.info("Fetching fee structures - page: {}, size: {}, sessionId: {}, classId: {}",
-                page, size, sessionId, classId);
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        String sessionName = userTypeInfo.getAcademicSession();
         Pageable pageable = PageRequest.of(page, size);
-        Page<FeeStructureResponse> results = feeStructureService.list(pageable, sessionId, classId);
+        Page<FeeStructureResponse> results = feeStructureService.list(pageable, sessionName);
         return ApiResponse.paged(results);
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
     @GetMapping("/structure/{id}")
     public ApiResponse<FeeStructureResponse> getFeeStructure(@PathVariable Long id) {
-        return ApiResponse.ok(feeStructureService.getById(id));
+        FeeStructureResponse response = feeStructureService.getById(id);
+        return ApiResponse.ok(response);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
+    @GetMapping("/structure/byClass/{id}")
+    public ApiResponse<FeeStructureResponse> getFeeStructureByClass(@PathVariable Long id) {
+        FeeStructureResponse response = feeStructureService.getFeeStructureByClass(id);
+        return ApiResponse.ok(response);
     }
 
 }

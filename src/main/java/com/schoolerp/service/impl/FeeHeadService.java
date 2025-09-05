@@ -31,8 +31,11 @@ public class FeeHeadService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .category(FeeCategory.valueOf(request.getCategory()))
-                .isMandatory(request.getIsMandatory()).isActive(true)
+                .isActive(true)
                 .build();
+        if (request.getIsMandatory() == null){
+            feeHead.setMandatory(true);
+        }
         feeHead.setActive(true);
         feeHead.setCreatedBy(createdBy);
         feeHead.setCreatedAt(Instant.now());
@@ -57,6 +60,7 @@ public class FeeHeadService {
         FeeHead feeHead = feeHeadRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("FeeHead not found with id: " + id));
         boolean hasChanges = false;
+
         if (feeHead.getName() != null && !feeHead.getName().equals(request.getName())) {
             feeHead.setName(request.getName());
             hasChanges = true;
@@ -66,9 +70,10 @@ public class FeeHeadService {
             hasChanges = true;
         }
         if (request.getCategory() != null){
-            feeHead.setCategory(FeeCategory.valueOf(request.getCategory()));
+            feeHead.setCategory(request.getCategory());
             hasChanges = true;
         }
+
         if (request.getMandatory() != null) {
             feeHead.setMandatory(request.getMandatory());
             hasChanges = true;
@@ -80,13 +85,6 @@ public class FeeHeadService {
             feeHead = feeHeadRepository.save(feeHead);
         }
         return feeHeadMapper.toResponse(feeHead);
-    }
-
-    public void delete(Long id) {
-        FeeHead feeHead = feeHeadRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("FeeHead not found with id: " + id));
-        feeHead.setActive(false);
-        feeHeadRepository.save(feeHead);
     }
 }
 

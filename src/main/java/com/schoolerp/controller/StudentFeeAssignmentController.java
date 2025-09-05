@@ -1,6 +1,7 @@
 package com.schoolerp.controller;
 
 import com.schoolerp.dto.request.FeeAssignDto;
+import com.schoolerp.dto.request.FeeAssignUpdateDto;
 import com.schoolerp.dto.request.StudentFeeAssignmentRequest;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.StudentFeeAssignmentResponse;
@@ -57,35 +58,33 @@ public class StudentFeeAssignmentController {
 //        return ApiResponse.paged(results);
 //    }
 //
-//    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT') or hasAuthority('TEACHER')")
-//    @GetMapping("/assignment/student/{studentId}")
-//    public ApiResponse<StudentFeeAssignmentResponse> getStudentAssignment(
-//            @PathVariable Long studentId,
-//            @RequestParam Long sessionId) {
-//        log.info("Fetching assignment for student: {}, session: {}", studentId, sessionId);
-//        return ApiResponse.ok(assignmentService.getByStudentAndSession(studentId, sessionId));
-//    }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT') or hasAuthority('TEACHER')")
+    @GetMapping("/assignment/student/{studentEnrollId}")
+    public ApiResponse<StudentFeeAssignmentResponse> getStudentAssignment(
+            @PathVariable Long studentEnrollId) {
+        return ApiResponse.ok(assignmentService.getByStudentEnrollment(studentEnrollId));
+    }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
     @PutMapping("/assignment/{id}")
     public ApiResponse<StudentFeeAssignmentResponse> updateAssignment(
             @PathVariable Long id,
-            @Valid @RequestBody FeeAssignDto request) {
+            @Valid @RequestBody FeeAssignUpdateDto request) {
         log.info("Updating assignment with id: {}", id);
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long updatedBy = userTypeInfo.getUserId();
         return ApiResponse.ok(assignmentService.assignUpdate(id, request, updatedBy));
     }
 
-//    @PreAuthorize("hasAuthority('ADMIN')")
-//    @PostMapping("/assignment/bulk")
-//    public ApiResponse<List<StudentFeeAssignmentResponse>> bulkAssignFeeStructure(
-//            @Valid @RequestBody BulkFeeAssignmentRequest request) {
-//        log.info("Bulk assigning fee structure: {} to {} students",
-//                request.getFeeStructureId(), request.getStudentEnrollmentIds().size());
-//        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-//        Long createdBy = userTypeInfo.getUserId();
-//        return ApiResponse.ok(assignmentService.bulkAssign(request, createdBy));
-//    }
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/assignment/bulk/{classId}/feeStructure/{feeStructureId}")
+    public ApiResponse<Void> bulkAssignFeeStructure(
+            @PathVariable Long classId, @PathVariable Long feeStructureId) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Long createdBy = userTypeInfo.getUserId();
+        String academicSessionName = userTypeInfo.getAcademicSession();
+        assignmentService.bulkAssign(classId, feeStructureId, academicSessionName, createdBy);
+        return ApiResponse.ok(null);
+    }
 
 }

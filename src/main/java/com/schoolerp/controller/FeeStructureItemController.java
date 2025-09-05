@@ -1,6 +1,7 @@
 package com.schoolerp.controller;
 
 import com.schoolerp.dto.request.FeeStructureItemRequest;
+import com.schoolerp.dto.request.FeeStructureItemUpdateRequest;
 import com.schoolerp.dto.request.FeeStructureRequest;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.FeeStructureItemResponse;
@@ -40,10 +41,17 @@ public class FeeStructureItemController {
             @Valid @RequestBody FeeStructureItemRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long createdBy = userTypeInfo.getUserId();
-        String academicSession = userTypeInfo.getAcademicSession();
         return ApiResponse.ok(feeStructureItemService.create(id, request, createdBy));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{id}")
+    public ApiResponse<FeeStructureItemResponse> updateFeeStructureItem( @PathVariable Long id,
+                                                                         @Valid @RequestBody FeeStructureItemUpdateRequest request) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Long updateBy = userTypeInfo.getUserId();
+        return ApiResponse.ok(feeStructureItemService.update(id, request, updateBy));
+    }
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
     @GetMapping
     public ApiResponse<List<FeeStructureItemResponse>> getAllFeeStructuresItem(

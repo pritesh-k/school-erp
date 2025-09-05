@@ -1,10 +1,12 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.FeeStructureItemRequest;
+import com.schoolerp.dto.request.FeeStructureItemUpdateRequest;
 import com.schoolerp.dto.response.FeeStructureItemResponse;
 import com.schoolerp.entity.FeeHead;
 import com.schoolerp.entity.FeeStructure;
 import com.schoolerp.entity.FeeStructureItem;
+import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.FeeStructureItemMapper;
 import com.schoolerp.repository.FeeHeadRepository;
@@ -38,13 +40,17 @@ public class FeeStructureItemServiceImpl {
         FeeHead feeHead = feeHeadRepository.findById(request.getFeeHeadId())
                 .orElseThrow(() -> new ResourceNotFoundException("FeeHead not found"));
 
-        // Map request -> entity
+        if (feeStructureItemRepository.existsByFeeStructure_IdAndFeeHead_Id(feeStructureId, feeHead.getId())) {
+            throw new DuplicateEntry("FeeStructureItem with the same FeeHead already exists in this FeeStructure");
+        }
+
         FeeStructureItem entity = new FeeStructureItem();
         entity.setAmount(request.getAmount());
         entity.setDueDate(request.getDueDate());
 
         entity.setFeeStructure(feeStructure);
         entity.setFeeHead(feeHead);
+
         entity.setCreatedBy(createdBy);
         entity.setCreatedAt(Instant.now());
 
@@ -52,13 +58,36 @@ public class FeeStructureItemServiceImpl {
         return mapper.toResponse(saved);
     }
 
-    @Transactional(readOnly = true)
+    public FeeStructureItemResponse update(Long feeStructureItemId, FeeStructureItemUpdateRequest request, Long updatedBy) {
+
+        FeeStructureItem existing = feeStructureItemRepository.findById(feeStructureItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("FeeStructureItem not found"));
+        boolean changed = false;
+
+        if (request.getAmount() != null) {
+            existing.setAmount(request.getAmount());
+            changed = true;
+        }
+        if (request.getDueDate() != null) {
+            existing.setDueDate(request.getDueDate());
+            changed = true;
+        }
+        if (!changed) {
+            return mapper.toResponse(existing);
+        }
+
+        existing.setUpdatedBy(updatedBy);
+        existing.setUpdatedAt(Instant.now());
+
+        FeeStructureItem saved = feeStructureItemRepository.save(existing);
+        return mapper.toResponse(saved);
+    }
+
     public Page<FeeStructureItemResponse> list(Pageable pageable, Long feeStructureId) {
-        Page<FeeStructureItem> page = feeStructureItemRepository.findAllByFilter(feeStructureId, pageable);
+        Page<FeeStructureItem> page = feeStructureItemRepository.findByFeeStructure_Id(feeStructureId, pageable);
         return page.map(mapper::toResponse);
     }
 
-    @Transactional(readOnly = true)
     public FeeStructureItemResponse getById(Long id) {
         FeeStructureItem entity = feeStructureItemRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("FeeStructureItem not found"));

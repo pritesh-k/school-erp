@@ -18,7 +18,7 @@ public class FeeStructure extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "session_id")
-    private AcademicSession session;
+    private AcademicSession academicSession;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "class_id")
@@ -30,12 +30,11 @@ public class FeeStructure extends BaseEntity {
     @OneToMany(mappedBy = "feeStructure", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FeeStructureItem> items = new HashSet<>();
 
-    public AcademicSession getSession() {
-        return session;
+    public AcademicSession getAcademicSession() {
+        return academicSession;
     }
-
-    public void setSession(AcademicSession session) {
-        this.session = session;
+    public void setAcademicSession(AcademicSession academicSession) {
+        this.academicSession = academicSession;
     }
 
     public SchoolClass getSchoolClass() {

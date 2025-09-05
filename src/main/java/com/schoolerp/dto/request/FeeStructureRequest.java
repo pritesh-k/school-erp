@@ -1,5 +1,7 @@
 package com.schoolerp.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class FeeStructureRequest {
+
+    @NotNull
     private Long classId;
+
+    @NotBlank
     private String name;
-    private Boolean isActive;
 
     public Long getClassId() {
         return classId;
@@ -30,13 +35,5 @@ public class FeeStructureRequest {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
     }
 }

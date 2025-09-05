@@ -1,10 +1,12 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.FeeStructureRequest;
+import com.schoolerp.dto.request.FeeStructureUpdateRequest;
 import com.schoolerp.dto.response.FeeStructureResponse;
 import com.schoolerp.entity.AcademicSession;
 import com.schoolerp.entity.FeeStructure;
 import com.schoolerp.entity.SchoolClass;
+import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.mapper.FeeStructureMapper;
 import com.schoolerp.repository.AcademicSessionRepository;
 import com.schoolerp.repository.FeeHeadRepository;
@@ -39,33 +41,55 @@ public class FeeStructureService {
                 .orElseThrow(() -> new EntityNotFoundException("Academic session not found"));
         SchoolClass schoolClass = classRepository.findById(request.getClassId())
                 .orElseThrow(() -> new EntityNotFoundException("Class not found"));
-
+        if (feeStructureRepository.existsByAcademicSession_IdAndSchoolClass_Id(academicSession.getId(), schoolClass.getId())) {
+            throw new DuplicateEntry("Fee structure already exists for this class and session");
+        }
         FeeStructure feeStructure = FeeStructure.builder()
                 .schoolClass(schoolClass)
                 .name(request.getName())
-                .session(academicSession)
+                .academicSession(academicSession)
                 .build();
 
         feeStructure.setActive(true);
         feeStructure.setCreatedAt(Instant.now());
         feeStructure.setCreatedBy(createdBy);
+        feeStructure.setDeleted(false);
 
         feeStructure = feeStructureRepository.save(feeStructure);
 
         return feeStructureMapper.toResponse(feeStructure);
     }
 
-    @Transactional(readOnly = true)
-    public Page<FeeStructureResponse> list(Pageable pageable, Long sessionId, Long classId) {
+    public Page<FeeStructureResponse> list(Pageable pageable, String sessionName) {
+        AcademicSession session = sessionRepository.findByName(sessionName)
+                .orElseThrow(() -> new EntityNotFoundException("Academic session not found"));
         Page<FeeStructure> structures = feeStructureRepository
-                .findBySessionIdAndSchoolClassIdOrderByNameAsc(pageable, sessionId, classId);
+                .findByAcademicSession_Id(pageable, session.getId());
+
         return structures.map(feeStructureMapper::toResponse);
     }
 
-    @Transactional(readOnly = true)
     public FeeStructureResponse getById(Long id) {
         FeeStructure structure = feeStructureRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("FeeStructure not found with id: " + id));
         return feeStructureMapper.toResponse(structure);
+    }
+
+    public FeeStructureResponse getFeeStructureByClass(Long id) {
+        FeeStructure structure = feeStructureRepository.findBySchoolClass_Id(id)
+                .orElseThrow(() -> new EntityNotFoundException("FeeStructure not found for class id: " + id));
+        return feeStructureMapper.toResponse(structure);
+    }
+
+    public FeeStructureResponse update(FeeStructureUpdateRequest request, Long updatedBy, Long id) {
+        FeeStructure feeStructure = feeStructureRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("FeeStructure not found with id: " + id));
+        if (request.getName() != null && !request.getName().isBlank() && !request.getName().equals(feeStructure.getName())){
+            feeStructure.setName(request.getName());
+            feeStructure.setUpdatedAt(Instant.now());
+            feeStructure.setUpdatedBy(updatedBy);
+            feeStructure = feeStructureRepository.save(feeStructure);
+        }
+        return feeStructureMapper.toResponse(feeStructure);
     }
 }

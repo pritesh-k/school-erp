@@ -33,5 +33,7 @@ public interface StudentEnrollmentRepository extends JpaRepository<StudentEnroll
     Optional<StudentEnrollment> findByStudent_Id(Long studentId);
 
     List<StudentEnrollment> findBySchoolClass_IdAndSection_IdAndAcademicSession_NameAndActiveTrue(Long classId, Long sectionId, String academicSessionName);
+
+    List<StudentEnrollment> findBySchoolClass_IdAndAcademicSession_Id(Long id, Long id1);
 }
 

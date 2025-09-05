@@ -8,51 +8,22 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class StudentFeeAssignmentResponse extends BaseDTO {
-    private Long studentEnrollmentId;
-    private String studentName;
-    private Long feeStructureId;
-    private String feeStructureName;
+    private FeeStructureResponse feeStructure;
     private BigDecimal discountAmount;
     private String discountReason;
     private LocalDate assignedDate;
 
-    public Long getStudentEnrollmentId() {
-        return studentEnrollmentId;
+    public FeeStructureResponse getFeeStructure() {
+        return feeStructure;
     }
 
-    public void setStudentEnrollmentId(Long studentEnrollmentId) {
-        this.studentEnrollmentId = studentEnrollmentId;
-    }
-
-    public String getStudentName() {
-        return studentName;
-    }
-
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
-    }
-
-    public Long getFeeStructureId() {
-        return feeStructureId;
-    }
-
-    public void setFeeStructureId(Long feeStructureId) {
-        this.feeStructureId = feeStructureId;
-    }
-
-    public String getFeeStructureName() {
-        return feeStructureName;
-    }
-
-    public void setFeeStructureName(String feeStructureName) {
-        this.feeStructureName = feeStructureName;
+    public void setFeeStructure(FeeStructureResponse feeStructure) {
+        this.feeStructure = feeStructure;
     }
 
     public BigDecimal getDiscountAmount() {

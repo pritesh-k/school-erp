@@ -1,24 +1,22 @@
 package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.FeeAssignDto;
+import com.schoolerp.dto.request.FeeAssignUpdateDto;
 import com.schoolerp.dto.response.StudentFeeAssignmentResponse;
-import com.schoolerp.entity.FeeStructure;
-import com.schoolerp.entity.Student;
-import com.schoolerp.entity.StudentEnrollment;
-import com.schoolerp.entity.StudentFeeAssignment;
+import com.schoolerp.entity.*;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.mapper.StudentFeeAssignmentMapper;
-import com.schoolerp.repository.FeeStructureRepository;
-import com.schoolerp.repository.StudentEnrollmentRepository;
-import com.schoolerp.repository.StudentFeeAssignmentRepository;
-import com.schoolerp.repository.StudentRepository;
+import com.schoolerp.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,15 +26,14 @@ public class StudentFeeAssignmentService {
     @Autowired private StudentFeeAssignmentRepository assignmentRepo;
 
     @Autowired private StudentEnrollmentRepository studentEnrollmentRepo;
-
+    @Autowired
+    private SchoolClassRepository classRepo;
     @Autowired
     private StudentFeeAssignmentMapper studentFeeAssignmentMapper;
+    @Autowired
+    private AcademicSessionRepository sessionRepo;
 
     public StudentFeeAssignmentResponse assign(FeeAssignDto dto, Long createdBy) {
-        Optional<Student> s = studentRepo.findById(dto.getStudentId());
-        if (s.isEmpty()) {
-            throw new ResourceNotFoundException("Student not found with ID: " + dto.getStudentId());
-        }
         Optional<FeeStructure> fs = structureRepo.findById(dto.getFeeStructureId());
         if (fs.isEmpty()) {
             throw new ResourceNotFoundException("Fee structure not found with ID: " + dto.getFeeStructureId());
@@ -69,7 +66,7 @@ public class StudentFeeAssignmentService {
         return studentFeeAssignmentMapper.toResponse(assignment);
     }
 
-    public StudentFeeAssignmentResponse assignUpdate(Long assignmentId, FeeAssignDto dto, Long updatedBy) {
+    public StudentFeeAssignmentResponse assignUpdate(Long assignmentId, FeeAssignUpdateDto dto, Long updatedBy) {
 
         StudentFeeAssignment assignment = assignmentRepo.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student fee assignment not found with ID: " + assignmentId));
@@ -93,8 +90,53 @@ public class StudentFeeAssignmentService {
         return studentFeeAssignmentMapper.toResponse(assignment);
     }
 
-    public StudentFeeAssignmentResponse getByStudentEnrollment(Long studentId) {
-        StudentFeeAssignment assignment = assignmentRepo.findByStudentEnrollment_Id(studentId);
+    public StudentFeeAssignmentResponse getByStudentEnrollment(Long studentEnrollId) {
+        StudentFeeAssignment assignment = assignmentRepo.findByStudentEnrollment_Id(studentEnrollId);
         return studentFeeAssignmentMapper.toResponse(assignment);
     }
+
+    @Transactional
+    public List<StudentFeeAssignmentResponse> bulkAssign(Long classId, Long feeStructureId, String academicSessionName, Long createdBy) {
+        AcademicSession session = sessionRepo.findByName(academicSessionName)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic session not found: " + academicSessionName));
+
+        SchoolClass schoolClass = classRepo.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Class not found with ID: " + classId));
+
+        FeeStructure feeStructure = structureRepo.findById(feeStructureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Fee structure not found with ID: " + feeStructureId));
+
+        // Fetch all student enrollments for this class + session
+        List<StudentEnrollment> enrollments = studentEnrollmentRepo
+                .findBySchoolClass_IdAndAcademicSession_Id(schoolClass.getId(), session.getId());
+
+        if (enrollments.isEmpty()) {
+            throw new ResourceNotFoundException("No students found for class: " + classId + " in session: " + academicSessionName);
+        }
+
+        List<StudentFeeAssignmentResponse> responses = new ArrayList<>();
+
+        for (StudentEnrollment enrollment : enrollments) {
+            // Skip if already assigned
+            boolean alreadyAssigned = assignmentRepo.existsByStudentEnrollment_IdAndFeeStructure_Id(enrollment.getId(), feeStructure.getId());
+            if (alreadyAssigned) {
+                continue;
+            }
+
+            StudentFeeAssignment assignment = StudentFeeAssignment.builder()
+                    .studentEnrollment(enrollment)
+                    .feeStructure(feeStructure)
+                    .assignedDate(LocalDate.now())
+                    .build();
+            assignment.setDeleted(false);
+            assignment.setActive(true);
+            assignment.setCreatedBy(createdBy);
+            assignment.setCreatedAt(Instant.now());
+
+            assignment = assignmentRepo.save(assignment);
+            responses.add(studentFeeAssignmentMapper.toResponse(assignment));
+        }
+        return responses;
+    }
+
 }

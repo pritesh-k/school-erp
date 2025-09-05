@@ -1,9 +1,11 @@
 package com.schoolerp.dto.request;
 
+import com.schoolerp.enums.FeeCategory;
+
 public class FeeHeadUpdateRequest {
     private String name;
     private String description;
-    private String category;
+    private FeeCategory category;
     private Boolean isMandatory;
 
     public String getName() {
@@ -22,11 +24,11 @@ public class FeeHeadUpdateRequest {
         this.description = description;
     }
 
-    public String getCategory() {
+    public FeeCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(FeeCategory category) {
         this.category = category;
     }
 

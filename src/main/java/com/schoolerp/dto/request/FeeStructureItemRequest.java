@@ -1,5 +1,6 @@
 package com.schoolerp.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +14,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class FeeStructureItemRequest {
+
+    @NotNull
     private Long feeHeadId;
+
+    @NotNull
     private BigDecimal amount;
+
+    @NotNull
     private LocalDate dueDate;
 
     public Long getFeeHeadId() {

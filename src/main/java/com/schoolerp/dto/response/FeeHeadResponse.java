@@ -16,8 +16,6 @@ public class FeeHeadResponse extends BaseDTO {
     private String description;
     private FeeCategory category;
     private Boolean isMandatory;
-    private Integer displayOrder;
-
     public String getName() {
         return name;
     }
@@ -48,13 +46,5 @@ public class FeeHeadResponse extends BaseDTO {
 
     public void setMandatory(Boolean mandatory) {
         isMandatory = mandatory;
-    }
-
-    public Integer getDisplayOrder() {
-        return displayOrder;
-    }
-
-    public void setDisplayOrder(Integer displayOrder) {
-        this.displayOrder = displayOrder;
     }
 }

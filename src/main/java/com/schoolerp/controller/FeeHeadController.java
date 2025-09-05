@@ -35,7 +35,8 @@ public class FeeHeadController {
     public ApiResponse<FeeHeadResponse> createFeeHead(@Valid @RequestBody FeeHeadRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long createdBy = userTypeInfo.getUserId();
-        return ApiResponse.ok(feeHeadService.create(request, createdBy));
+        FeeHeadResponse response = feeHeadService.create(request, createdBy);
+        return ApiResponse.ok(response);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -43,7 +44,8 @@ public class FeeHeadController {
     public ApiResponse<List<FeeHeadResponse>> getAllFeeHead(
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
             @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size).withSort(
+                org.springframework.data.domain.Sort.by("name").ascending());
         Page<FeeHeadResponse> results = feeHeadService.list(pageable);
         return ApiResponse.paged(results);
     }
@@ -51,7 +53,8 @@ public class FeeHeadController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/head/{id}")
     public ApiResponse<FeeHeadResponse> getFeeHead(@PathVariable Long id) {
-        return ApiResponse.ok(feeHeadService.getById(id));
+        FeeHeadResponse response = feeHeadService.getById(id);
+        return ApiResponse.ok(response);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -61,13 +64,7 @@ public class FeeHeadController {
             @Valid @RequestBody FeeHeadUpdateRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long updatedBy = userTypeInfo.getUserId();
-        return ApiResponse.ok(feeHeadService.update(id, request, updatedBy));
-    }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @DeleteMapping("/head/{id}")
-    public ApiResponse<Void> deleteFeeHead(@PathVariable Long id) {
-        feeHeadService.delete(id);
-        return ApiResponse.ok(null);
+        FeeHeadResponse response = feeHeadService.update(id, request, updatedBy);
+        return ApiResponse.ok(response);
     }
 }

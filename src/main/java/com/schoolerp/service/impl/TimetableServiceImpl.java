@@ -18,9 +18,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -34,13 +36,24 @@ public class TimetableServiceImpl implements TimetableService {
     private final SectionSubjectAssignmentRepository sectionSubjectAssignmentRepository;
 
     @Override
-    public TimetableResponseDTO createTimetable(CreateTimetableDTO dto, Long createdByUserId) {
+    public TimetableResponseDTO createTimetable(CreateTimetableDTO dto, Long createdByUserId, String academicSessionName) {
+        AcademicSession academicSession = aca.findByName(academicSessionName)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic Session not found"));
+
         Timetable entity = new Timetable();
 
-        entity.setStatus(Timetable.TimeTableStatus.DRAFT);
+        entity.setStatus(Timetable.TimeTableStatus.ACTIVE);
         entity.setCreatedBy(createdByUserId); // from BaseEntity
         entity.setUpdatedBy(createdByUserId);
-
+        entity.setActive(true);
+        entity.setDeleted(false);
+        entity.setType(dto.getType());
+        entity.setDate(dto.getDate());
+        entity.setStartTime(dto.getStartTime());
+        entity.setEndTime(dto.getEndTime());
+        entity.setLocation(dto.getLocation());
+        entity.setNote(dto.getNote());
+        entity.setAcademicSession(academicSession);
         Timetable saved = timetableRepository.save(entity);
         return timetableMapper.toResponseDto(saved);
     }
@@ -60,6 +73,7 @@ public class TimetableServiceImpl implements TimetableService {
                 .findById(sectionSubjectAssignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("SectionSubjectAssignment not found"));
         AcademicSession academicSession = sectionSubjectAssignment.getAcademicSession();
+
         entity.setAcademicSession(academicSession);
         entity.setSectionSubjectAssignment(sectionSubjectAssignment);
 
@@ -85,7 +99,7 @@ public class TimetableServiceImpl implements TimetableService {
 
         entity.setStatus(Timetable.TimeTableStatus.ACTIVE);
         entity.setUpdatedBy(updatedByUserId);
-
+        entity.setUpdatedAt(Instant.now());
         Timetable updated = timetableRepository.save(entity);
         return timetableMapper.toResponseDto(updated);
     }
@@ -113,10 +127,8 @@ public class TimetableServiceImpl implements TimetableService {
         AcademicSession academicSession = aca.findByName(academicSessionName)
                 .orElseThrow(() -> new ResourceNotFoundException("Academic Session not found"));
         Page<Timetable> page = timetableRepository.findByAcademicSession_Id(academicSession.getId(), pageable);
-        List<TimetableDetailedResponseDTO> mapped = page.stream()
-                .map(timetableMapper::toDetailedResponse)
-                .toList();
-        return new PageImpl<>(mapped, pageable, page.getTotalElements());
+        Page<TimetableDetailedResponseDTO> mapped = page.map(timetableMapper::toDetailedResponse);
+        return mapped;
     }
 
     @Override
@@ -124,16 +136,25 @@ public class TimetableServiceImpl implements TimetableService {
     public Page<TimetableDetailedResponseDTO> searchTimetables(Long classId,
                                                                Long sectionId,
                                                                Long subjectId,
+                                                               TimetableType type,
                                                                String academicSessionName,
                                                                Pageable pageable) {
-        Page<Timetable> page = timetableRepository.searchTimetables(classId, sectionId, subjectId, academicSessionName, pageable);
+        // Always required
+        AcademicSession academicSession = aca.findByName(academicSessionName)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic Session not found"));
 
-        List<TimetableDetailedResponseDTO> mapped = page.stream()
-                .map(timetableMapper::toDetailedResponse)
-                .toList();
+        Specification<Timetable> spec = Specification
+                .where(TimetableSpecifications.belongsToAcademicSession(academicSession.getId()))
+                .and(TimetableSpecifications.hasClassId(classId))
+                .and(TimetableSpecifications.hasSectionId(sectionId))
+                .and(TimetableSpecifications.hasSubjectId(subjectId))
+                .and(TimetableSpecifications.hasType(type));
 
-        return new PageImpl<>(mapped, pageable, page.getTotalElements());
+        Page<Timetable> page = timetableRepository.findAll(spec, pageable);
+
+        return page.map(timetableMapper::toDetailedResponse);
     }
+
 
 }
 

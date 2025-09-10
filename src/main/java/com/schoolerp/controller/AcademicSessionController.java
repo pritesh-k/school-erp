@@ -39,6 +39,11 @@ public class AcademicSessionController {
         return ApiResponse.ok(service.getActive());
     }
 
+    @GetMapping("/upcoming")
+    public ApiResponse<AcademicSessionResponseDto> getByUpcomingStatus() {
+        return ApiResponse.ok(service.getByUpcomingStatus());
+    }
+
     @PostMapping
     public ApiResponse<AcademicSessionResponseDto> create(@RequestBody @Valid AcademicSessionCreateDto dto) {
         return ApiResponse.ok(service.create(dto));

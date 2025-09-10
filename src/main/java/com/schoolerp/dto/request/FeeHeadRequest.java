@@ -1,6 +1,8 @@
 package com.schoolerp.dto.request;
 
+import com.schoolerp.enums.FeeCategory;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +18,9 @@ public class FeeHeadRequest {
     private String name;
     private String description;
 
-    @NotBlank(message = "category is mandatory")
-    private String category;
-    private Boolean isMandatory;
+    @NotNull
+    private FeeCategory category;
+    private Boolean isMandatory = true;
 
     public String getName() {
         return name;
@@ -36,11 +38,11 @@ public class FeeHeadRequest {
         this.description = description;
     }
 
-    public String getCategory() {
+    public FeeCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(FeeCategory category) {
         this.category = category;
     }
 

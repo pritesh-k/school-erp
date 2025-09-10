@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/feesStructureItem")
+@RequestMapping("/api/v1/fees")
 @Validated
 @Slf4j
 public class FeeStructureItemController {
@@ -36,7 +36,7 @@ public class FeeStructureItemController {
     private FeeStructureItemServiceImpl feeStructureItemService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/{id}")
+    @PostMapping("/structureItem/{id}")
     public ApiResponse<FeeStructureItemResponse> createFeeStructureItem( @PathVariable Long id,
             @Valid @RequestBody FeeStructureItemRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
@@ -45,7 +45,7 @@ public class FeeStructureItemController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping("/{id}")
+    @PutMapping("/structureItem/{id}")
     public ApiResponse<FeeStructureItemResponse> updateFeeStructureItem( @PathVariable Long id,
                                                                          @Valid @RequestBody FeeStructureItemUpdateRequest request) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
@@ -53,7 +53,7 @@ public class FeeStructureItemController {
         return ApiResponse.ok(feeStructureItemService.update(id, request, updateBy));
     }
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
-    @GetMapping
+    @GetMapping("/structureItem")
     public ApiResponse<List<FeeStructureItemResponse>> getAllFeeStructuresItem(
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
             @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size,
@@ -65,7 +65,7 @@ public class FeeStructureItemController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('ACCOUNTANT')")
-    @GetMapping("/{id}")
+    @GetMapping("/structureItem/{id}")
     public ApiResponse<FeeStructureItemResponse> getFeeStructureItem(@PathVariable Long id) {
         return ApiResponse.ok(feeStructureItemService.getById(id));
     }

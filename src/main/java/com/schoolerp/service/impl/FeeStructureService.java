@@ -5,6 +5,7 @@ import com.schoolerp.dto.request.FeeStructureUpdateRequest;
 import com.schoolerp.dto.response.FeeStructureResponse;
 import com.schoolerp.entity.AcademicSession;
 import com.schoolerp.entity.FeeStructure;
+import com.schoolerp.entity.FeeStructureItem;
 import com.schoolerp.entity.SchoolClass;
 import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.mapper.FeeStructureMapper;
@@ -20,6 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -59,6 +64,52 @@ public class FeeStructureService {
 
         return feeStructureMapper.toResponse(feeStructure);
     }
+
+    @Transactional
+    public FeeStructureResponse migrateToNextSession(long feeStructureId, long academicSessionId, long createdBy) {
+        if (feeStructureId <= 0 || academicSessionId <= 0) {
+            throw new IllegalArgumentException("Invalid feeStructureId or academicSessionId");
+        }
+
+        AcademicSession academicSession = sessionRepository.findById(academicSessionId)
+                .orElseThrow(() -> new EntityNotFoundException("Academic session not found"));
+
+        FeeStructure existingStructure = feeStructureRepository.findById(feeStructureId)
+                .orElseThrow(() -> new EntityNotFoundException("Fee structure not found"));
+
+        if (existingStructure.getAcademicSession().getId().equals(academicSessionId)) {
+            throw new DuplicateEntry("Cannot copy to the same academic session");
+        }
+
+        FeeStructure newStructure = new FeeStructure();
+        newStructure.setSchoolClass(existingStructure.getSchoolClass());
+        newStructure.setName(existingStructure.getName());
+        newStructure.setAcademicSession(academicSession);
+        newStructure.setActive(true);
+        newStructure.setCreatedAt(Instant.now());
+        newStructure.setCreatedBy(createdBy);
+        newStructure.setDeleted(false);
+
+        if (existingStructure.getItems() != null && !existingStructure.getItems().isEmpty()) {
+            Set<FeeStructureItem> newItems = existingStructure.getItems().stream()
+                    .map(item -> {
+                        FeeStructureItem copy = new FeeStructureItem();
+                        copy.setFeeStructure(newStructure);   // link to new parent
+                        copy.setFeeHead(item.getFeeHead());   // reuse same FeeHead
+                        copy.setAmount(item.getAmount());     // copy amount
+                        copy.setDueDate(item.getDueDate());   // copy due date
+                        return copy;
+                    })
+                    .collect(Collectors.toSet());
+
+            newStructure.setItems(newItems);
+        }
+
+        FeeStructure saved = feeStructureRepository.save(newStructure);
+
+        return feeStructureMapper.toResponse(saved);
+    }
+
 
     public Page<FeeStructureResponse> list(Pageable pageable, String sessionName) {
         AcademicSession session = sessionRepository.findByName(sessionName)

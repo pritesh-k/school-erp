@@ -1,6 +1,7 @@
 package com.schoolerp.repository;
 
 import com.schoolerp.entity.AcademicSession;
+import com.schoolerp.enums.SessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +13,6 @@ public interface AcademicSessionRepository extends JpaRepository<AcademicSession
     Optional<AcademicSession> findByName(String name);
 
     Optional<AcademicSession> findByIsCurrentTrue();
+
+    Optional<AcademicSession> findByStatus(SessionStatus upcoming);
 }

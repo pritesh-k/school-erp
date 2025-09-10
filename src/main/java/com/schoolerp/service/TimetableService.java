@@ -4,13 +4,14 @@ import com.schoolerp.dto.request.CreateTimetableDTO;
 import com.schoolerp.dto.request.UpdateTimetableDTO;
 import com.schoolerp.dto.response.TimetableDetailedResponseDTO;
 import com.schoolerp.dto.response.TimetableResponseDTO;
+import com.schoolerp.enums.TimetableType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface TimetableService {
 
-    TimetableResponseDTO createTimetable(CreateTimetableDTO dto, Long createdByUserId);
+    TimetableResponseDTO createTimetable(CreateTimetableDTO dto, Long createdByUserId, String academicSessionName);
 
     TimetableResponseDTO createTimetableForSubject(Long createdByUserId,
                                                    Long sectionSubjectAssignmentId);
@@ -26,6 +27,6 @@ public interface TimetableService {
     @Transactional(readOnly = true)
     Page<TimetableDetailedResponseDTO> getAllTimetables(String academicSessionName, Pageable pageable);
 
-    Page<TimetableDetailedResponseDTO> searchTimetables(Long classId, Long sectionId, Long subjectId,
+    Page<TimetableDetailedResponseDTO> searchTimetables(Long classId, Long sectionId, Long subjectId, TimetableType type,
                                                         String academicSessionName, Pageable pageable);
 }

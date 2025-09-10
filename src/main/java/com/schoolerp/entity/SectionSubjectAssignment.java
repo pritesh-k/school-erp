@@ -14,6 +14,9 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 public class SectionSubjectAssignment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "class_id", nullable = false)
+    private SchoolClass schoolClass;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "section_id", nullable = false)
     private Section section;
 
@@ -67,6 +70,14 @@ public class SectionSubjectAssignment extends BaseEntity {
 
     public void setAcademicSession(AcademicSession academicSession) {
         this.academicSession = academicSession;
+    }
+
+    public SchoolClass getSchoolClass() {
+        return schoolClass;
+    }
+
+    public void setSchoolClass(SchoolClass schoolClass) {
+        this.schoolClass = schoolClass;
     }
 }
 

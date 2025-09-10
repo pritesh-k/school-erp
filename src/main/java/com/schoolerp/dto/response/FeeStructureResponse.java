@@ -23,4 +23,11 @@ public class FeeStructureResponse extends BaseDTO {
         this.name = name;
     }
 
+    public ClassResponseDto getSchoolClass() {
+        return schoolClass;
+    }
+
+    public void setSchoolClass(ClassResponseDto schoolClass) {
+        this.schoolClass = schoolClass;
+    }
 }

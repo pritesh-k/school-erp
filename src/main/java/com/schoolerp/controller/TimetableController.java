@@ -6,6 +6,7 @@ import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.TimetableDetailedResponseDTO;
 import com.schoolerp.dto.response.TimetableResponseDTO;
 import com.schoolerp.entity.UserTypeInfo;
+import com.schoolerp.enums.TimetableType;
 import com.schoolerp.service.RequestContextService;
 import com.schoolerp.service.TimetableService;
 import jakarta.validation.constraints.Max;
@@ -34,8 +35,8 @@ public class TimetableController {
     public ApiResponse<TimetableResponseDTO> createTimetable(@RequestBody CreateTimetableDTO dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long createdByUserId = userTypeInfo.getUserId();
-
-        return ApiResponse.ok(timetableService.createTimetable(dto, createdByUserId));
+        String academicSessionName = userTypeInfo.getAcademicSession();
+        return ApiResponse.ok(timetableService.createTimetable(dto, createdByUserId, academicSessionName));
     }
 
     @PutMapping("/{id}")
@@ -48,7 +49,7 @@ public class TimetableController {
         return ApiResponse.ok(timetableService.updateTimetable(id, dto, updatedByUserId));
     }
 
-    @PutMapping("/activate/{id}")
+    @PutMapping("/{id}/activate")
     public ApiResponse<TimetableResponseDTO> activateTimetable(
             @PathVariable Long id) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
@@ -59,6 +60,7 @@ public class TimetableController {
 
     @GetMapping("/search")
     public ApiResponse<List<TimetableDetailedResponseDTO>> searchTimetables(
+            @RequestParam(required = false) TimetableType type,
             @RequestParam(required = false) Long classId,
             @RequestParam(required = false) Long sectionId,
             @RequestParam(required = false) Long subjectId,
@@ -70,7 +72,7 @@ public class TimetableController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<TimetableDetailedResponseDTO> result = timetableService.searchTimetables(classId,
-                sectionId, subjectId, academicSessionName, pageable);
+                sectionId, subjectId,type, academicSessionName, pageable);
         return ApiResponse.paged(result);
     }
 
@@ -88,7 +90,6 @@ public class TimetableController {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         String academicSessionName = userTypeInfo.getAcademicSession();
         Pageable pageable = PageRequest.of(page, size);
-
         Page<TimetableDetailedResponseDTO> result = timetableService.getAllTimetables(academicSessionName, pageable);
         return ApiResponse.paged(result);
     }

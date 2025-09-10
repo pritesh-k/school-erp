@@ -1,12 +1,15 @@
 package com.schoolerp.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class SectionSubjectAssignmentCreateDto {
 
-    @NotBlank
+    @NotNull
     private Long subjectId;
-    private boolean isMandatory;
+
+    @NotNull
+    private Long classId;
+    private boolean isMandatory = false;
     private Integer weeklyHours;
 
     public Long getSubjectId() {
@@ -31,5 +34,17 @@ public class SectionSubjectAssignmentCreateDto {
 
     public void setWeeklyHours(Integer weeklyHours) {
         this.weeklyHours = weeklyHours;
+    }
+
+    public Long getClassId() {
+        return classId;
+    }
+
+    public void setClassId(Long classId) {
+        this.classId = classId;
+    }
+
+    public boolean isMandatory() {
+        return isMandatory;
     }
 }

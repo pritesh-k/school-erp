@@ -32,15 +32,10 @@ public class Timetable extends BaseEntity {
     // If this event is an exam slot, link to the exam
     @ManyToOne(fetch = FetchType.LAZY)
     private Exam exam;
-
-    // Scheduled date/time
-    @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false)
     private LocalTime startTime;
 
-    @Column(nullable = false)
     private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)

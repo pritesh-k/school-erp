@@ -41,7 +41,10 @@ public class AcademicSessionService {
         if (repo.existsByName(dto.name())) {
             throw new DuplicateEntry("Session with name already exists");
         }
-
+        Optional<AcademicSession> upcomingObject = repo.findByStatus(SessionStatus.UPCOMING);
+        if (upcomingObject.isPresent()){
+            throw new DuplicateEntry("There is already an upcoming session. Cannot create multiple active sessions.");
+        }
         AcademicSession session = mapper.toEntity(dto);
         session.setCurrent(false);
         session.setStatus(SessionStatus.UPCOMING);
@@ -95,9 +98,17 @@ public class AcademicSessionService {
 
     public AcademicSessionResponseDto getActive() {
         Optional<AcademicSession> oldActiveObject = repo.findByIsCurrentTrue();
-        if (!oldActiveObject.isPresent()){
+        if (oldActiveObject.isEmpty()){
             throw new ResourceNotFoundException("No active session found");
         }
         return mapper.toDto(oldActiveObject.get());
+    }
+
+    public AcademicSessionResponseDto getByUpcomingStatus() {
+        Optional<AcademicSession> upcomingObject = repo.findByStatus(SessionStatus.UPCOMING);
+        if (upcomingObject.isEmpty()){
+            throw new ResourceNotFoundException("No active session found");
+        }
+        return mapper.toDto(upcomingObject.get());
     }
 }

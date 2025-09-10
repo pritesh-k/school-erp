@@ -30,12 +30,12 @@ public class FeeHeadService {
         FeeHead feeHead = FeeHead.builder()
                 .name(request.getName())
                 .description(request.getDescription())
-                .category(FeeCategory.valueOf(request.getCategory()))
+                .category(request.getCategory())
                 .isActive(true)
                 .build();
-        if (request.getIsMandatory() == null){
-            feeHead.setMandatory(true);
-        }
+
+        feeHead.setMandatory(request.getMandatory());
+
         feeHead.setActive(true);
         feeHead.setCreatedBy(createdBy);
         feeHead.setCreatedAt(Instant.now());

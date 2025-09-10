@@ -1,5 +1,6 @@
 package com.schoolerp.dto.request;
 
+import com.schoolerp.enums.ClassStandard;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ public class SectionSummaryDto {
     private String sectionName;
     private String roomNo;
     private Integer capacity;
-    private String className;
+    private ClassStandard className;
     private Integer studentCount;
     private Long classId;
 
@@ -58,11 +59,11 @@ public class SectionSummaryDto {
         this.capacity = capacity;
     }
 
-    public String getClassName() {
+    public ClassStandard getClassName() {
         return className;
     }
 
-    public void setClassName(String className) {
+    public void setClassName(ClassStandard className) {
         this.className = className;
     }
 

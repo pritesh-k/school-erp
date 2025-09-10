@@ -2,18 +2,12 @@ package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.SectionSubjectAssignmentCreateDto;
 import com.schoolerp.dto.response.SectionSubjectAssignmentResponseDto;
-import com.schoolerp.entity.AcademicSession;
-import com.schoolerp.entity.Section;
-import com.schoolerp.entity.SectionSubjectAssignment;
-import com.schoolerp.entity.Subject;
+import com.schoolerp.entity.*;
 import com.schoolerp.exception.DuplicateEntry;
 import com.schoolerp.exception.ResourceNotFoundException;
 import com.schoolerp.exception.ValidationException;
 import com.schoolerp.mapper.AssignmentMapper;
-import com.schoolerp.repository.AcademicSessionRepository;
-import com.schoolerp.repository.SectionRepository;
-import com.schoolerp.repository.SectionSubjectAssignmentRepository;
-import com.schoolerp.repository.SubjectRepository;
+import com.schoolerp.repository.*;
 import com.schoolerp.service.TimetableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,6 +32,8 @@ public class SectionSubjectAssignmentService {
     AcademicSessionRepository academicSessionRepository;
 
     @Autowired
+    SchoolClassRepository classRepository;
+    @Autowired
     TimetableService timetableService;
 
     @Transactional
@@ -52,22 +48,26 @@ public class SectionSubjectAssignmentService {
             throw new DuplicateEntry("This subject is already assigned to the section");
         }
 
+        SchoolClass schoolClass = classRepository.findById(dto.getClassId()).
+                orElseThrow(() -> new ResourceNotFoundException("Class not found"));
+
         Section section = sectionRepo.findById(sectionId).orElseThrow(() -> new ResourceNotFoundException("Section not found"));
         Subject subject = subjectRepo.findById(dto.getSubjectId()).orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
-        boolean mandatory = Boolean.TRUE.equals(dto.getMandatory());
+        boolean mandatory = dto.getMandatory();
         SectionSubjectAssignment assignment = SectionSubjectAssignment.builder()
                 .section(section)
                 .subject(subject)
                 .isMandatory(mandatory)
                 .weeklyHours(dto.getWeeklyHours())
                 .academicSession(academicSession.get())
+                .schoolClass(schoolClass)
                 .build();
+
         assignment.setActive(true);
         assignment.setDeleted(false);
         assignment.setCreatedBy(userId);
-
+        assignment = repo.save(assignment);
         timetableService.createTimetableForSubject(userId, assignment.getId());
-        repo.save(assignment);
     }
 
     public Page<SectionSubjectAssignmentResponseDto> listBySectionId(Long sectionId, Pageable pageable) {

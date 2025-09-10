@@ -1,5 +1,6 @@
 package com.schoolerp.controller;
 
+import com.schoolerp.dto.request.FeeStructureMigration;
 import com.schoolerp.dto.request.FeeStructureRequest;
 import com.schoolerp.dto.request.FeeStructureUpdateRequest;
 import com.schoolerp.dto.response.ApiResponse;
@@ -41,6 +42,16 @@ public class FeeStructureController {
         Long createdBy = userTypeInfo.getUserId();
         String academicSession = userTypeInfo.getAcademicSession();
         return ApiResponse.ok(feeStructureService.create(request, createdBy, academicSession));
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/structure/migrateToNextSession")
+    public ApiResponse<FeeStructureResponse> migrateToNextSession(@RequestBody FeeStructureMigration request ) {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Long createdBy = userTypeInfo.getUserId();
+        long feeStructureId = request.getFeeStructureId();
+        long newSessionId = request.getAcademicSessionId();
+        return ApiResponse.ok(feeStructureService.migrateToNextSession(feeStructureId, newSessionId, createdBy));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

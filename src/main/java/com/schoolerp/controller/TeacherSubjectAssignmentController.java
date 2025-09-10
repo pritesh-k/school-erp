@@ -33,7 +33,10 @@ public class TeacherSubjectAssignmentController {
             @PathVariable Long teacherId,
             @RequestBody TeacherSubjectAssignmentCreateDto dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        service.create(dto, teacherId, userTypeInfo.getAcademicSession());
+        Long createdById = userTypeInfo.getUserId();
+        String academicSession = userTypeInfo.getAcademicSession();
+
+        service.create(dto, teacherId, academicSession, createdById);
         return ApiResponse.ok(null);
     }
 

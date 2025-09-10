@@ -1,5 +1,6 @@
 package com.schoolerp.service.impl;
 
+import com.schoolerp.dto.request.ClassTeacherAssignmentRequest;
 import com.schoolerp.dto.request.TeacherSubjectAssignmentCreateDto;
 import com.schoolerp.dto.response.TeacherSubjectAssignmentResponseDto;
 import com.schoolerp.entity.AcademicSession;
@@ -36,10 +37,12 @@ public class TeacherSubjectAssignmentService {
     private AcademicSessionRepository academicSessionRepository;
 
     @Autowired
+    private ClassTeacherAssignmentService classTeacherAssignmentService;
+    @Autowired
     private AssignmentMapper mapper;
 
     @Transactional
-    public void create(TeacherSubjectAssignmentCreateDto dto, Long teacherId, String academicSessionName) {
+    public void create(TeacherSubjectAssignmentCreateDto dto, Long teacherId, String academicSessionName, Long createdById) {
         Teacher teacher = teacherRepo.findById(teacherId).orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
         SectionSubjectAssignment sectionSubject = sectionSubjRepo.findById(dto.getSectionSubjectAssignmentId()).orElseThrow(() -> new ResourceNotFoundException("SectionSubjectAssignment not found"));
 
@@ -54,10 +57,20 @@ public class TeacherSubjectAssignmentService {
         TeacherSubjectAssignment assignment = TeacherSubjectAssignment.builder()
                 .teacher(teacher)
                 .sectionSubjectAssignment(sectionSubject)
-                .isClassTeacher(dto.getClassTeacher())
                 .assignedDate(LocalDate.now())
                 .build();
+        assignment.setCreatedBy(createdById);
+        assignment.setCreatedAt(java.time.Instant.now());
+        assignment.setActive(true);
+        assignment.setDeleted(false);
 
+         // If the dto indicates that this teacher is to be assigned as class teacher
+        if (dto.getClassTeacher() == Boolean.TRUE ){
+            ClassTeacherAssignmentRequest request = new ClassTeacherAssignmentRequest();
+            request.setSectionId(sectionSubject.getSection().getId());
+            request.setTeacherId(teacherId);
+            classTeacherAssignmentService.assignClassTeacher(request, academicSessionName, createdById);
+        }
         repo.save(assignment);
     }
 

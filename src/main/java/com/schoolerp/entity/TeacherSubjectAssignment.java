@@ -25,8 +25,6 @@ public class TeacherSubjectAssignment extends BaseEntity {
     @JoinColumn(name = "section_subject_assignment_id", nullable = false)
     private SectionSubjectAssignment sectionSubjectAssignment;
 
-    private Boolean isClassTeacher;
-
     private LocalDate assignedDate;
 
     public Teacher getTeacher() {
@@ -43,14 +41,6 @@ public class TeacherSubjectAssignment extends BaseEntity {
 
     public void setSectionSubjectAssignment(SectionSubjectAssignment sectionSubjectAssignment) {
         this.sectionSubjectAssignment = sectionSubjectAssignment;
-    }
-
-    public Boolean getClassTeacher() {
-        return isClassTeacher;
-    }
-
-    public void setClassTeacher(Boolean classTeacher) {
-        isClassTeacher = classTeacher;
     }
 
     public LocalDate getAssignedDate() {

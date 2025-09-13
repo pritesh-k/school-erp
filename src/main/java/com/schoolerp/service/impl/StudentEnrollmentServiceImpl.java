@@ -1,5 +1,6 @@
 package com.schoolerp.service.impl;
 
+import com.schoolerp.dto.request.BulkStudentEnrollmentCreateDTO;
 import com.schoolerp.dto.request.StudentEnrollmentCreateDTO;
 import com.schoolerp.dto.request.StudentEnrollmentDTO;
 import com.schoolerp.dto.request.StudentEnrollmentUpdateDTO;
@@ -64,6 +65,18 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     @Override
     public StudentEnrollmentDTO create(StudentEnrollmentCreateDTO dto, Long createdByUserId) {
 
+        Optional<Student> student = studentRepository.findById(dto.getStudentId());
+        if (student.isEmpty()) {
+            throw new ResourceNotFoundException("Student not found");
+        }
+
+        AcademicSession academicSession = academicSessionRepository.findByName(dto.getAcademicSessionName())
+                .orElseThrow(() -> new ResourceNotFoundException("Academic Session not found"));
+
+        if (!academicSession.isActive()){
+            throw new ResourceNotFoundException("Academic Session is not active");
+        }
+
         if (repo.existsByStudent_IdAndAcademicSession_Name(dto.getStudentId(), dto.getAcademicSessionName())){
             throw new DuplicateEntry("Enrollment already exists in selected academic session");
         }
@@ -84,16 +97,6 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         }
 
         StudentEnrollment studentEnrollment = new StudentEnrollment();
-        AcademicSession academicSession = academicSessionRepository.findByName(dto.getAcademicSessionName())
-                .orElseThrow(() -> new ResourceNotFoundException("Academic Session not found"));
-
-        if (!academicSession.isActive()){
-            throw new ResourceNotFoundException("Academic Session is not active");
-        }
-        Optional<Student> student = studentRepository.findById(dto.getStudentId());
-        if (student.isEmpty()) {
-            throw new ResourceNotFoundException("Student not found");
-        }
 
         studentEnrollment.setAcademicSession(academicSession);
         studentEnrollment.setSection(section1);
@@ -105,6 +108,56 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
         return mapper.toDto(repo.save(studentEnrollment));
     }
+
+    @Override
+    public List<StudentEnrollmentDTO> bulkCreate(
+            BulkStudentEnrollmentCreateDTO dto, Long createdByUserId, String academicSessionName) {
+
+        AcademicSession academicSession = academicSessionRepository.findByName(academicSessionName)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic Session not found"));
+
+        if (!academicSession.isActive()) {
+            throw new ResourceNotFoundException("Academic Session is not active");
+        }
+
+        SchoolClass schoolClass = schoolClassRepository.findById(dto.getSchoolClassId())
+                .orElseThrow(() -> new ResourceNotFoundException("School Class not found"));
+
+        Section section = sectionRepository.findById(dto.getSectionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Section not found"));
+
+        if (!section.getSchoolClass().getId().equals(dto.getSchoolClassId())) {
+            throw new ResourceNotFoundException("Section does not belong to the specified School Class");
+        }
+
+        List<StudentEnrollmentDTO> results = new ArrayList<>();
+
+        for (Long studentId : dto.getStudentIds()) {
+            Optional<Student> studentOpt = studentRepository.findById(studentId);
+            if (studentOpt.isEmpty()) {
+                throw new ResourceNotFoundException("Student with ID " + studentId + " not found");
+            }
+
+            if (repo.existsByStudent_IdAndAcademicSession_Name(studentId, academicSessionName)) {
+                throw new DuplicateEntry("Enrollment already exists for student ID " + studentId +
+                        " in session " + academicSessionName);
+            }
+
+            StudentEnrollment studentEnrollment = new StudentEnrollment();
+            studentEnrollment.setAcademicSession(academicSession);
+            studentEnrollment.setSection(section);
+            studentEnrollment.setSchoolClass(schoolClass);
+            studentEnrollment.setActive(true);
+            studentEnrollment.setStudent(studentOpt.get());
+            studentEnrollment.setCreatedBy(createdByUserId);
+            studentEnrollment.setCreatedAt(Instant.now());
+            studentEnrollment = repo.save(studentEnrollment);
+            results.add(mapper.toDto(studentEnrollment));
+        }
+
+        return results;
+    }
+
 
     @Override
     public StudentEnrollmentDTO update(StudentEnrollmentUpdateDTO dto, Long updatedByUserId, String academicSessionName) {

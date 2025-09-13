@@ -18,7 +18,7 @@ public interface StudentService {
     Page<StudentResponseDto> list(Pageable pageable);
     StudentResponseDto get(Long id);
 
-    Page<StudentResponseDto> searchStudentsByName(String name, Pageable pageable);
+    Page<StudentResponseDto> searchStudents(String name, boolean notEntrolledOnes, String academicSessionName, Pageable pageable);
 
     StudentResponseDto update(Long id, StudentUpdateDto dto);
     void delete(Long id);

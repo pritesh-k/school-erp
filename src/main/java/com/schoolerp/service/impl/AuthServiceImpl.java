@@ -105,13 +105,6 @@ public class AuthServiceImpl implements AuthService {
 
             academicSession.ifPresent(session -> userTypeInfo.setAcademicSession(session.getName()));
 
-//            Optional<AcademicSession> academicSession = academicSessionRepository.findByIsCurrentTrue();
-//            if (academicSession.isPresent()){
-//                userTypeInfo.setAcademicSessionId(academicSession.get().getId());
-//            } else {
-//                throw new ResourceNotFoundException("No active academic session found");
-//            }
-
             String token = jwtUtil.generateToken(userTypeInfo);
             userTypeInfo.setToken(token);
 

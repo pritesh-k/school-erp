@@ -1,9 +1,6 @@
 package com.schoolerp.controller;
 
-import com.schoolerp.dto.request.StudentCreateDto;
-import com.schoolerp.dto.request.StudentEnrollmentCreateDTO;
-import com.schoolerp.dto.request.StudentEnrollmentDTO;
-import com.schoolerp.dto.request.StudentEnrollmentUpdateDTO;
+import com.schoolerp.dto.request.*;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.StudentResponseDto;
 import com.schoolerp.dto.response.enrollments.StudentEnrollmentResDto;
@@ -36,9 +33,24 @@ public class StudentEnrollmentController {
     public ApiResponse<StudentEnrollmentDTO> create(@RequestBody StudentEnrollmentCreateDTO dto) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
         Long createdByUserId = userTypeInfo.getUserId();
+        String academicSession = userTypeInfo.getAcademicSession();
         StudentEnrollmentDTO studentEnrollmentDTO = enrollmentService.create(dto, createdByUserId);
         return ApiResponse.ok(studentEnrollmentDTO);
     }
+
+    @PostMapping("/bulk")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ApiResponse<List<StudentEnrollmentDTO>> bulkCreate(
+            @RequestBody BulkStudentEnrollmentCreateDTO dto) {
+
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        Long createdByUserId = userTypeInfo.getUserId();
+        String academicSession = userTypeInfo.getAcademicSession();
+
+        List<StudentEnrollmentDTO> enrollments = enrollmentService.bulkCreate(dto, createdByUserId, academicSession);
+        return ApiResponse.ok(enrollments);
+    }
+
 
     @PutMapping("/{enrollmentId}")
     @PreAuthorize("hasAuthority('ADMIN')")

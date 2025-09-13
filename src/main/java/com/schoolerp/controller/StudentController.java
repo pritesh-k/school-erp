@@ -31,7 +31,6 @@ public class StudentController {
     private final StudentService service;
     private final RequestContextService requestContextService;
     private final ParentService parentService;
-
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ApiResponse<StudentResponseDto> create(@RequestBody StudentCreateDto dto) {
@@ -39,7 +38,6 @@ public class StudentController {
         Long createdByUserId = userTypeInfo.getUserId();
         return ApiResponse.ok(service.create(dto, createdByUserId));
     }
-
     @PostMapping("/bulk-import")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ApiResponse<BulkImportReport> bulkImport(@RequestParam("file") MultipartFile file) {
@@ -61,15 +59,22 @@ public class StudentController {
 
     @GetMapping("/search")
     public ApiResponse<List<StudentResponseDto>> searchStudents(
-            @RequestParam String name,
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "false") boolean notEnrolledOnes,
             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer page,
             @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer size) {
-        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        Pageable pageable = PageRequest.of(page, size).withSort(Sort.Direction.ASC, "admissionNumber");
 
-        Page<StudentResponseDto> result = service.searchStudentsByName(name, pageable);
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        String academicSessionName = userTypeInfo.getAcademicSession();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "admissionNumber"));
+
+        Page<StudentResponseDto> result = service.searchStudents(
+                name, notEnrolledOnes, academicSessionName, pageable);
+
         return ApiResponse.paged(result);
     }
+
     @GetMapping("/total")
     public ApiResponse<Long> totalStudents() {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();

@@ -1,15 +1,12 @@
 package com.schoolerp.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-public class StudentEnrollmentCreateDTO {
+import java.util.List;
 
-    @NotNull
-    @Min(value = 1, message = "Student ID must be greater than 0")
-    private long studentId;
+public class BulkStudentEnrollmentCreateDTO {
 
     @NotNull(message = "Class ID is required")
     @Min(value = 1, message = "Class ID must be greater than 0")
@@ -18,17 +15,8 @@ public class StudentEnrollmentCreateDTO {
     @NotNull(message = "Section ID is required")
     @Min(value = 1, message = "Section ID must be greater than 0")
     private long sectionId;
-
-    @NotBlank(message = "Academic Session is required") @JsonProperty("academicSessionId")
-    private String academicSessionName;
-
-    public long getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(long studentId) {
-        this.studentId = studentId;
-    }
+    @NotEmpty(message = "At least one student ID is required")
+    private List<@Min(value = 1, message = "Student ID must be greater than 0") Long> studentIds;
 
     public long getSchoolClassId() {
         return schoolClassId;
@@ -45,12 +33,11 @@ public class StudentEnrollmentCreateDTO {
     public void setSectionId(long sectionId) {
         this.sectionId = sectionId;
     }
-
-    public String getAcademicSessionName() {
-        return academicSessionName;
+    public List<Long> getStudentIds() {
+        return studentIds;
     }
 
-    public void setAcademicSessionName(String academicSessionName) {
-        this.academicSessionName = academicSessionName;
+    public void setStudentIds(List<Long> studentIds) {
+        this.studentIds = studentIds;
     }
 }

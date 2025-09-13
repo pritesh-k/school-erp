@@ -14,6 +14,7 @@ import com.schoolerp.mapper.StudentMapper;
 import com.schoolerp.repository.*;
 import com.schoolerp.service.ParentService;
 import com.schoolerp.service.StudentService;
+import com.schoolerp.specifications.StudentSpecification;
 import com.schoolerp.utils.BulkImportReport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,8 +51,8 @@ public class StudentServiceImpl implements StudentService {
     private final AuthServiceImpl authService;
     private final UserRepository userRepo;
     private final ParentService parentService;
-    @Autowired
-    private final ParentRepository parentRepository;
+
+    private final AcademicSessionRepository academicSessionRepository;
 
     @Override
     @Transactional
@@ -213,10 +215,22 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<StudentResponseDto> searchStudentsByName(String name, Pageable pageable) {
-        Page<Student> page = repo.searchByName(name, pageable);
+    public Page<StudentResponseDto> searchStudents(
+            String name, boolean notEnrolledOnes, String academicSessionName, Pageable pageable) {
+
+        AcademicSession academicSession = academicSessionRepository.findByName(academicSessionName)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic session not found: " + academicSessionName));
+
+        Specification<Student> spec = Specification.where(StudentSpecification.hasName(name));
+
+        if (notEnrolledOnes) {
+            spec = spec.and(StudentSpecification.notEnrolledIn(academicSession.getId()));
+        }
+
+        Page<Student> page = repo.findAll(spec, pageable);
         return page.map(mapper::toDto);
     }
+
 
     @Override
     @Transactional

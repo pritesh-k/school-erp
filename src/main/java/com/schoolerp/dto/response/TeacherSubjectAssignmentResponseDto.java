@@ -10,13 +10,8 @@ import java.time.LocalDate;
 public class TeacherSubjectAssignmentResponseDto extends BaseDTO {
 
     private TeacherResponseDto teacher;
-    private boolean isClassTeacher;
     private LocalDate assignedDate;
     private SectionSubjectAssignmentResponseDto sectionSubjectAssignment;
-
-    public boolean isClassTeacher() {
-        return isClassTeacher;
-    }
 
     public SectionSubjectAssignmentResponseDto getSectionSubjectAssignment() {
         return sectionSubjectAssignment;
@@ -24,14 +19,6 @@ public class TeacherSubjectAssignmentResponseDto extends BaseDTO {
 
     public void setSectionSubjectAssignment(SectionSubjectAssignmentResponseDto sectionSubjectAssignment) {
         this.sectionSubjectAssignment = sectionSubjectAssignment;
-    }
-
-    public boolean getClassTeacher() {
-        return isClassTeacher;
-    }
-
-    public void setClassTeacher(boolean classTeacher) {
-        isClassTeacher = classTeacher;
     }
 
     public LocalDate getAssignedDate() {

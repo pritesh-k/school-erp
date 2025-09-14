@@ -1,11 +1,8 @@
 package com.schoolerp.dto.request;
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import com.schoolerp.enums.AttendanceStatus;
-import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 

@@ -2,8 +2,8 @@ package com.schoolerp.service.impl;
 
 import com.schoolerp.dto.request.AttendanceCreateDto;
 import com.schoolerp.dto.request.AttendanceUpdateDto;
-import com.schoolerp.dto.response.AttendancePercentageReportDto;
 import com.schoolerp.dto.response.AttendanceResponseDto;
+import com.schoolerp.dto.response.AttendanceSummaryDto;
 import com.schoolerp.entity.*;
 import com.schoolerp.enums.AttendanceStatus;
 import com.schoolerp.exception.DuplicateEntry;
@@ -275,32 +275,56 @@ public class AttendanceServiceImpl implements AttendanceService {
         throw new IllegalArgumentException("Either studentId or (classId and sectionId) must be provided");
     }
 
-    @Override
-    public AttendancePercentageReportDto getAttendancePercentageReport(String academicSessionName) {
-        AcademicSession session = academicSessionRepository.findByName(academicSessionName)
-                .orElseThrow(() -> new ResourceNotFoundException("Academic Session not found: " + academicSessionName));
+    public Page<AttendanceSummaryDto> getAttendanceReport(
+            String academicSessionName,
+            LocalDate date,
+            Long classId,
+            Long sectionId,
+            Pageable pageable) {
 
-        List<Object[]> results = repo.countByStatusForSession(session.getId());
-
-        long total = results.stream().mapToLong(r -> (Long) r[1]).sum();
-
-        Map<AttendanceStatus, Double> percentageByStatus = new EnumMap<>(AttendanceStatus.class);
-        for (AttendanceStatus status : AttendanceStatus.values()) {
-            long count = results.stream()
-                    .filter(r -> r[0] == status)
-                    .mapToLong(r -> (Long) r[1])
-                    .findFirst()
-                    .orElse(0L);
-            double percentage = total > 0 ? (count * 100.0) / total : 0.0;
-            percentageByStatus.put(status, Math.round(percentage * 100.0) / 100.0);
+        // Dashboard view - class-wise summary
+        if (classId == null && sectionId == null) {
+            Page<Object[]> rawResults = repo.getClassWiseSummaryRaw(academicSessionName, date, pageable);
+            return rawResults.map(this::mapToAttendanceSummaryDto);
         }
 
-        AttendancePercentageReportDto report = new AttendancePercentageReportDto();
-        report.setAcademicSessionName(session.getName());
-        report.setTotalRecords(total);
-        report.setPercentageByStatus(percentageByStatus);
+        // Class drill-down - section-wise summary
+        if (classId != null && sectionId == null) {
+            Page<Object[]> rawResults = repo.getSectionWiseSummaryRaw(academicSessionName, classId, date, pageable);
+            return rawResults.map(this::mapToAttendanceSummaryDto);
+        }
 
-        return report;
+        // Section detail - daily attendance details
+        if (classId != null && sectionId != null) {
+            Page<Object[]> rawResults = repo.getDetailedSummaryRaw(academicSessionName, classId, sectionId, date, pageable);
+            return rawResults.map(this::mapToAttendanceSummaryDto);
+        }
+
+        // Invalid combination
+        throw new IllegalArgumentException("sectionId cannot be provided without classId");
     }
 
+    private AttendanceSummaryDto mapToAttendanceSummaryDto(Object[] row) {
+        return new AttendanceSummaryDto(
+                (LocalDate) row[0],                           // date
+                (Long) row[1],                                // classId
+                (String) row[2],                              // className
+                (Long) row[3],                                // sectionId (can be null)
+                (String) row[4],                              // sectionName (can be null)
+                ((Number) row[5]).longValue(),                // totalStudents
+                ((Number) row[6]).longValue(),                // presentCount
+                ((Number) row[7]).longValue(),                // absentCount
+                ((Number) row[8]).longValue(),                // lateCount
+                ((Number) row[9]).longValue(),                // leaveCount
+                ((Number) row[10]).doubleValue()              // percentagePresent
+        );
+    }
+
+    @Override
+    public Double getTodayAttendancePercentage(String academicSessionName) {
+        AcademicSession session = academicSessionRepository.findByName(academicSessionName)
+                .orElseThrow(() -> new ResourceNotFoundException("Academic session not found: " + academicSessionName));
+        Double percentage = repo.getTodayAttendancePercentage(academicSessionName);
+        return Math.round(percentage * 100.0) / 100.0; // Round to 2 decimal places
+    }
 }

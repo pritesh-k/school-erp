@@ -5,13 +5,15 @@ import com.schoolerp.dto.request.AttendanceUpdateDto;
 import com.schoolerp.dto.response.ApiResponse;
 import com.schoolerp.dto.response.AttendancePercentageReportDto;
 import com.schoolerp.dto.response.AttendanceResponseDto;
+import com.schoolerp.dto.response.AttendanceSummaryDto;
+import com.schoolerp.dto.response.attendance.ClassAttendanceSummaryDto;
+import com.schoolerp.dto.response.attendance.SectionAttendanceSummaryDto;
 import com.schoolerp.entity.UserTypeInfo;
 import com.schoolerp.enums.AttendanceStatus;
 import com.schoolerp.enums.Role;
 import com.schoolerp.exception.UnauthorizedException;
 import com.schoolerp.service.AttendanceService;
 import com.schoolerp.service.RequestContextService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -90,14 +92,30 @@ public class AttendanceController {
         return ApiResponse.paged(pagedResult);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('TEACHER')")
-    @GetMapping("/percentage-report")
-    public ApiResponse<AttendancePercentageReportDto> getAttendancePercentageReport() {
-
+    // Existing detailed report API
+    @GetMapping("/report")
+    public ApiResponse<List<AttendanceSummaryDto>> getAttendanceReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Long classId,
+            @RequestParam(required = false) Long sectionId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
-        String sessionName = userTypeInfo.getAcademicSession();
-        AttendancePercentageReportDto report = service.getAttendancePercentageReport(sessionName);
-        return ApiResponse.ok(report);
+        Pageable pageable = PageRequest.of(page, size);
+        String academicSessionName = userTypeInfo.getAcademicSession();
+
+        Page<AttendanceSummaryDto> report = service.getAttendanceReport(
+                academicSessionName, date, classId, sectionId, pageable);
+
+        return ApiResponse.paged(report);
     }
 
+    @GetMapping("/today/overall-percentage")
+    public ApiResponse<Double> getTodayAttendancePercentage() {
+        UserTypeInfo userTypeInfo = requestContextService.getCurrentUserContext();
+        String academicSessionName = userTypeInfo.getAcademicSession();
+
+        double overallPercentage = service.getTodayAttendancePercentage(academicSessionName);
+        return ApiResponse.ok(overallPercentage);
+    }
 }

@@ -4,9 +4,13 @@ import com.schoolerp.dto.request.AttendanceCreateDto;
 import com.schoolerp.dto.request.AttendanceUpdateDto;
 import com.schoolerp.dto.response.AttendancePercentageReportDto;
 import com.schoolerp.dto.response.AttendanceResponseDto;
+import com.schoolerp.dto.response.AttendanceSummaryDto;
+import com.schoolerp.dto.response.attendance.ClassAttendanceSummaryDto;
+import com.schoolerp.dto.response.attendance.SectionAttendanceSummaryDto;
 import com.schoolerp.enums.AttendanceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,5 +38,12 @@ public interface AttendanceService {
                                            AttendanceCreateDto req,
                                            Long recordedByUserId);
 
-    AttendancePercentageReportDto getAttendancePercentageReport(String academicSessionName);
+    Page<AttendanceSummaryDto> getAttendanceReport(
+            String academicSessionName,
+            LocalDate date,
+            Long classId,
+            Long sectionId,
+            Pageable pageable);
+
+    Double getTodayAttendancePercentage(String academicSessionName);
 }
